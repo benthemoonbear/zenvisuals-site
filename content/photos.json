@@ -1,0 +1,28 @@
+{
+  "photos": [
+    { "image": "/media/photos/barn-kiss.jpg", "alt": "Couple kissing in a shaft of light inside an old barn", "category": "wedding", "size": "full" },
+    { "image": "/media/photos/bride-garden-steps.jpg", "alt": "Bride standing on stone steps among trees", "category": "wedding", "size": "tall" },
+    { "image": "/media/photos/gazebo-sunset.jpg", "alt": "Couple silhouetted inside a white gazebo at sunset", "category": "wedding", "size": "tall" },
+    { "image": "/media/photos/gazebo-backlit.jpg", "alt": "Close backlit embrace with sun flare", "category": "wedding", "size": "tall" },
+    { "image": "/media/photos/luke-arali-smile.jpg", "alt": "Bride and groom smiling nose to nose", "category": "wedding", "size": "wide" },
+    { "image": "/media/photos/bride-getting-ready.jpg", "alt": "Bride laughing while getting ready", "category": "wedding", "size": "normal" },
+    { "image": "/media/photos/bridesmaids-laughing.jpg", "alt": "Bridesmaids laughing together", "category": "wedding", "size": "normal" },
+    { "image": "/media/photos/veil-in-the-wind.jpg", "alt": "Couple with the veil caught in the wind", "category": "wedding", "size": "normal" },
+    { "image": "/media/photos/running-across-field.jpg", "alt": "Couple running hand in hand across a field", "category": "wedding", "size": "normal" },
+    { "image": "/media/photos/groom-and-bridesmaids.jpg", "alt": "Groom with six bridesmaids in rust and sage dresses", "category": "wedding", "size": "wide" },
+    { "image": "/media/photos/wedding-rings.jpg", "alt": "Close-up of hands showing wedding rings", "category": "wedding", "size": "normal" },
+    { "image": "/media/photos/robyn-gabriel-walk.jpg", "alt": "Bride and groom walking hand in hand across a lawn above the valley", "category": "wedding", "size": "wide" },
+    { "image": "/media/photos/robyn-bouquet.jpg", "alt": "Bride holding a deep red bouquet", "category": "wedding", "size": "normal" },
+    { "image": "/media/photos/robyn-gabriel-trees.jpg", "alt": "Couple touching foreheads among the trees", "category": "wedding", "size": "normal" },
+    { "image": "/media/photos/robyn-gabriel-confetti.jpg", "alt": "Couple laughing under a shower of confetti", "category": "wedding", "size": "normal" },
+    { "image": "/media/photos/robyn-aisle.jpg", "alt": "Bride walking down the aisle with her father", "category": "wedding", "size": "normal" },
+    { "image": "/media/photos/biffs-beetle-front.jpg", "alt": "Restored 1967 VW Beetle on a tree-lined lane", "category": "commercial", "size": "wide" },
+    { "image": "/media/photos/stanton-workshop-light.jpg", "alt": "Black and white silhouette switching on a workshop light", "category": "commercial", "size": "normal" },
+    { "image": "/media/photos/katie-jobling-paintings.jpg", "alt": "Watercolour paintings and paint pans laid out on a desk", "category": "commercial", "size": "normal" },
+    { "image": "/media/photos/biffs-beetle-rear.jpg", "alt": "Low rear view of the Beetle's chrome bumper and wheel", "category": "commercial", "size": "normal" },
+    { "image": "/media/photos/thermal-heat-boiler.jpg", "alt": "Engineers fitting a new boiler", "category": "commercial", "size": "normal" },
+    { "image": "/media/photos/katie-jobling-painting.jpg", "alt": "Watercolour artichoke painting in progress", "category": "commercial", "size": "normal" },
+    { "image": "/media/photos/thermal-heat-pipework.jpg", "alt": "Copper pipework being pressed into place", "category": "commercial", "size": "normal" },
+    { "image": "/media/photos/biffs-beetle-headlights.jpg", "alt": "Beetle headlights and chrome bumper", "category": "commercial", "size": "normal" }
+  ]
+}

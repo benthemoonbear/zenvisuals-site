@@ -1,0 +1,158 @@
+# Editing dashboard for Pages CMS (https://app.pagescms.org)
+# Log in with GitHub, pick this repository, and edit everything below without touching code.
+
+media:
+  input: media
+  output: /media
+
+content:
+  - name: films
+    label: Films
+    type: file
+    path: content/films.json
+    format: json
+    fields:
+      - name: films
+        label: Films (drag to reorder)
+        type: object
+        list: true
+        fields:
+          - { name: title, label: Title, type: string, required: true }
+          - name: category
+            label: Section
+            type: select
+            options:
+              values: [wedding, commercial]
+          - { name: featured, label: "Show as the big featured film (tick only one)", type: boolean }
+          - { name: video, label: "Video file (MP4, under 20MB)", type: file, required: true }
+          - { name: poster, label: Cover image, type: image, required: true }
+
+  - name: photos
+    label: Photos
+    type: file
+    path: content/photos.json
+    format: json
+    fields:
+      - name: photos
+        label: Photos (drag to reorder)
+        type: object
+        list: true
+        fields:
+          - { name: image, label: Photo, type: image, required: true }
+          - { name: alt, label: "Short description (for Google and screen readers)", type: string, required: true }
+          - name: category
+            label: Section
+            type: select
+            options:
+              values: [wedding, commercial]
+          - name: size
+            label: Size in the grid
+            type: select
+            options:
+              values: [normal, tall, wide, full]
+
+  - name: reviews
+    label: Reviews
+    type: file
+    path: content/reviews.json
+    format: json
+    fields:
+      - name: reviews
+        label: Reviews (shown under the big quote)
+        type: object
+        list: true
+        fields:
+          - { name: name, label: Name, type: string, required: true }
+          - { name: text, label: Review, type: text, required: true }
+
+  - name: site
+    label: Page text & prices
+    type: file
+    path: content/site.json
+    format: json
+    fields:
+      - name: hero
+        label: Top of the page
+        type: object
+        fields:
+          - { name: tagline, label: Line under the logo, type: string }
+          - { name: reel, label: "Background reel (short silent MP4, under 10MB)", type: file }
+          - { name: reel_poster, label: Still shown while the reel loads, type: image }
+          - { name: button_text, label: Button text, type: string }
+      - name: weddings
+        label: Weddings section
+        type: object
+        fields:
+          - { name: title, label: Heading, type: string }
+          - { name: text, label: Text, type: text }
+          - { name: image, label: Image, type: image }
+          - { name: image_alt, label: Image description, type: string }
+          - { name: link_text, label: Link text, type: string }
+      - name: commercial
+        label: Commercial section
+        type: object
+        fields:
+          - { name: title, label: Heading, type: string }
+          - { name: text, label: Text, type: text }
+          - { name: image, label: Image, type: image }
+          - { name: image_alt, label: Image description, type: string }
+          - { name: link_text, label: Link text, type: string }
+      - name: about
+        label: About us
+        type: object
+        fields:
+          - { name: title, label: Heading, type: string }
+          - { name: title_emphasis, label: "Heading (brown italic part)", type: string }
+          - { name: image, label: Photo, type: image }
+          - { name: image_alt, label: Photo description, type: string }
+          - { name: paragraphs, label: Paragraphs, type: text, list: true }
+      - name: reviews
+        label: Big review quote
+        type: object
+        fields:
+          - { name: rating_text, label: Rating line, type: string }
+          - { name: featured_quote, label: Quote, type: text }
+          - { name: featured_name, label: Name, type: string }
+      - name: pricing
+        label: Pricing
+        type: object
+        fields:
+          - { name: intro, label: Intro text, type: text }
+          - name: packages
+            label: Wedding packages
+            type: object
+            list: true
+            fields:
+              - { name: name, label: Name, type: string }
+              - { name: price, label: "Price (e.g. £750)", type: string }
+              - { name: badge, label: "Small label (optional, e.g. Save £200)", type: string }
+              - { name: description, label: Description, type: text }
+              - { name: highlight, label: Dark highlighted card, type: boolean }
+          - { name: button_text, label: Package link text, type: string }
+          - { name: commercial_title, label: Commercial box heading, type: string }
+          - { name: commercial_text, label: Commercial box text, type: text }
+          - { name: commercial_button, label: Commercial box button, type: string }
+      - name: contact
+        label: Contact
+        type: object
+        fields:
+          - { name: title, label: Heading, type: string }
+          - { name: title_emphasis, label: "Heading (italic part)", type: string }
+          - { name: phone, label: Phone, type: string }
+          - { name: email, label: Email, type: string }
+          - { name: area, label: Area line, type: string }
+          - { name: enquiry_types, label: Enquiry form options, type: string, list: true }
+          - { name: thank_you, label: Message after sending the form, type: text }
+      - name: social
+        label: Social links
+        type: object
+        fields:
+          - { name: facebook, label: Facebook page link, type: string }
+          - { name: instagram, label: "Instagram link (leave empty to hide)", type: string }
+      - name: seo
+        label: Google & sharing
+        type: object
+        fields:
+          - { name: title, label: Page title in Google, type: string }
+          - { name: description, label: Description in Google, type: text }
+          - { name: share_image, label: Image when the link is shared, type: image }

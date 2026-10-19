@@ -1,0 +1,60 @@
+{
+  "films": [
+    {
+      "title": "Robyn & Gabriel",
+      "category": "wedding",
+      "featured": true,
+      "video": "/media/films/robyn-gabriel.mp4",
+      "poster": "/media/photos/robyn-gabriel-walk.jpg"
+    },
+    {
+      "title": "Harrison & Soraya",
+      "category": "wedding",
+      "featured": false,
+      "video": "/media/films/harrison-soraya.mp4",
+      "poster": "/media/photos/poster-harrison-soraya.jpg"
+    },
+    {
+      "title": "Lucas & Chantelle",
+      "category": "wedding",
+      "featured": false,
+      "video": "/media/films/lucas-chantelle.mp4",
+      "poster": "/media/photos/poster-lucas-chantelle.jpg"
+    },
+    {
+      "title": "Luke & Arali",
+      "category": "wedding",
+      "featured": false,
+      "video": "/media/films/luke-arali.mp4",
+      "poster": "/media/photos/luke-arali-smile.jpg"
+    },
+    {
+      "title": "Biff’s Detailing — ’67 VW Beetle",
+      "category": "commercial",
+      "featured": false,
+      "video": "/media/films/biffs-beetle.mp4",
+      "poster": "/media/photos/biffs-beetle-front.jpg"
+    },
+    {
+      "title": "Katie Jobling Art",
+      "category": "commercial",
+      "featured": false,
+      "video": "/media/films/katie-jobling-art.mp4",
+      "poster": "/media/photos/katie-jobling-paintings.jpg"
+    },
+    {
+      "title": "The Thermal Heat Company",
+      "category": "commercial",
+      "featured": false,
+      "video": "/media/films/thermal-heat-company.mp4",
+      "poster": "/media/photos/thermal-heat-boiler.jpg"
+    },
+    {
+      "title": "Stanton",
+      "category": "commercial",
+      "featured": false,
+      "video": "/media/films/stanton.mp4",
+      "poster": "/media/photos/stanton-workshop.jpg"
+    }
+  ]
+}
