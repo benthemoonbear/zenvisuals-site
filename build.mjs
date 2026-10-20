@@ -7,7 +7,8 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const OUT = join(ROOT, 'dist');
-const SITE_URL = (process.env.URL || 'https://www.zenvisuals.co.uk').replace(/\/$/, '');
+// The public address used for Google, sharing previews and the sitemap.
+const SITE_URL = (process.env.SITE_URL || 'https://zenvisuals.co.uk').replace(/\/$/, '');
 
 const load = (f) => JSON.parse(readFileSync(join(ROOT, 'content', f), 'utf8'));
 const site = load('site.json');
