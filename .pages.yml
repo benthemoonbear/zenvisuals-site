@@ -83,6 +83,48 @@ content:
           - { name: question, label: Question, type: string, required: true }
           - { name: answer, label: Answer, type: text, required: true }
 
+  - name: pages
+    label: Service pages
+    type: collection
+    path: content/pages
+    format: json
+    fields:
+      - { name: slug, label: "Web address (e.g. wedding-videographer-derbyshire)", type: string, required: true }
+      - { name: nav_label, label: Short name (used in links), type: string }
+      - { name: seo_title, label: "Page title in Google (under 60 characters)", type: string }
+      - { name: seo_description, label: "Description in Google (under 155 characters)", type: text }
+      - { name: eyebrow, label: Small label above the heading, type: string }
+      - { name: h1, label: Main heading, type: string }
+      - { name: hero_image, label: Top image, type: image }
+      - { name: hero_alt, label: Top image description, type: string }
+      - { name: intro, label: Intro paragraphs, type: text, list: true }
+      - name: sections
+        label: Sections
+        type: object
+        list: true
+        fields:
+          - { name: heading, label: Heading, type: string }
+          - { name: text, label: Text, type: text }
+      - name: film_category
+        label: Films to show
+        type: select
+        options:
+          values: ["", wedding, commercial]
+      - name: photo_category
+        label: Photos to show
+        type: select
+        options:
+          values: ["", wedding, commercial]
+      - { name: photo_limit, label: Number of photos, type: number }
+      - { name: show_pricing, label: Show wedding prices, type: boolean }
+      - name: faqs
+        label: Questions on this page
+        type: object
+        list: true
+        fields:
+          - { name: question, label: Question, type: string }
+          - { name: answer, label: Answer, type: text }
+
   - name: site
     label: Page text & prices
     type: file
@@ -162,6 +204,7 @@ content:
           - { name: email, label: Email, type: string }
           - { name: area, label: Area line, type: string }
           - { name: town, label: "Town you are based in (for Google)", type: string }
+          - { name: areas, label: "Areas covered (footer line)", type: string }
           - { name: enquiry_types, label: Enquiry form options, type: string, list: true }
           - { name: thank_you, label: Message after sending the form, type: text }
       - name: social

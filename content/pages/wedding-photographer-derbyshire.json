@@ -1,0 +1,54 @@
+{
+  "slug": "wedding-photographer-derbyshire",
+  "nav_label": "Wedding photography",
+  "seo_title": "Wedding Photographer in Derbyshire | Zen Visuals, Belper",
+  "seo_description": "Natural wedding photography by Zuzia and Ben, based in Belper. Whole-day coverage for £750, photos delivered within 3–6 weeks. Check your date.",
+  "eyebrow": "Wedding photography",
+  "h1": "Wedding photographer in Derbyshire",
+  "hero_image": "/media/photos/barn-kiss.jpg",
+  "hero_alt": "Couple kissing in a shaft of light inside an old barn",
+  "intro": [
+    "We're Zuzia and Ben, a husband-and-wife team based in Belper, photographing weddings across Derbyshire and the rest of the UK. Our photographs are natural and unposed, and true to how your day actually felt.",
+    "We stay for the whole day, so nothing is missed: getting ready, the ceremony, the portraits, the speeches and the dance floor."
+  ],
+  "sections": [
+    {
+      "heading": "One price for the whole day",
+      "text": "Wedding photography is £750 for your whole day, with no hourly packages. We stay for as long as you need us. Add a wedding film and both together are £1,650, saving £200."
+    },
+    {
+      "heading": "Light, colour and real moments",
+      "text": "We look for the light first: shafts of sun in an old barn, golden hour under a gazebo, a quiet window while you get ready. Then we wait for the real moments to happen in it, rather than staging them."
+    },
+    {
+      "heading": "Your photos in 3–6 weeks",
+      "text": "Your edited photographs are usually ready within 3 to 6 weeks of the wedding. We take half of the price upfront to secure your date, and the rest whenever suits you, up to two weeks after the wedding."
+    },
+    {
+      "heading": "Where we photograph",
+      "text": "From our base in Belper we photograph weddings across Derbyshire, including Derby, Matlock, Ashbourne and the Peak District. We've worked at venues including Shottle Hall and West Mill in Darley Abbey, and in London a number of times."
+    }
+  ],
+  "film_category": "",
+  "photo_category": "wedding",
+  "photo_limit": 12,
+  "show_pricing": true,
+  "faqs": [
+    {
+      "question": "How much does a wedding photographer cost in Derbyshire?",
+      "answer": "Our wedding photography is £750 for the whole day. Photography and film together is £1,650, saving £200. There are no hourly packages."
+    },
+    {
+      "question": "How long until we get our wedding photos?",
+      "answer": "Your edited photos are usually ready within 3 to 6 weeks of your wedding."
+    },
+    {
+      "question": "Do you charge by the hour?",
+      "answer": "No. We charge one price for the whole day and stay for as long as you need us, from getting ready to the dance floor."
+    },
+    {
+      "question": "How does the deposit work?",
+      "answer": "We take half of the price upfront to secure your date. The other half can be paid whenever suits you, up to two weeks after your wedding."
+    }
+  ]
+}

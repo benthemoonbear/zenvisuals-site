@@ -1,0 +1,50 @@
+{
+  "slug": "video-production-derbyshire",
+  "nav_label": "Video production",
+  "seo_title": "Video Production in Derbyshire | Zen Visuals, Belper",
+  "seo_description": "Adverts, promo films, product photography and event coverage for businesses, from Belper, Derbyshire. Every brief quoted per project.",
+  "eyebrow": "Commercial & adverts",
+  "h1": "Video production and commercial photography in Derbyshire",
+  "hero_image": "/media/photos/biffs-beetle-front.jpg",
+  "hero_alt": "Restored 1967 VW Beetle on a tree-lined lane",
+  "intro": [
+    "We make adverts, promotional films, product photography and corporate event coverage for businesses in Derbyshire and across the UK. Every project is built around one question: what do you need people to feel and do after watching?",
+    "We're Zuzia and Ben, a small photo and video team based in Belper, and you'll talk to us directly from the first call to the final film."
+  ],
+  "sections": [
+    {
+      "heading": "Promo films and adverts",
+      "text": "For Biff's Detailing we filmed a restored 1967 Volkswagen Beetle, from the detailing in the workshop to the finished car out on the road. For watercolour artist Katie Jobling we made a brand film in her studio, showing her process from the first brush stroke to the finished painting."
+    },
+    {
+      "heading": "Explainer and customer films",
+      "text": "For The Thermal Heat Company, a plumbing and heating firm, we made a film that walks customers through what to expect on installation day, with the managing director explaining each step on camera and footage of the team at work."
+    },
+    {
+      "heading": "Brand films and product photography",
+      "text": "For Stanton we shot a black and white brand film inside their workshop. We also photograph products, details and people at work, so your website and social media have stills that match your films."
+    },
+    {
+      "heading": "How pricing works",
+      "text": "Every brief is different, so we quote per project. Tell us what you have in mind, where you are and when you need it, and we'll come back with a price."
+    }
+  ],
+  "film_category": "commercial",
+  "photo_category": "commercial",
+  "photo_limit": 8,
+  "show_pricing": false,
+  "faqs": [
+    {
+      "question": "How much does a promotional video cost?",
+      "answer": "Every brief is different, so we quote per project. Get in touch with what you have in mind and we'll come back with a price."
+    },
+    {
+      "question": "Do you work with businesses outside Derbyshire?",
+      "answer": "Yes. We're based in Belper, Derbyshire, and work with businesses across the UK."
+    },
+    {
+      "question": "Can you provide photos as well as video?",
+      "answer": "Yes. We offer product photography and stills alongside films, so your website and social media have matching images."
+    }
+  ]
+}
