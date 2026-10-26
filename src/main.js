@@ -108,7 +108,7 @@
             w.appendChild(inner); frag.appendChild(w);
           });
           child.replaceWith(frag);
-        } else if (child.nodeType === 1 && !child.hasAttribute('data-type')) walk(child);
+        } else if (child.nodeType === 1 && !child.hasAttribute('data-type') && !child.classList.contains('sr')) walk(child);
       });
     };
     el.setAttribute('aria-label', el.textContent.trim());

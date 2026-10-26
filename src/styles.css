@@ -332,7 +332,7 @@ ul[role="list"] { list-style: none; padding: 0; }
 
 /* ---------- questions ---------- */
 .faq { padding: var(--gap) var(--m) 0; overflow-x: clip; }
-.faq-title { max-width: 14ch; }
+.faq-title { max-width: 22ch; }
 .faq-list { display: grid; gap: 12px; margin: clamp(56px, 6vw, 80px) 0 0 calc((100% + var(--g)) / 3); }
 .faq-item { margin: 0 -24px; border-radius: 0; transition: background-color var(--t-ui) ease; }
 .faq-item[open], .faq-item:hover { background: var(--tone); }
@@ -626,6 +626,7 @@ dialog[open] { animation: dialog-in 520ms var(--ease-expo); }
   .offer-actions .btn { width: 100%; }
 
   .faq-list { margin-left: 0; margin-top: 40px; gap: 4px; }
+  .faq-title { font-size: 9.4vw; }
   .faq-item { margin: 0 calc(var(--m) * -1); }
   .faq-item summary { padding: 18px var(--m); }
   .faq-item h3 { font-size: 19px; }

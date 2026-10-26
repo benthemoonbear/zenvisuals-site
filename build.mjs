@@ -93,7 +93,7 @@ const filmIndex = (list) => `<div class="index" data-index>
     <ul class="index-list" role="list">
       ${list.map((f, i) => `<li class="index-row${i === 0 ? ' is-active' : ''}" data-i="${i}" data-reveal>
         <button type="button" class="index-btn" ${filmAttrs(f)} aria-label="Play ${esc(f.title)}, ${esc(kind(f).toLowerCase())}, ${minutes(f.duration_seconds)}">
-          <span class="index-thumb">${pic(f.poster, '', { sizes: '(max-width: 760px) 100vw, 1px' })}</span>
+          <span class="index-thumb">${pic(f.poster, `Still from ${f.title}, ${kind(f).toLowerCase()}`, { sizes: '(max-width: 760px) 100vw, 1px' })}</span>
           <span class="index-name">${esc(f.title)}</span>
           <span class="index-meta">${kind(f)}${f.duration_seconds ? ` · ${minutes(f.duration_seconds)}` : ''}</span>
         </button>
@@ -251,7 +251,7 @@ const topbar = (base) => `<header class="bar" id="topbar">
 `;
 
 const reviewsBlock = () => `<section class="voices" id="reviews" aria-labelledby="reviews-title">
-  <h2 class="h-head voices-title" id="reviews-title" data-reveal>Kind <em>words</em></h2>
+  <h2 class="h-head voices-title" id="reviews-title" data-reveal>Kind <em>words</em><span class="sr">: reviews from our couples and clients</span></h2>
   <figure class="voice-lead" data-reveal>
     <blockquote><p>“${esc(site.reviews.featured_quote)}”</p></blockquote>
     <figcaption>${esc(site.reviews.featured_name)}${site.social.google_business ? ` · <a href="${esc(site.social.google_business)}" rel="noopener" target="_blank">${esc(site.reviews.rating_text)}</a>` : ` · ${esc(site.reviews.rating_text)}`}</figcaption>
@@ -280,7 +280,7 @@ const pricingBlock = (withCommercial = true) => `<section class="offer" id="pric
     <button type="button" class="pick" aria-pressed="true" data-pick="photo">Photography</button>
     <button type="button" class="pick" aria-pressed="true" data-pick="film">Film</button>
   </div>
-  <h2 class="offer-title" id="pricing-title" aria-live="polite" data-reveal><span class="offer-words" data-offer-words>${esc(offers.both.words[0])} <em data-type>${esc(offers.both.words[1])}</em></span> <span class="price-chip"><span data-offer-price>${esc(offers.both.price)}</span></span></h2>
+  <h2 class="offer-title" id="pricing-title" aria-live="polite" data-reveal><span class="sr">Wedding photography and film prices: </span><span class="offer-words" data-offer-words>${esc(offers.both.words[0])} <em data-type>${esc(offers.both.words[1])}</em></span> <span class="price-chip"><span data-offer-price>${esc(offers.both.price)}</span></span></h2>
   <div class="offer-foot" data-reveal>
     <div class="offer-copy">
       <p class="offer-text" data-offer-text>${esc(offerText(offers.both))}</p>
@@ -443,12 +443,12 @@ const home = head({ title: site.seo.title, description: site.seo.description, ur
 
 <section class="films" id="films" aria-labelledby="films-title">
   <div class="films-head">
-    <h2 class="h-display" id="films-title">Our <em data-type>films</em></h2>
+    <h2 class="h-display" id="films-title">Our <em data-type>films</em><span class="sr">: wedding and commercial films from Derbyshire</span></h2>
     <p data-reveal>Wedding films of three to six minutes, and short films for businesses. Press play on any of them.</p>
   </div>
   <div class="opening" data-opening>
     <div class="opening-stage">
-      <div class="opening-pic">${pic(featured.poster, '', { sizes: '100vw' })}</div>
+      <div class="opening-pic">${pic(featured.poster, `Still from ${featured.title}, ${kind(featured).toLowerCase()} by Zen Visuals`, { sizes: '100vw' })}</div>
       <div class="opening-caption">
         <h3 class="h-head">${esc(featured.title)}</h3>
         <button type="button" class="btn btn-light" ${filmAttrs(featured)}>${playIcon(11)}Play the film${featured.duration_seconds ? ` · ${minutes(featured.duration_seconds)}` : ''}</button>
@@ -467,7 +467,7 @@ const home = head({ title: site.seo.title, description: site.seo.description, ur
 </section>
 
 <section class="photos" id="photos" aria-labelledby="photos-title">
-  <h2 class="h-display" id="photos-title">In <em data-type>photographs</em></h2>
+  <h2 class="h-display" id="photos-title">In <em data-type>photographs</em><span class="sr">: wedding photography in Derbyshire</span></h2>
   ${stagger(galleryPhotos)}
 </section>
 
@@ -552,18 +552,18 @@ function landing(p) {
 </section>
 
 ${pFilms.length ? `<section class="films films--page" id="films" aria-labelledby="films-title">
-  <div class="films-head"><h2 class="h-display" id="films-title">Our <em data-type>films</em></h2></div>
+  <div class="films-head"><h2 class="h-display" id="films-title">Our <em data-type>films</em><span class="sr">: ${esc((p.nav_label || '').toLowerCase())} in Derbyshire</span></h2></div>
   ${filmIndex(pFilms)}
 </section>` : ''}
 
 ${pPhotos.length ? `<section class="photos" id="photos" aria-labelledby="photos-title">
-  <h2 class="h-display" id="photos-title">In <em data-type>photographs</em></h2>
+  <h2 class="h-display" id="photos-title">In <em data-type>photographs</em><span class="sr">: ${isCommercial ? 'commercial and product photography' : 'wedding photography'} in Derbyshire</span></h2>
   ${stagger(pPhotos)}
 </section>` : ''}
 
 ${isCommercial ? '' : reviewsBlock()}
 ${p.show_pricing ? pricingBlock(false) : ''}
-${p.faqs && p.faqs.length ? faqBlock('Questions', p.faqs) : ''}
+${p.faqs && p.faqs.length ? faqBlock(`Questions about ${(p.nav_label || 'our work').toLowerCase()}`, p.faqs) : ''}
 
 ${others.length ? `<section class="related" aria-labelledby="related-title">
   <h2 class="h-head" id="related-title">More from <em>Zen Visuals</em></h2>
