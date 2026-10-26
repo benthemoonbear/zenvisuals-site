@@ -408,9 +408,9 @@ const home = head({ title: site.seo.title, description: site.seo.description, ur
     <noscript><style>.hero-video { display: none; }</style></noscript>
   </div>
   <div class="hero-copy">
-    <h1 class="hero-title" data-load style="--d:1500ms"><span data-type-now data-type-delay="1800">${esc(site.hero.tagline)}</span></h1>
-    <p class="hero-sub" data-load style="--d:1650ms">Zuzia and Ben, based in ${esc(c.town || 'Derbyshire')}. One price for your whole day.</p>
-    <button type="button" class="btn btn-light hero-play" data-load style="--d:1800ms" ${filmAttrs(featured)}>${playIcon(11)}${esc(site.hero.button_text)}</button>
+    <h1 class="hero-title" data-load style="--d:2600ms"><span data-type-now data-type-delay="2900">${esc(site.hero.tagline)}</span></h1>
+    <p class="hero-sub" data-load style="--d:2750ms">Zuzia and Ben, based in ${esc(c.town || 'Derbyshire')}. One price for your whole day.</p>
+    <button type="button" class="btn btn-light hero-play" data-load style="--d:2900ms" ${filmAttrs(featured)}>${playIcon(11)}${esc(site.hero.button_text)}</button>
   </div>
   <div class="hero-mark" data-hero-mark>${logo('hero-logo', 'Zen Visuals')}</div>
 </section>
