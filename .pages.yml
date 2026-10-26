@@ -67,6 +67,11 @@ content:
         fields:
           - { name: name, label: Name, type: string, required: true }
           - { name: text, label: Review, type: text, required: true }
+          - name: category
+            label: Shown on
+            type: select
+            options:
+              values: [wedding, commercial]
 
   - name: faq
     label: FAQ
@@ -175,6 +180,18 @@ content:
           - { name: rating_text, label: Rating line, type: string }
           - { name: featured_quote, label: Quote, type: text }
           - { name: featured_name, label: Name, type: string }
+      - name: booking
+        label: How booking works
+        type: object
+        fields:
+          - { name: title, label: Heading, type: string }
+          - name: steps
+            label: Steps
+            type: object
+            list: true
+            fields:
+              - { name: title, label: Step heading, type: string }
+              - { name: text, label: Step text, type: text }
       - name: pricing
         label: Pricing
         type: object

@@ -298,6 +298,8 @@ ul[role="list"] { list-style: none; padding: 0; }
   background: var(--night); color: var(--on-night);
 }
 .voices-title { color: var(--on-night-soft); }
+.voices--short { min-height: 0; padding-bottom: clamp(72px, 8vw, 120px); }
+.voices--short .voice-corners { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; }
 .voice-lead { align-self: start; justify-self: center; max-width: min(64vw, 900px); text-align: center; }
 .voice-lead blockquote p { font: 400 clamp(24px, 2.3vw, 34px)/1.22 var(--serif); letter-spacing: -0.01em; text-wrap: balance; }
 .voice-lead figcaption { margin-top: 24px; font-size: var(--fs-small); color: var(--on-night-soft); }
@@ -330,6 +332,16 @@ ul[role="list"] { list-style: none; padding: 0; }
 .offer-text { font-size: var(--fs-lead); line-height: 1.4; max-width: 36ch; }
 .offer-note { margin-top: 14px; font-size: var(--fs-small); color: var(--soft); max-width: 52ch; }
 .offer-actions { grid-column: 9 / 13; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+
+/* ---------- how booking works ---------- */
+.booking { padding: var(--gap) var(--m) 0; }
+.steps { list-style: none; margin: clamp(48px, 6vw, 80px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px var(--g); counter-reset: step; }
+.step { counter-increment: step; display: flex; flex-direction: column; gap: 14px; padding-top: 24px; position: relative; }
+.step::before { content: ''; position: absolute; top: 0; left: 0; width: 44px; height: 3px; border-radius: 3px; background: var(--accent); transition: width 900ms var(--ease-expo); }
+.step:hover::before { width: 88px; }
+.step p { max-width: 32ch; }
+@media (max-width: 1100px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .steps { grid-template-columns: 1fr; gap: 32px; } }
 
 /* ---------- questions ---------- */
 .faq { padding: var(--gap) var(--m) 0; overflow-x: clip; }

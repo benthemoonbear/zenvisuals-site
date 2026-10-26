@@ -2,19 +2,23 @@
   "reviews": [
     {
       "name": "Robyn and Gabriel",
-      "text": "Asking Ben and Zuzia to film our special day for us was one of the best decisions we made when wedding planning! From our initial enquiry to getting the video back, every interaction was an absolute pleasure. We went into our wedding day confident that our memories were in very capable hands, and the incredible video we got at the end of it is testament to that. We hardly noticed they were there on the day, but every little moment of our celebration was captured perfectly - we simply can’t stop watching (and crying happy tears over) what they created for us. Could not recommend Zen Visuals highly enough!"
+      "text": "Asking Ben and Zuzia to film our special day for us was one of the best decisions we made when wedding planning! From our initial enquiry to getting the video back, every interaction was an absolute pleasure. We went into our wedding day confident that our memories were in very capable hands, and the incredible video we got at the end of it is testament to that. We hardly noticed they were there on the day, but every little moment of our celebration was captured perfectly - we simply can’t stop watching (and crying happy tears over) what they created for us. Could not recommend Zen Visuals highly enough!",
+      "category": "wedding"
     },
     {
       "name": "Niamh B.",
-      "text": "Ben was the videographer for our wedding. We were blown away, first of all, by his lovely disposition and professional, personable manner. He worked throughout the whole day, capturing every little detail that we didn't even know about till we watched our highlights video. His work is absolutely second to none."
+      "text": "Ben was the videographer for our wedding. We were blown away, first of all, by his lovely disposition and professional, personable manner. He worked throughout the whole day, capturing every little detail that we didn't even know about till we watched our highlights video. His work is absolutely second to none.",
+      "category": "wedding"
     },
     {
       "name": "Biffs Detailing",
-      "text": "Just Perfect. Ben listen to our brief and produced an amazing on point promo video of our 67 VW Beetle. Will be using him again for all our media needs."
+      "text": "Just Perfect. Ben listen to our brief and produced an amazing on point promo video of our 67 VW Beetle. Will be using him again for all our media needs.",
+      "category": "commercial"
     },
     {
       "name": "Katie Jobling",
-      "text": "A stunning, professional video that I'm excited to share on my website. Top class. Would highly recommend."
+      "text": "A stunning, professional video that I'm excited to share on my website. Top class. Would highly recommend.",
+      "category": "commercial"
     }
   ]
 }

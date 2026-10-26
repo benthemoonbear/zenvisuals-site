@@ -250,21 +250,29 @@ const topbar = (base) => `<header class="bar" id="topbar">
 </div>
 `;
 
-const reviewsBlock = () => `<section class="voices" id="reviews" aria-labelledby="reviews-title">
+// Reviews: weddings pages show wedding reviews under the big quote; the business page leads with a business review.
+const reviewsBlock = (kind = 'all') => {
+  const list = kind === 'all' ? reviews : reviews.filter((r) => (r.category || 'wedding') === kind);
+  if (!list.length) return '';
+  const lead = kind === 'commercial'
+    ? { quote: list[0].text, name: list[0].name }
+    : { quote: site.reviews.featured_quote, name: site.reviews.featured_name };
+  const rest = kind === 'commercial' ? list.slice(1) : list;
+  return `<section class="voices${rest.length < 3 ? ' voices--short' : ''}" id="reviews" aria-labelledby="reviews-title">
   <h2 class="h-head voices-title" id="reviews-title" data-reveal>Kind <em>words</em><span class="sr">: reviews from our couples and clients</span></h2>
   <figure class="voice-lead" data-reveal>
-    <blockquote><p>“${esc(site.reviews.featured_quote)}”</p></blockquote>
-    <figcaption>${esc(site.reviews.featured_name)}${site.social.google_business ? ` · <a href="${esc(site.social.google_business)}" rel="noopener" target="_blank">${esc(site.reviews.rating_text)}</a>` : ` · ${esc(site.reviews.rating_text)}`}</figcaption>
+    <blockquote><p>“${esc(lead.quote)}”</p></blockquote>
+    <figcaption>${esc(lead.name)}${site.social.google_business ? ` · <a href="${esc(site.social.google_business)}" rel="noopener" target="_blank">${esc(site.reviews.rating_text)}</a>` : ` · ${esc(site.reviews.rating_text)}`}</figcaption>
   </figure>
   <div class="voice-corners">
-    ${reviews.map((r) => `<figure class="voice" data-reveal>
+    ${rest.map((r) => `<figure class="voice" data-reveal>
       <blockquote><p>“${esc(r.text)}”</p></blockquote>
       <figcaption>${esc(r.name)}</figcaption>
     </figure>`).join('\n    ')}
   </div>
 </section>
 `;
-
+};
 // Pricing as one sentence. Pick photographs, film or both and the sentence and price follow.
 const pkg = (re) => site.pricing.packages.find((p) => re(p.name)) || {};
 const offers = {
@@ -294,6 +302,14 @@ const pricingBlock = (withCommercial = true) => `<section class="offer" id="pric
   <script type="application/json" data-offer-data>${JSON.stringify(Object.fromEntries(Object.entries(offers).map(([k, o]) => [k, { words: o.words, price: o.price, text: offerText(o) }]))).replace(/</g, '\\u003c')}</script>
 </section>
 `;
+
+const bookingBlock = () => (site.booking && site.booking.steps && site.booking.steps.length ? `<section class="booking" id="booking" aria-labelledby="booking-title">
+  <h2 class="h-display" id="booking-title">${emLast(site.booking.title || 'How booking works', 2)}</h2>
+  <ol class="steps">
+    ${site.booking.steps.map((st) => `<li class="step" data-reveal><h3 class="h-head">${esc(st.title)}</h3><p>${esc(st.text)}</p></li>`).join('\n    ')}
+  </ol>
+</section>
+` : '');
 
 const faqBlock = (title, items) => `<section class="faq" id="faq" aria-labelledby="faq-title">
   <h2 class="h-display faq-title" id="faq-title">${emLast(title, 2)}</h2>
@@ -493,6 +509,7 @@ const home = head({ title: site.seo.title, description: site.seo.description, ur
 
 ${reviewsBlock()}
 ${pricingBlock(true)}
+${bookingBlock()}
 ${faqs.length ? faqBlock(faqTitle, faqs) : ''}
 ${contactAndFooter()}` + dialogsAndScripts();
 
@@ -562,8 +579,9 @@ ${pPhotos.length ? `<section class="photos" id="photos" aria-labelledby="photos-
   ${stagger(pPhotos)}
 </section>` : ''}
 
-${isCommercial ? '' : reviewsBlock()}
+${reviewsBlock(isCommercial ? 'commercial' : 'all')}
 ${p.show_pricing ? pricingBlock(false) : ''}
+${isCommercial ? '' : bookingBlock()}
 ${p.faqs && p.faqs.length ? faqBlock(`Questions about ${(p.nav_label || 'our work').toLowerCase()}`, p.faqs) : ''}
 
 ${others.length ? `<section class="related" aria-labelledby="related-title">

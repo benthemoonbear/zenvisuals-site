@@ -93,5 +93,26 @@
     "facebook": "https://www.facebook.com/p/Zen-Visuals-61572277799280/",
     "instagram": "",
     "google_business": "https://maps.app.goo.gl/8twQZr1Vc69SZbMW7"
+  },
+  "booking": {
+    "title": "How booking works",
+    "steps": [
+      {
+        "title": "Tell us your date",
+        "text": "Send us your date and venue through the form below, by email or by phone, and we'll check we're free."
+      },
+      {
+        "title": "Secure your date",
+        "text": "Half of the price secures your date. Once it's paid, the day is yours."
+      },
+      {
+        "title": "Your wedding day",
+        "text": "We stay for the whole day, from getting ready to the last dance, and capture it as it happens."
+      },
+      {
+        "title": "Your photos and film",
+        "text": "Everything is ready within 3 to 6 weeks. The rest of the balance is due any time up to two weeks after the wedding."
+      }
+    ]
   }
 }
