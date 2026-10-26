@@ -1,25 +1,72 @@
-// Zen Visuals: small enhancements, no libraries.
+// Zen Visuals: motion and small enhancements, no libraries.
 (() => {
+  const root = document.documentElement;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const playSafe = (v) => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
 
-  // Hero reel: keep muted for autoplay; pause for people who prefer less motion.
-  const hero = document.querySelector('.hero-video');
-  if (hero) {
-    // Phones get a lighter version of the reel.
-    if (hero.dataset.mobileSrc && window.matchMedia('(max-width: 760px)').matches) hero.src = hero.dataset.mobileSrc;
-    hero.muted = true;
-    if (reduceMotion) hero.pause();
-    else { const p = hero.play(); if (p && p.catch) p.catch(() => {}); }
+  // ---------- header reel: play on screen, pause off screen ----------
+  const heroVideo = document.querySelector('.hero-video');
+  if (heroVideo) {
+    if (reduceMotion) heroVideo.pause();
+    else if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([en]) => { if (en.isIntersecting) playSafe(heroVideo); else heroVideo.pause(); }).observe(heroVideo);
+    }
   }
 
-  // Mobile menu.
+  // ---------- smooth scrolling for mouse wheels (not touch, not reduced motion) ----------
+  const smooth = (() => {
+    if (reduceMotion || !finePointer) return null;
+    let target = window.scrollY;
+    let current = window.scrollY;
+    let running = false;
+    const max = () => root.scrollHeight - window.innerHeight;
+    const blocked = (e) => e.ctrlKey || root.classList.contains('menu-open') || document.querySelector('dialog[open]')
+      || (e.target instanceof Element && e.target.closest('textarea, select, [data-native-scroll]'));
+    const tick = () => {
+      current += (target - current) * 0.11;
+      if (Math.abs(target - current) < 0.4) { current = target; running = false; }
+      window.scrollTo(0, current);
+      if (running) requestAnimationFrame(tick);
+    };
+    const go = (y) => {
+      target = clamp(y, 0, max());
+      if (!running) { running = true; current = window.scrollY; requestAnimationFrame(tick); }
+    };
+    window.addEventListener('wheel', (e) => {
+      if (blocked(e) || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      const unit = e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? window.innerHeight : 1;
+      go((running ? target : window.scrollY) + e.deltaY * unit);
+    }, { passive: false });
+    // Keyboard, scrollbar and find-in-page move the page directly: follow them.
+    window.addEventListener('scroll', () => { if (!running) target = current = window.scrollY; }, { passive: true });
+    return { go };
+  })();
+
+  // In-page links glide to their section.
+  document.querySelectorAll('a[href^="#"]').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href').slice(1);
+      const el = id ? document.getElementById(id) : null;
+      if (!el && id !== 'top') return;
+      e.preventDefault();
+      const y = el ? el.getBoundingClientRect().top + window.scrollY - (id === 'top' ? 0 : 64) : 0;
+      if (smooth) smooth.go(y); else window.scrollTo({ top: y, behavior: reduceMotion ? 'auto' : 'smooth' });
+      if (el && id !== 'top') { history.replaceState(null, '', '#' + id); }
+    });
+  });
+
+  // ---------- mobile menu ----------
   const toggle = document.querySelector('.menu-toggle');
   const menu = document.getElementById('mobile-menu');
   if (toggle && menu) {
+    const word = toggle.querySelector('.menu-word');
     const setMenu = (open) => {
-      document.documentElement.classList.toggle('menu-open', open);
+      root.classList.toggle('menu-open', open);
       toggle.setAttribute('aria-expanded', String(open));
-      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      if (word) word.textContent = open ? 'Close' : 'Menu';
       if (open) menu.removeAttribute('inert'); else menu.setAttribute('inert', '');
     };
     toggle.addEventListener('click', () => setMenu(toggle.getAttribute('aria-expanded') !== 'true'));
@@ -28,37 +75,25 @@
     window.matchMedia('(min-width: 761px)').addEventListener('change', (e) => { if (e.matches) setMenu(false); });
   }
 
-  // Typing effect: the line under the logo, and any [data-type] text when it scrolls into view.
-  const typeOut = (el, delay = 0) => {
-    const full = el.textContent.trim();
-    if (!full) return;
-    const h = el.getBoundingClientRect().height;
-    el.setAttribute('aria-label', full);
-    el.style.minHeight = h + 'px';
-    el.innerHTML = '<span class="type-text" aria-hidden="true"></span><span class="type-caret" aria-hidden="true"></span>';
-    const text = el.firstChild;
-    const caret = el.lastChild;
-    let i = 0;
-    const step = () => {
-      text.textContent = full.slice(0, ++i);
-      if (i < full.length) setTimeout(step, full[i - 1] === ' ' ? 70 : 34 + Math.random() * 30);
-      else { caret.classList.add('is-done'); el.style.minHeight = ''; }
-    };
-    setTimeout(step, delay);
-  };
-  if (!reduceMotion) {
-    const tagline = document.querySelector('.hero-tagline');
-    if (tagline) typeOut(tagline, 1100);
-    const typeLater = document.querySelectorAll('[data-type]');
-    if (typeLater.length && 'IntersectionObserver' in window) {
-      const tio = new IntersectionObserver((entries) => entries.forEach((en) => {
-        if (en.isIntersecting) { tio.unobserve(en.target); typeOut(en.target, 250); }
-      }), { threshold: 0.6 });
-      typeLater.forEach((el) => tio.observe(el));
-    }
+  // ---------- top bar: plain over the first screen, solid after it, tucks away while reading ----------
+  const bar = document.getElementById('topbar');
+  const heroEl = document.querySelector('[data-hero]');
+  if (bar) {
+    if (heroEl && 'IntersectionObserver' in window) {
+      new IntersectionObserver(([en]) => bar.classList.toggle('is-solid', !en.isIntersecting), { rootMargin: '-76px 0px 0px 0px' }).observe(heroEl);
+    } else bar.classList.add('is-solid');
+    let lastY = window.scrollY;
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      if (!root.classList.contains('menu-open')) {
+        if (y > 400 && y - lastY > 4) bar.classList.add('is-hidden');
+        else if (lastY - y > 4 || y < 400) bar.classList.remove('is-hidden');
+      }
+      lastY = y;
+    }, { passive: true });
   }
 
-  // Headings rise in word by word.
+  // ---------- entrances ----------
   const splitWords = (el) => {
     let n = 0;
     const walk = (node) => {
@@ -73,7 +108,7 @@
             w.appendChild(inner); frag.appendChild(w);
           });
           child.replaceWith(frag);
-        } else if (child.nodeType === 1) walk(child);
+        } else if (child.nodeType === 1 && !child.hasAttribute('data-type')) walk(child);
       });
     };
     el.setAttribute('aria-label', el.textContent.trim());
@@ -81,76 +116,162 @@
     el.classList.add('split');
   };
 
-  // Gentle reveal as sections scroll into view.
-  if (!reduceMotion && 'IntersectionObserver' in window) {
-    const sio = new IntersectionObserver((entries) => entries.forEach((en) => {
-      if (en.isIntersecting) { en.target.classList.add('is-in'); sio.unobserve(en.target); }
-    }), { rootMargin: '0px 0px -10% 0px' });
-    document.querySelectorAll('.section-title, .about-title, .path-title').forEach((el) => { splitWords(el); sio.observe(el); });
-
-    const groups = [
-      '.eyebrow', '.pricing-intro', '.path', '.film-thumb.featured', '.film-title--featured',
-      '.film-card', '.about-text', '.review-featured', '.review', '.price-card', '.price-commercial',
-      '.faq-item', '.prose > *', '.contact-intro', '.contact-form', '.related', '.footer > *',
-    ];
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); } });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-    const stagger = (els, cls) => els.forEach((el) => {
-      const siblings = [...el.parentElement.children].filter((s) => s.matches(cls === 'reveal-img' ? '.g-item, .about-img' : '*'));
-      const i = Math.max(0, siblings.indexOf(el)) % 4;
-      el.style.setProperty('--d', `${i * 90}ms`);
-      el.classList.add(cls);
-      io.observe(el);
-    });
-    stagger(document.querySelectorAll(groups.join(',')), 'reveal');
-    stagger(document.querySelectorAll('.g-item, .about-img'), 'reveal-img');
-  }
-
-  // Logo drifts up and fades as you scroll past the hero.
-  const heroInner = document.querySelector('.hero-inner');
-  if (heroInner && !reduceMotion) {
-    heroInner.classList.add('hero-parallax');
-    let ticking = false;
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const h = heroInner.parentElement.offsetHeight || 1;
-        const p = Math.min(1, Math.max(0, window.scrollY / h));
-        if (p < 1) {
-          heroInner.style.transform = `translate3d(0, ${p * -60}px, 0)`;
-          heroInner.style.opacity = String(1 - p * 1.2);
-        }
-        ticking = false;
-      });
+  // Typing: the italic words of a heading write themselves out, letter by letter.
+  // The full text keeps its space while it types, so nothing around it moves.
+  const typeOut = (el, delay = 0) => {
+    const full = el.textContent;
+    if (!full.trim() || el.dataset.typed) return;
+    el.dataset.typed = '1';
+    el.setAttribute('aria-label', full);
+    el.innerHTML = '<span class="typed" aria-hidden="true"></span><span class="type-caret" aria-hidden="true"></span><span class="type-rest" aria-hidden="true"></span>';
+    const typed = el.firstChild;
+    const caret = typed.nextSibling;
+    const rest = caret.nextSibling;
+    rest.textContent = full;
+    let i = 0;
+    const step = () => {
+      i += 1;
+      typed.textContent = full.slice(0, i);
+      rest.textContent = full.slice(i);
+      if (i < full.length) setTimeout(step, full[i - 1] === ' ' ? 90 : 42 + Math.random() * 46);
+      else setTimeout(() => caret.classList.add('is-done'), 1400);
     };
+    setTimeout(step, delay);
+  };
+  window.zenType = typeOut;
+  if (reduceMotion) window.zenType = () => {};
+
+  if (!reduceMotion && 'IntersectionObserver' in window) {
+    document.querySelectorAll('[data-type-now]').forEach((el) => typeOut(el, Number(el.dataset.typeDelay) || 900));
+    const tio = new IntersectionObserver((entries) => entries.forEach((en) => {
+      if (!en.isIntersecting) return;
+      tio.unobserve(en.target);
+      en.target.querySelectorAll('[data-type]').forEach((em) => {
+        const words = en.target.querySelectorAll('.w').length;
+        typeOut(em, 350 + words * 70);
+      });
+    }), { rootMargin: '0px 0px -15% 0px' });
+    document.querySelectorAll('h1, h2, h3').forEach((h) => { if (h.querySelector('[data-type]')) tio.observe(h); });
+
+    const io = new IntersectionObserver((entries) => entries.forEach((en) => {
+      if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); }
+    }), { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+
+    document.querySelectorAll('.h-display:not(h1)').forEach((el) => { splitWords(el); io.observe(el); });
+    // Stagger the parts of each section in reading order.
+    document.querySelectorAll('main > section, .films > div').forEach((sec) => {
+      let i = 0;
+      sec.querySelectorAll(':scope [data-reveal]').forEach((el) => {
+        if (!el.style.getPropertyValue('--d')) el.style.setProperty('--d', `${Math.min(i++, 5) * 80}ms`);
+      });
+    });
+    document.querySelectorAll('[data-reveal], .shot, [data-shutter]').forEach((el) => io.observe(el));
+  } else {
+    document.querySelectorAll('[data-reveal], .shot').forEach((el) => el.classList.add('is-in'));
+  }
+
+  // ---------- scroll-linked moves, one loop ----------
+  const heroMark = document.querySelector('[data-hero-mark]');
+  const heroFilm = document.querySelector('.hero-film');
+  const opening = document.querySelector('[data-opening]');
+  const footerMark = document.querySelector('[data-footer-mark]');
+  const drifters = [...document.querySelectorAll('.shot-frame')];
+  if (!reduceMotion) {
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const vh = window.innerHeight;
+      if (heroEl && heroMark) {
+        const p = clamp(window.scrollY / (heroEl.offsetHeight || vh), 0, 1);
+        heroEl.style.setProperty('--p', p.toFixed(4));
+      }
+      if (opening) {
+        const r = opening.getBoundingClientRect();
+        const run = r.height - vh;
+        const o = run > 0 ? clamp(-r.top / (run * 0.75), 0, 1) : 1;
+        opening.style.setProperty('--o', o.toFixed(4));
+      }
+      for (const el of drifters) {
+        const r = el.getBoundingClientRect();
+        if (r.bottom < -100 || r.top > vh + 100) continue;
+        const t = clamp((r.top + r.height / 2 - vh / 2) / vh, -1, 1); // -1 above centre, 1 below
+        el.style.setProperty('--drift', `${(t * -3).toFixed(2)}%`);
+      }
+      if (footerMark) {
+        const r = footerMark.getBoundingClientRect();
+        const f = clamp(1 - (r.bottom - vh) / (vh * 0.6), 0, 1);
+        footerMark.style.setProperty('--f', f.toFixed(4));
+      }
+    };
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    update();
   }
 
-  // Menu bar tucks away while scrolling down and returns when scrolling up.
-  const topbarEl = document.getElementById('topbar');
-  if (topbarEl) {
-    let lastY = window.scrollY;
-    window.addEventListener('scroll', () => {
-      const y = window.scrollY;
-      const open = document.documentElement.classList.contains('menu-open');
-      if (!open && y > 300 && y - lastY > 6) topbarEl.classList.add('is-hidden');
-      else if (lastY - y > 6 || y < 300 || open) topbarEl.classList.remove('is-hidden');
-      lastY = y;
-    }, { passive: true });
+  // The wordmark at the foot of the page plays the reel through its letters.
+  const footerEl = document.querySelector('.footer');
+  if (footerMark && footerEl && !reduceMotion && 'IntersectionObserver' in window) {
+    const reel = footerEl.querySelector('.footer-reel');
+    let loaded = false;
+    new IntersectionObserver(([en]) => {
+      if (en.isIntersecting) {
+        if (!loaded) {
+          loaded = true; reel.src = reel.dataset.src;
+          reel.addEventListener('playing', () => footerEl.classList.add('is-playing'), { once: true });
+        }
+        playSafe(reel);
+      } else if (loaded) reel.pause();
+    }, { rootMargin: '200px 0px' }).observe(footerMark);
   }
 
-  // Top bar turns solid once you scroll past the hero.
-  const bar = document.getElementById('topbar');
-  const heroSection = document.querySelector('.hero');
-  if (bar && heroSection && 'IntersectionObserver' in window) {
-    new IntersectionObserver(([entry]) => {
-      bar.classList.toggle('is-solid', !entry.isIntersecting);
-    }, { rootMargin: '-80px 0px 0px 0px' }).observe(heroSection);
-  }
+  // ---------- film index: the frame shows the film you point at ----------
+  document.querySelectorAll('[data-index]').forEach((index) => {
+    const rows = [...index.querySelectorAll('.index-row')];
+    const shots = [...index.querySelectorAll('.index-shot')];
+    const set = (i) => {
+      rows.forEach((r, j) => r.classList.toggle('is-active', j === i));
+      shots.forEach((s, j) => s.classList.toggle('is-active', j === i));
+    };
+    rows.forEach((r, i) => {
+      r.addEventListener('pointerenter', () => set(i));
+      r.addEventListener('focusin', () => set(i));
+    });
+  });
 
-  // Film player.
+  // ---------- pricing: pick photography, film or both ----------
+  document.querySelectorAll('[data-offer]').forEach((offer) => {
+    const data = JSON.parse(offer.querySelector('[data-offer-data]').textContent);
+    const picks = [...offer.querySelectorAll('[data-pick]')];
+    const words = offer.querySelector('[data-offer-words]');
+    const price = offer.querySelector('[data-offer-price]');
+    const text = offer.querySelector('[data-offer-text]');
+    const restart = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+    const render = () => {
+      const on = picks.filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.pick);
+      const key = on.length === 2 ? 'both' : on[0];
+      const o = data[key];
+      if (!o || price.textContent === o.price) return;
+      words.textContent = o.words[0] + ' ';
+      const em = document.createElement('em');
+      em.textContent = o.words[1];
+      words.appendChild(em);
+      price.textContent = o.price;
+      text.textContent = o.text;
+      restart(words, 'swap');
+      restart(price, 'roll-in');
+      if (window.zenType) window.zenType(em, 180);
+    };
+    picks.forEach((b) => b.addEventListener('click', () => {
+      const pressed = b.getAttribute('aria-pressed') === 'true';
+      const others = picks.filter((x) => x !== b && x.getAttribute('aria-pressed') === 'true');
+      if (pressed && !others.length) { picks.forEach((x) => x.setAttribute('aria-pressed', String(x !== b))); }
+      else b.setAttribute('aria-pressed', String(!pressed));
+      render();
+    }));
+  });
+
+  // ---------- film player ----------
   const player = document.getElementById('player');
   const video = document.getElementById('player-video');
   const title = document.getElementById('player-title');
@@ -159,19 +280,19 @@
       video.src = btn.dataset.filmSrc;
       video.poster = btn.dataset.filmPoster || '';
       title.textContent = btn.dataset.filmTitle || '';
-      if (hero) hero.pause();
+      if (heroVideo) heroVideo.pause();
       player.showModal();
-      const p = video.play(); if (p && p.catch) p.catch(() => {});
+      playSafe(video);
     });
   });
   player.addEventListener('close', () => {
     video.pause();
     video.removeAttribute('src');
     video.load();
-    if (hero && !reduceMotion) { const p = hero.play(); if (p && p.catch) p.catch(() => {}); }
+    if (heroVideo && !reduceMotion) playSafe(heroVideo);
   });
 
-  // Photo lightbox.
+  // ---------- photo viewer ----------
   const lightbox = document.getElementById('lightbox');
   const lightImg = document.getElementById('lightbox-img');
   document.querySelectorAll('[data-photo]').forEach((btn) => {
@@ -181,14 +302,12 @@
       lightbox.showModal();
     });
   });
-
-  // Close buttons, and click outside the content to close.
   document.querySelectorAll('dialog').forEach((d) => {
     d.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => d.close()));
     d.addEventListener('click', (e) => { if (e.target === d) d.close(); });
   });
 
-  // "Enquire" links pre-select the right enquiry type.
+  // ---------- "Check your date" and friends pre-select the enquiry type ----------
   const select = document.getElementById('enquiry-type');
   document.querySelectorAll('[data-enquiry]').forEach((a) => {
     a.addEventListener('click', () => {
@@ -198,7 +317,7 @@
     });
   });
 
-  // Enquiry form: send without leaving the page (falls back to /thank-you/ without JS).
+  // ---------- enquiry form: send without leaving the page (falls back to /thank-you/ without JS) ----------
   const form = document.querySelector('.contact-form');
   if (form) {
     const status = form.querySelector('.form-status');

@@ -69,30 +69,72 @@ function pic(src, alt, { cls = '', sizes = '100vw', eager = false } = {}) {
   return `<picture><source type="image/webp" srcset="${srcset}" sizes="${sizes}">${img}</picture>`;
 }
 
-const playIcon = (size = 16, color = '#F1EEE7') =>
-  `<svg width="${size}" height="${size}" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 1.5v11l9-5.5z" fill="${color}"/></svg>`;
+const playIcon = (size = 14) =>
+  `<svg class="i-play" width="${size}" height="${size}" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 1.5v11l9-5.5z" fill="currentColor"/></svg>`;
 
-const filmButton = (f, cls = '') => `
-  <button type="button" class="film-thumb ${cls}" data-film-src="${esc(f.video)}" data-film-title="${esc(f.title)}" data-film-poster="${esc(f.poster)}" aria-label="Play ${esc(f.title)}">
-    ${pic(f.poster, '', { sizes: cls.includes('featured') ? '(max-width: 1280px) 100vw, 1216px' : '(max-width: 760px) 100vw, 50vw' })}
-    <span class="play-ring">${playIcon(cls.includes('featured') ? 22 : 16)}</span>
-  </button>`;
+// The wordmark, traced from the logo so it stays sharp at any size. It takes the colour of the text around it.
+const LOGO_SVG = readFileSync(join(ROOT, 'media', 'brand', 'logo.svg'), 'utf8');
+const logo = (cls, label = 'Zen Visuals') => LOGO_SVG.replace('<path ', '<path pathLength="1" ').replace('<svg ', label
+  ? `<svg class="${cls}" role="img" aria-label="${esc(label)}" focusable="false" `
+  : `<svg class="${cls}" aria-hidden="true" focusable="false" `);
 
-const filmCard = (f) => `
-  <div class="film-card">
-    ${filmButton(f)}
-    <p class="film-title">${esc(f.title)}</p>
+// Set the last few words of a heading in italic; they type themselves out when the heading arrives.
+const emLast = (text, n = 2, attr = 'data-type') => {
+  const w = String(text).trim().split(/\s+/);
+  if (w.length <= n) return `<em ${attr}>${esc(text)}</em>`;
+  return `${esc(w.slice(0, -n).join(' '))} <em ${attr}>${esc(w.slice(-n).join(' '))}</em>`;
+};
+const minutes = (s) => (s ? `${Math.max(1, Math.round(s / 60))} min` : '');
+const filmAttrs = (f) => `data-film-src="${esc(f.video)}" data-film-title="${esc(f.title)}" data-film-poster="${esc(f.poster)}"`;
+const kind = (f) => (f.category === 'commercial' ? 'Commercial film' : 'Wedding film');
+
+// Films as an index of names, with one frame that shows the film you point at.
+const filmIndex = (list) => `<div class="index" data-index>
+    <ul class="index-list" role="list">
+      ${list.map((f, i) => `<li class="index-row${i === 0 ? ' is-active' : ''}" data-i="${i}" data-reveal>
+        <button type="button" class="index-btn" ${filmAttrs(f)} aria-label="Play ${esc(f.title)}, ${esc(kind(f).toLowerCase())}, ${minutes(f.duration_seconds)}">
+          <span class="index-thumb">${pic(f.poster, '', { sizes: '(max-width: 760px) 100vw, 1px' })}</span>
+          <span class="index-name">${esc(f.title)}</span>
+          <span class="index-meta">${kind(f)}${f.duration_seconds ? ` · ${minutes(f.duration_seconds)}` : ''}</span>
+        </button>
+      </li>`).join('\n      ')}
+    </ul>
+    <div class="index-frame" aria-hidden="true">
+      ${list.map((f, i) => `<div class="index-shot${i === 0 ? ' is-active' : ''}">${pic(f.poster, '', { sizes: '(max-width: 760px) 1px, 40vw' })}</div>`).join('\n      ')}
+      <span class="index-play">${playIcon(12)} Play film</span>
+    </div>
   </div>`;
 
-const gallery = (items) => items.map((p) => `
-    <button type="button" class="g-item g-${esc(p.size || 'normal')}" data-photo="${esc(p.image)}" data-alt="${esc(p.alt)}" aria-label="View larger: ${esc(p.alt)}">
-      ${pic(p.image, p.alt, { sizes: p.size === 'full' ? '100vw' : p.size === 'wide' ? '(max-width: 760px) 100vw, 66vw' : '(max-width: 760px) 50vw, 33vw' })}
-    </button>`).join('');
+// Photographs placed in staggered pairs, like prints on a wall. Clicking opens them larger.
+// Portraits take four columns; a landscape takes seven when it leads a pair and four when it follows.
+const isTall = (p) => { const d = imageSize(p.image); return d ? d.h > d.w : p.size === 'tall'; };
+const shot = (p, j, col) => `<figure class="shot shot-${j + 1} ${isTall(p) ? 'shot--tall' : 'shot--wide'}" style="--col:${col}">
+        <button type="button" class="shot-btn" data-photo="${esc(p.image)}" data-alt="${esc(p.alt)}" aria-label="View larger: ${esc(p.alt)}">
+          <span class="shot-frame">${pic(p.image, p.alt, { sizes: '(max-width: 760px) 100vw, 58vw' })}</span>
+        </button>
+      </figure>`;
+const stagger = (items) => {
+  const pairs = [];
+  for (let i = 0; i < items.length; i += 2) pairs.push(items.slice(i, i + 2));
+  return `<div class="stagger">
+    ${pairs.map((pair, i) => {
+      const leftFirst = i % 2 === 0;
+      const w1 = isTall(pair[0]) ? 4 : 7;
+      const w2 = pair[1] ? (isTall(pair[1]) ? 4 : (w1 === 4 ? 6 : 4)) : 0;
+      const c1 = leftFirst ? `1 / ${1 + w1}` : `${13 - w1} / 13`;
+      const c2 = leftFirst ? `${13 - w2} / 13` : `${w2 === 4 ? 2 : 1} / ${(w2 === 4 ? 2 : 1) + w2}`;
+      return `<div class="pair">
+      ${shot(pair[0], 0, c1)}
+      ${pair[1] ? shot(pair[1], 1, c2) : ''}
+    </div>`;
+    }).join('\n    ')}
+  </div>`;
+};
 
-const faqList = (items, openFirst = true) => `<div class="faq-list">
-    ${items.map((f, i) => `<details class="faq-item"${openFirst && i === 0 ? ' open' : ''}>
-      <summary><h3>${esc(f.question)}</h3></summary>
-      <p>${esc(f.answer)}</p>
+const faqList = (items) => `<div class="faq-list">
+    ${items.map((f) => `<details class="faq-item" data-reveal>
+      <summary><h3>${esc(f.question)}</h3><span class="chev" aria-hidden="true"></span></summary>
+      <div class="faq-a"><p>${esc(f.answer)}</p></div>
     </details>`).join('\n    ')}
   </div>`;
 const faqSchema = (items) => ({
@@ -172,7 +214,7 @@ const head = ({ title, description, url, image, graph, preload }) => `<!doctype 
 <link rel="apple-touch-icon" href="/media/brand/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400..600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/styles.css">
 ${preload ? `<link rel="preload" as="image" href="${esc(preload)}">` : ''}
 ${ldScript(graph)}
@@ -182,23 +224,20 @@ ${ldScript(graph)}
 `;
 
 // base = '' on the homepage (links jump within the page) and '/' elsewhere.
-const topbar = (base) => `<header class="topbar" id="topbar">
-  <a href="${base ? '/' : '#top'}" class="topbar-logo" aria-label="Zen Visuals, ${base ? 'home' : 'back to top'}"><img src="/media/brand/logo-cream.png" alt="Zen Visuals"${dims('/media/brand/logo-cream.png')}></a>
-  <nav aria-label="Main">
-    <a href="${base}#weddings">Weddings</a>
-    <a href="${base}#commercial">Commercial</a>
+const topbar = (base) => `<header class="bar" id="topbar">
+  <a href="${base ? '/' : '#top'}" class="bar-logo" aria-label="Zen Visuals, ${base ? 'home' : 'back to top'}">${logo('bar-mark', '')}</a>
+  <nav class="bar-nav" aria-label="Main">
     <a href="${base}#films">Films</a>
-    <a href="${base}#about">About</a>
+    <a href="${base}#photos">Photographs</a>
     <a href="${base}#pricing">Pricing</a>
-    ${faqs.length ? `<a href="${base}#faq">FAQ</a>` : ''}
-    <a href="${base ? '' : ''}#contact" class="nav-cta">Contact</a>
+    <a href="${base}#about">About</a>
+    <a href="#contact" class="btn btn-accent bar-cta" data-enquiry="Wedding">Check your date</a>
   </nav>
-  <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu"><span></span><span></span></button>
+  <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu"><span class="menu-word">Menu</span></button>
 </header>
 <div class="mobile-menu" id="mobile-menu" inert>
   <nav aria-label="Mobile">
     <a href="${base}#weddings">Weddings</a>
-    <a href="${base}#commercial">Commercial</a>
     <a href="${base}#films">Films</a>
     <a href="${base}#photos">Photographs</a>
     <a href="${base}#about">About us</a>
@@ -211,54 +250,64 @@ const topbar = (base) => `<header class="topbar" id="topbar">
 </div>
 `;
 
-const reviewsBlock = () => `<section class="wrap-narrow reviews" id="reviews">
-  <figure class="review-featured">
-    <div class="stars" role="img" aria-label="5 out of 5 stars">★★★★★</div>
-    <p class="rating">${site.social.google_business ? `<a href="${esc(site.social.google_business)}" rel="noopener" target="_blank">${esc(site.reviews.rating_text)}</a>` : esc(site.reviews.rating_text)}</p>
-    <blockquote>“${esc(site.reviews.featured_quote)}”</blockquote>
-    <figcaption>${esc(site.reviews.featured_name)}</figcaption>
+const reviewsBlock = () => `<section class="voices" id="reviews" aria-labelledby="reviews-title">
+  <h2 class="h-head voices-title" id="reviews-title" data-reveal>Kind <em>words</em></h2>
+  <figure class="voice-lead" data-reveal>
+    <blockquote><p>“${esc(site.reviews.featured_quote)}”</p></blockquote>
+    <figcaption>${esc(site.reviews.featured_name)}${site.social.google_business ? ` · <a href="${esc(site.social.google_business)}" rel="noopener" target="_blank">${esc(site.reviews.rating_text)}</a>` : ` · ${esc(site.reviews.rating_text)}`}</figcaption>
   </figure>
-  <div class="review-list">
-    ${reviews.map((r) => `<figure class="review">
-      <blockquote>“${esc(r.text)}”</blockquote>
+  <div class="voice-corners">
+    ${reviews.map((r) => `<figure class="voice" data-reveal>
+      <blockquote><p>“${esc(r.text)}”</p></blockquote>
       <figcaption>${esc(r.name)}</figcaption>
     </figure>`).join('\n    ')}
   </div>
 </section>
 `;
 
-const pricingBlock = (withCommercial = true) => `<section class="wrap-narrow pricing" id="pricing">
-  <h2 class="section-title">Pricing</h2>
-  <p class="pricing-intro">${esc(site.pricing.intro)}</p>
-  <div class="price-grid">
-    ${site.pricing.packages.map((p) => `<div class="price-card${p.highlight ? ' price-card--dark' : ''}">
-      <div class="price-head"><h3>${esc(p.name)}</h3>${p.badge ? `<span class="price-badge">${esc(p.badge)}</span>` : ''}</div>
-      <div class="price">${esc(p.price)}</div>
-      <p class="price-text">${esc(p.description)}</p>
-      <a href="#contact" class="text-link" data-enquiry="Wedding">${esc(site.pricing.button_text)}</a>
-    </div>`).join('\n    ')}
+// Pricing as one sentence. Pick photographs, film or both and the sentence and price follow.
+const pkg = (re) => site.pricing.packages.find((p) => re(p.name)) || {};
+const offers = {
+  both: { ...pkg((n) => /\+/.test(n)), words: ['Photo and film,', 'the whole day'] },
+  photo: { ...pkg((n) => /photo/i.test(n) && !/\+|film/i.test(n)), words: ['Photography,', 'the whole day'] },
+  film: { ...pkg((n) => /^film$/i.test(n.trim())), words: ['A film of', 'the whole day'] },
+};
+const num = (p) => Number(String(p || '').replace(/[^0-9.]/g, '')) || 0;
+const saving = num(offers.photo.price) + num(offers.film.price) - num(offers.both.price);
+const offerText = (o) => `${o.description || ''}${o === offers.both && saving > 0 ? ` Booking both saves £${saving.toLocaleString('en-GB')}.` : ''}`;
+const pricingBlock = (withCommercial = true) => `<section class="offer" id="pricing" data-offer aria-labelledby="pricing-title">
+  <div class="offer-pick" role="group" aria-label="What would you like?" data-reveal>
+    <button type="button" class="pick" aria-pressed="true" data-pick="photo">Photography</button>
+    <button type="button" class="pick" aria-pressed="true" data-pick="film">Film</button>
   </div>
-  ${withCommercial ? `<div class="price-commercial">
-    <div>
-      <h3>${esc(site.pricing.commercial_title)}</h3>
-      <p>${esc(site.pricing.commercial_text)}</p>
+  <h2 class="offer-title" id="pricing-title" aria-live="polite" data-reveal><span class="offer-words" data-offer-words>${esc(offers.both.words[0])} <em data-type>${esc(offers.both.words[1])}</em></span> <span class="price-chip"><span data-offer-price>${esc(offers.both.price)}</span></span></h2>
+  <div class="offer-foot" data-reveal>
+    <div class="offer-copy">
+      <p class="offer-text" data-offer-text>${esc(offerText(offers.both))}</p>
+      <p class="offer-note">${esc(site.pricing.intro)} Half secures your date; the rest is due any time up to two weeks after the wedding.</p>
     </div>
-    <a href="#contact" class="btn-dark" data-enquiry="Advert / promo film">${esc(site.pricing.commercial_button)}</a>
-  </div>` : ''}
+    <div class="offer-actions">
+      <a href="#contact" class="btn btn-accent" data-enquiry="Wedding">${esc(site.pricing.button_text)}</a>
+      ${withCommercial ? `<a href="#contact" class="text-link" data-enquiry="Advert / promo film">Commercial work is quoted per project</a>` : ''}
+    </div>
+  </div>
+  <script type="application/json" data-offer-data>${JSON.stringify(Object.fromEntries(Object.entries(offers).map(([k, o]) => [k, { words: o.words, price: o.price, text: offerText(o) }]))).replace(/</g, '\\u003c')}</script>
 </section>
 `;
 
-const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="contact">
-  <div class="wrap-narrow contact-inner">
-    <div class="contact-intro">
-      <h2 class="contact-title">${esc(c.title)} <em data-type>${esc(c.title_emphasis)}</em></h2>
-      <div class="contact-details">
-        <a href="${telHref}">${esc(c.phone)}</a>
-        <a href="mailto:${esc(c.email)}" class="underlined">${esc(c.email)}</a>
-        <span class="muted">${esc(c.area)}</span>
-      </div>
+const faqBlock = (title, items) => `<section class="faq" id="faq" aria-labelledby="faq-title">
+  <h2 class="h-display faq-title" id="faq-title">${emLast(title, 2)}</h2>
+  ${faqList(items)}
+</section>
+`;
+
+const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="contact" aria-labelledby="contact-title">
+  <div class="contact-top">
+    <h2 class="h-display contact-title" id="contact-title">${esc(c.title)} <em data-type>${esc(c.title_emphasis)}</em></h2>
+    <div class="contact-intro" data-reveal>
+      <p>Tell us your date, your venue and what you have in mind. Weddings, adverts, promo films and events.</p>
     </div>
-    <form class="contact-form" name="enquiry" method="POST" action="/thank-you/" data-netlify="true" netlify-honeypot="company-website">
+    <form class="contact-form" name="enquiry" method="POST" action="/thank-you/" data-netlify="true" netlify-honeypot="company-website" data-reveal>
       <input type="hidden" name="form-name" value="enquiry">
       <p class="hidden-field"><label>Leave this empty <input name="company-website" tabindex="-1" autocomplete="off"></label></p>
       <div class="field-row">
@@ -271,37 +320,56 @@ const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="
       </div>
       <label>Phone (optional)<input type="tel" name="phone" autocomplete="tel"></label>
       <label>Message<textarea name="message" rows="4" required></textarea></label>
-      <button type="submit" class="btn-light">Send enquiry</button>
+      <button type="submit" class="btn btn-light">Send enquiry</button>
       <p class="form-status" role="status" aria-live="polite" hidden></p>
     </form>
   </div>
-  <footer class="footer wrap-narrow">
-    <img src="/media/brand/logo-sage.png" alt="Zen Visuals"${dims('/media/brand/logo-sage.png')} loading="lazy" class="footer-logo">
-    ${landingPages.length ? `<nav class="footer-services" aria-label="Services">
-      ${landingPages.map((p) => `<a href="/${esc(p.slug)}/">${esc(p.nav_label || p.h1)}</a>`).join('\n      ')}
-    </nav>` : ''}
-    ${site.contact.areas ? `<p class="footer-areas">${esc(site.contact.areas)}</p>` : ''}
-    <div class="footer-links">
+  <a class="contact-email" href="mailto:${esc(c.email)}" data-reveal>${esc(c.email).replace('@', '@<wbr>')}</a>
+  <div class="contact-corners">
+    <p><a href="${telHref}">${esc(c.phone)}</a></p>
+    <p>${esc(c.area)}</p>
+    <p>
       ${site.social.instagram ? `<a href="${esc(site.social.instagram)}" rel="noopener" target="_blank">Instagram</a>` : ''}
       ${site.social.facebook ? `<a href="${esc(site.social.facebook)}" rel="noopener" target="_blank">Facebook</a>` : ''}
       ${site.social.google_business ? `<a href="${esc(site.social.google_business)}" rel="noopener" target="_blank">Google reviews</a>` : ''}
-      <span>© ${new Date().getFullYear()} Zen Visuals</span>
-    </div>
-  </footer>
+    </p>
+  </div>
 </section>
+</main>
+<footer class="footer">
+  <div class="footer-cols">
+    ${landingPages.length ? `<nav class="footer-col" aria-label="Services"><p>Services</p>
+      ${landingPages.map((p) => `<a href="/${esc(p.slug)}/">${esc(p.nav_label || p.h1)}</a>`).join('\n      ')}
+    </nav>` : ''}
+    <div class="footer-col"><p>Contact</p><a href="${telHref}">${esc(c.phone)}</a><a href="mailto:${esc(c.email)}">${esc(c.email)}</a></div>
+    <div class="footer-col"><p>Follow</p>
+      ${site.social.instagram ? `<a href="${esc(site.social.instagram)}" rel="noopener" target="_blank">Instagram</a>` : ''}
+      ${site.social.facebook ? `<a href="${esc(site.social.facebook)}" rel="noopener" target="_blank">Facebook</a>` : ''}
+      ${site.social.google_business ? `<a href="${esc(site.social.google_business)}" rel="noopener" target="_blank">Google reviews</a>` : ''}
+    </div>
+    ${site.contact.areas ? `<div class="footer-col"><p>Where we work</p><span>${esc(site.contact.areas)}</span></div>` : ''}
+  </div>
+  <div class="footer-mark" data-footer-mark>
+    ${logo('footer-logo', 'Zen Visuals')}
+  </div>
+  <div class="footer-bg" aria-hidden="true">
+    <video class="footer-reel" data-src="${esc(site.hero.reel_mobile || site.hero.reel)}" poster="${esc(site.hero.reel_poster)}" muted loop playsinline preload="none"></video>
+  </div>
+  <p class="footer-legal">© ${new Date().getFullYear()} Zen Visuals · Wedding photographers &amp; videographers in ${esc(c.town || 'Derbyshire')}, Derbyshire</p>
+</footer>
 `;
 
 const dialogsAndScripts = () => `
 <dialog class="player" id="player" aria-label="Film player">
   <div class="player-bar">
     <span class="player-title" id="player-title"></span>
-    <button type="button" class="btn-ghost btn-small" data-close>Close</button>
+    <button type="button" class="btn btn-ghost" data-close>Close</button>
   </div>
   <video id="player-video" controls playsinline preload="none"></video>
 </dialog>
 
 <dialog class="lightbox" id="lightbox" aria-label="Photo viewer">
-  <button type="button" class="btn-ghost btn-small lightbox-close" data-close>Close</button>
+  <button type="button" class="btn btn-ghost lightbox-close" data-close>Close</button>
   <img id="lightbox-img" alt="">
 </dialog>
 
@@ -311,99 +379,127 @@ const dialogsAndScripts = () => `
 </html>
 `;
 
-const moreLink = (slug, text) => { const p = pageBySlug(slug); return p ? `<a href="/${esc(p.slug)}/" class="more-link">${esc(text || p.nav_label)} →</a>` : ''; };
+const moreLink = (slug, text) => { const p = pageBySlug(slug); return p ? `<a href="/${esc(p.slug)}/" class="text-link">${esc(text || p.nav_label)}</a>` : ''; };
 
 // ---------- homepage ----------
 const homeGraph = [business, website, ...films.filter((f) => f.video).map(videoSchema)];
 if (faqs.length) homeGraph.push(faqSchema(faqs));
+const otherFilms = films.filter((f) => f !== featured);
+const galleryPhotos = weddingPhotos.filter((p) => p.image !== site.weddings.image);
 
 const home = head({ title: site.seo.title, description: site.seo.description, url: SITE_URL + '/', image: site.seo.share_image, graph: homeGraph, preload: site.hero.reel_poster })
 + topbar('') + `
 <main id="main">
 
-<section class="hero" id="top">
-  <video class="hero-video" src="${esc(site.hero.reel)}"${site.hero.reel_mobile ? ` data-mobile-src="${esc(site.hero.reel_mobile)}"` : ''} poster="${esc(site.hero.reel_poster)}" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>
-  <div class="hero-shade"></div>
-  <div class="hero-inner">
-    <div class="hero-logo"><img src="/media/brand/logo-cream.png" alt="Zen Visuals"${dims('/media/brand/logo-cream.png')}></div>
-    <h1 class="hero-tagline">${esc(site.hero.tagline)}</h1>
+<section class="hero" id="top" data-hero>
+  <div class="hero-film">
+    <video class="hero-video" data-desktop="${esc(site.hero.reel)}" data-mobile="${esc(site.hero.reel_mobile || site.hero.reel)}" poster="${esc(site.hero.reel_poster)}" autoplay muted loop playsinline webkit-playsinline disablepictureinpicture disableremoteplayback preload="auto" aria-hidden="true"></video>
+    <script>(function (v) {
+      var phone = window.matchMedia('(max-width: 760px)').matches;
+      v.muted = true; v.defaultMuted = true; v.setAttribute('muted', '');
+      v.src = phone ? v.dataset.mobile : v.dataset.desktop;
+      var start = function () { var p = v.play(); if (p && p.catch) p.catch(function () {}); };
+      start();
+      // Low Power Mode and some browsers block autoplay: try again on the first touch or scroll.
+      var retry = function () { if (v.paused) start(); };
+      ['touchstart', 'scroll', 'click'].forEach(function (e) { window.addEventListener(e, retry, { passive: true, once: true }); });
+      document.addEventListener('visibilitychange', function () { if (!document.hidden) retry(); });
+    })(document.currentScript.previousElementSibling);</script>
+    <noscript><style>.hero-video { display: none; }</style></noscript>
   </div>
-  <div class="hero-actions">
-    <button type="button" class="btn-ghost" data-film-src="${esc(featured.video)}" data-film-title="${esc(featured.title)}" data-film-poster="${esc(featured.poster)}">${playIcon(10)}${esc(site.hero.button_text)}</button>
+  <div class="hero-copy">
+    <h1 class="hero-title" data-load style="--d:1500ms"><span data-type-now data-type-delay="1800">${esc(site.hero.tagline)}</span></h1>
+    <p class="hero-sub" data-load style="--d:1650ms">Zuzia and Ben, based in ${esc(c.town || 'Derbyshire')}. One price for your whole day.</p>
+    <button type="button" class="btn btn-light hero-play" data-load style="--d:1800ms" ${filmAttrs(featured)}>${playIcon(11)}${esc(site.hero.button_text)}</button>
+  </div>
+  <div class="hero-mark" data-hero-mark>${logo('hero-logo', 'Zen Visuals')}</div>
+</section>
+
+<section class="intro" id="weddings" aria-labelledby="weddings-title">
+  <div class="intro-top">
+    <h2 class="h-display" id="weddings-title">Your whole <em data-type>wedding day</em></h2>
+    <p class="intro-note" data-reveal>${esc(site.weddings.text)}</p>
+  </div>
+  <dl class="facts">
+    <div data-reveal><dt>Whole day</dt><dd>From getting ready to the last dance</dd></div>
+    <div data-reveal><dt>3–6 min</dt><dd>The length of your wedding film</dd></div>
+    <div data-reveal><dt>3–6 weeks</dt><dd>Until your photos and film arrive</dd></div>
+    <div data-reveal><dt>From ${esc(offers.photo.price || '£750')}</dt><dd>One price for the day, never by the hour</dd></div>
+  </dl>
+  <div class="intro-bottom">
+    <div class="intro-links" data-reveal>
+      ${site.weddings.venues ? `<p>${esc(site.weddings.venues)}</p>` : ''}
+      <div class="link-row">
+        <a href="#contact" class="btn btn-accent" data-enquiry="Wedding">${esc(site.weddings.link_text)}</a>
+        ${moreLink('wedding-videographer-derbyshire', 'Wedding films')}
+        ${moreLink('wedding-photographer-derbyshire', 'Wedding photography')}
+      </div>
+    </div>
+    <figure class="intro-pic" data-shutter>
+      <span class="shot-frame">${pic(site.weddings.image, site.weddings.image_alt, { sizes: '(max-width: 760px) 100vw, 58vw' })}</span>
+    </figure>
   </div>
 </section>
 
-<section class="wrap paths">
-  <article id="weddings" class="path">
-    ${pic(site.weddings.image, site.weddings.image_alt, { cls: 'path-img', sizes: '(max-width: 760px) 100vw, 50vw' })}
-    <h2 class="path-title">${esc(site.weddings.title)}</h2>
-    <p class="path-text">${esc(site.weddings.text)}</p>
-    ${site.weddings.venues ? `<p class="path-note">${esc(site.weddings.venues)}</p>` : ''}
-    <div class="path-links">
-      <a href="#contact" class="text-link" data-enquiry="Wedding">${esc(site.weddings.link_text)}</a>
-      ${moreLink('wedding-videographer-derbyshire', 'Wedding films')}
-      ${moreLink('wedding-photographer-derbyshire', 'Wedding photography')}
+<section class="films" id="films" aria-labelledby="films-title">
+  <div class="films-head">
+    <h2 class="h-display" id="films-title">Our <em data-type>films</em></h2>
+    <p data-reveal>Wedding films of three to six minutes, and short films for businesses. Press play on any of them.</p>
+  </div>
+  <div class="opening" data-opening>
+    <div class="opening-stage">
+      <div class="opening-pic">${pic(featured.poster, '', { sizes: '100vw' })}</div>
+      <div class="opening-caption">
+        <h3 class="h-head">${esc(featured.title)}</h3>
+        <button type="button" class="btn btn-light" ${filmAttrs(featured)}>${playIcon(11)}Play the film${featured.duration_seconds ? ` · ${minutes(featured.duration_seconds)}` : ''}</button>
+      </div>
     </div>
-  </article>
-  <article id="commercial" class="path">
-    ${firstCommercial ? `<button type="button" class="path-media" data-film-src="${esc(firstCommercial.video)}" data-film-title="${esc(firstCommercial.title)}" data-film-poster="${esc(firstCommercial.poster)}" aria-label="Play ${esc(firstCommercial.title)}">
-      ${pic(site.commercial.image, '', { cls: 'path-img', sizes: '(max-width: 760px) 100vw, 50vw' })}
-      <span class="play-ring play-ring--lg">${playIcon(18)}</span>
-    </button>` : pic(site.commercial.image, site.commercial.image_alt, { cls: 'path-img', sizes: '(max-width: 760px) 100vw, 50vw' })}
-    <h2 class="path-title">${esc(site.commercial.title)}</h2>
-    <p class="path-text">${esc(site.commercial.text)}</p>
-    <div class="path-links">
-      <a href="#contact" class="text-link" data-enquiry="Advert / promo film">${esc(site.commercial.link_text)}</a>
+  </div>
+  ${filmIndex(otherFilms)}
+  <div class="commercial" id="commercial">
+    <h3 class="h-head" data-reveal>${esc(site.commercial.title)}</h3>
+    <p data-reveal>${esc(site.commercial.text)}</p>
+    <div class="link-row" data-reveal>
+      <a href="#contact" class="btn btn-light" data-enquiry="Advert / promo film">${esc(site.commercial.link_text)}</a>
       ${moreLink('video-production-derbyshire', 'Video production')}
     </div>
-  </article>
-</section>
-
-<section class="films" id="films">
-  <div class="wrap">
-    <h2 class="section-title">Films</h2>
-    ${filmButton(featured, 'featured')}
-    <p class="film-title film-title--featured">${esc(featured.title)}</p>
-    ${weddingFilms.length ? `<p class="eyebrow">Weddings</p>
-    <div class="film-grid film-grid--3">${weddingFilms.map(filmCard).join('')}</div>` : ''}
-    ${commercialFilms.length ? `<p class="eyebrow eyebrow--spaced">Commercial</p>
-    <div class="film-grid film-grid--2">${commercialFilms.map(filmCard).join('')}</div>` : ''}
   </div>
 </section>
 
-<section class="wrap photos" id="photos">
-  <h2 class="section-title">Photographs</h2>
-  <div class="gallery">${gallery(weddingPhotos)}
-  </div>
-  ${commercialPhotos.length ? `<p class="eyebrow eyebrow--dark eyebrow--spaced">Commercial</p>
-  <div class="gallery">${gallery(commercialPhotos)}
-  </div>` : ''}
+<section class="photos" id="photos" aria-labelledby="photos-title">
+  <h2 class="h-display" id="photos-title">In <em data-type>photographs</em></h2>
+  ${stagger(galleryPhotos)}
 </section>
 
-<section class="wrap-narrow about" id="about">
-  ${pic(site.about.image, site.about.image_alt, { cls: 'about-img', sizes: '380px' })}
-  <div class="about-text">
-    <h2 class="about-title">${esc(site.about.title)} <em>${esc(site.about.title_emphasis)}</em></h2>
-    ${site.about.paragraphs.map((p) => `<p>${esc(p)}</p>`).join('\n    ')}
+<section class="about" id="about" aria-labelledby="about-title">
+  <div class="about-side" data-reveal>
+    <figure class="about-pic">${pic(site.about.image, site.about.image_alt, { sizes: '240px' })}</figure>
+    <dl class="about-facts">
+      <div><dt>Who</dt><dd>Zuzia and Ben</dd></div>
+      <div><dt>Based in</dt><dd>${esc(c.town || 'Derbyshire')}, Derbyshire</dd></div>
+      <div><dt>Married</dt><dd>March 2023</dd></div>
+    </dl>
+  </div>
+  <div class="about-main">
+    <h2 class="h-display about-title" id="about-title">${esc(site.about.title)} <em data-type>${esc(site.about.title_emphasis)}</em></h2>
+    ${site.about.paragraphs.map((p) => `<p class="about-text" data-reveal>${esc(p)}</p>`).join('\n    ')}
+    <div class="about-record">
+      <div data-reveal><h3>Venues</h3><ul role="list"><li>Shottle Hall</li><li>West Mill, Darley Abbey</li><li>Weddings in London</li></ul></div>
+      <div data-reveal><h3>Where we work</h3><ul role="list"><li>Belper and Derby</li><li>Matlock and Ashbourne</li><li>The Peak District</li><li>The rest of the UK</li></ul></div>
+    </div>
   </div>
 </section>
 
 ${reviewsBlock()}
 ${pricingBlock(true)}
-${faqs.length ? `<section class="wrap-narrow faq" id="faq">
-  <h2 class="section-title">${esc(faqTitle)}</h2>
-  ${faqList(faqs)}
-</section>
-` : ''}
-${contactAndFooter()}
-</main>
-` + dialogsAndScripts();
+${faqs.length ? faqBlock(faqTitle, faqs) : ''}
+${contactAndFooter()}` + dialogsAndScripts();
 
 // ---------- landing pages ----------
 function landing(p) {
   const url = pageUrl(p.slug);
   const pFilms = p.film_category ? films.filter((f) => f.category === p.film_category) : [];
-  const pPhotos = p.photo_category ? photos.filter((x) => x.category === p.photo_category).slice(0, p.photo_limit || 9) : [];
+  const pPhotos = p.photo_category ? photos.filter((x) => x.category === p.photo_category && x.image !== p.hero_image).slice(0, p.photo_limit || 9) : [];
   const isCommercial = p.film_category === 'commercial' || p.photo_category === 'commercial';
   const graph = [
     business,
@@ -431,78 +527,69 @@ function landing(p) {
   ];
   if (p.faqs && p.faqs.length) graph.push(faqSchema(p.faqs));
   const others = landingPages.filter((x) => x.slug !== p.slug);
+  const enquiry = isCommercial ? 'Advert / promo film' : 'Wedding';
 
   return head({ title: p.seo_title, description: p.seo_description, url, image: p.hero_image, graph, preload: null })
   + topbar('/') + `
 <main id="main">
 
-<section class="hero hero--page" id="top">
-  ${pic(p.hero_image, p.hero_alt, { cls: 'hero-image', sizes: '100vw', eager: true })}
-  <div class="hero-shade"></div>
-  <div class="hero-inner hero-inner--page">
-    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span>${esc(p.nav_label || p.h1)}</span></nav>
-    <p class="hero-eyebrow">${esc(p.eyebrow || '')}</p>
-    <h1 class="page-title">${esc(p.h1)}</h1>
-    <a href="#contact" class="btn-light" data-enquiry="${isCommercial ? 'Advert / promo film' : 'Wedding'}">${isCommercial ? 'Get a quote' : 'Check your date'}</a>
+<section class="phero" id="top" data-hero>
+  <div class="phero-copy">
+    <nav class="breadcrumb" aria-label="Breadcrumb" data-load style="--d:100ms"><a href="/">Home</a> <span aria-hidden="true">/</span> <span>${esc(p.nav_label || p.h1)}</span></nav>
+    <h1 class="h-display${p.h1.length > 40 ? ' is-long' : ''}" data-load style="--d:180ms">${emLast(p.h1, 2, 'data-type-now')}</h1>
+    ${p.intro && p.intro[0] ? `<p class="phero-lead" data-load style="--d:300ms">${esc(p.intro[0])}</p>` : ''}
+    <a href="#contact" class="btn btn-accent" data-enquiry="${enquiry}" data-load style="--d:420ms">${isCommercial ? 'Get a quote' : 'Check your date'}</a>
   </div>
+  <figure class="phero-pic" data-hero-pic>${pic(p.hero_image, p.hero_alt, { sizes: '(max-width: 760px) 100vw, 50vw', eager: true })}</figure>
 </section>
 
-<section class="wrap-narrow prose">
-  ${(p.intro || []).map((x, i) => `<p${i === 0 ? ' class="lead"' : ''}>${esc(x)}</p>`).join('\n  ')}
-  ${(p.sections || []).map((s) => `<h2>${esc(s.heading)}</h2>
-  <p>${esc(s.text)}</p>`).join('\n  ')}
+<section class="story" aria-label="${esc(p.nav_label || p.h1)}">
+  ${(p.intro || []).slice(1).map((x) => `<p class="story-lead" data-reveal>${esc(x)}</p>`).join('\n  ')}
+  ${(p.sections || []).map((s) => `<div class="story-row">
+    <h2 class="h-head" data-reveal>${esc(s.heading)}</h2>
+    <p data-reveal>${esc(s.text)}</p>
+  </div>`).join('\n  ')}
 </section>
 
-${pFilms.length ? `<section class="films films--page" id="films">
-  <div class="wrap">
-    <h2 class="section-title">Films</h2>
-    <div class="film-grid film-grid--2">${pFilms.map(filmCard).join('')}</div>
-  </div>
+${pFilms.length ? `<section class="films films--page" id="films" aria-labelledby="films-title">
+  <div class="films-head"><h2 class="h-display" id="films-title">Our <em data-type>films</em></h2></div>
+  ${filmIndex(pFilms)}
 </section>` : ''}
 
-${pPhotos.length ? `<section class="wrap photos" id="photos">
-  <h2 class="section-title">Photographs</h2>
-  <div class="gallery">${gallery(pPhotos)}
-  </div>
+${pPhotos.length ? `<section class="photos" id="photos" aria-labelledby="photos-title">
+  <h2 class="h-display" id="photos-title">In <em data-type>photographs</em></h2>
+  ${stagger(pPhotos)}
 </section>` : ''}
 
 ${isCommercial ? '' : reviewsBlock()}
 ${p.show_pricing ? pricingBlock(false) : ''}
-${p.faqs && p.faqs.length ? `<section class="wrap-narrow faq" id="faq">
-  <h2 class="section-title">Questions</h2>
-  ${faqList(p.faqs)}
-</section>` : ''}
+${p.faqs && p.faqs.length ? faqBlock('Questions', p.faqs) : ''}
 
-${others.length ? `<section class="wrap-narrow related">
-  <p class="eyebrow eyebrow--dark">More from Zen Visuals</p>
+${others.length ? `<section class="related" aria-labelledby="related-title">
+  <h2 class="h-head" id="related-title">More from <em>Zen Visuals</em></h2>
   <div class="related-links">
     <a href="/">Home</a>
     ${others.map((o) => `<a href="/${esc(o.slug)}/">${esc(o.nav_label || o.h1)}</a>`).join('\n    ')}
   </div>
 </section>` : ''}
 
-${contactAndFooter(isCommercial ? 'Advert / promo film' : 'Wedding')}
-</main>
-` + dialogsAndScripts();
+${contactAndFooter(enquiry)}` + dialogsAndScripts();
 }
 
 // ---------- simple pages ----------
-const thanks = `<!doctype html>
+const simplePage = (title, heading, text) => `<!doctype html>
 <html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Thank you | Zen Visuals</title><meta name="robots" content="noindex">
+<title>${esc(title)} | Zen Visuals</title><meta name="robots" content="noindex">
 <link rel="icon" href="/media/brand/favicon.svg" type="image/svg+xml">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400..600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/styles.css"></head>
 <body class="simple-page"><main class="simple">
-<img src="/media/brand/logo-sage.png" alt="Zen Visuals" class="simple-logo">
-<h1>Thank you.</h1><p>${esc(c.thank_you)}</p>
-<a href="/" class="btn-light">Back to the site</a>
+${logo('simple-logo', 'Zen Visuals')}
+<h1 class="h-display">${esc(heading)}</h1><p>${esc(text)}</p>
+<a href="/" class="btn btn-accent">Back to the site</a>
 </main></body></html>`;
-
-const notFound = thanks
-  .replace('<title>Thank you | Zen Visuals</title>', '<title>Page not found | Zen Visuals</title>')
-  .replace('<h1>Thank you.</h1>', '<h1>Page not found.</h1>')
-  .replace(`<p>${esc(c.thank_you)}</p>`, '<p>That page doesn\'t exist, but our films and photos do.</p>');
+const thanks = simplePage('Thank you', 'Thank you.', c.thank_you);
+const notFound = simplePage('Page not found', 'Page not found.', 'That page doesn\'t exist, but our films and photos do.');
 
 // ---------- sitemap (pages, images and videos) ----------
 const imgTags = (list) => list.map((src) => `<image:image><image:loc>${esc(abs(src))}</image:loc></image:image>`).join('');
