@@ -1,25 +1,27 @@
 {
   "seo": {
-    "title": "Zen Visuals | Wedding & Commercial Photography and Film in Derbyshire",
-    "description": "Wedding and commercial photography and film by Zuzia and Ben, based in Derbyshire and working across the UK. One price for the whole day: we stay as long as you need us.",
+    "title": "Wedding Photographer & Videographer Derbyshire | Zen Visuals",
+    "description": "Wedding photography and film by Zuzia and Ben, based in Belper, Derbyshire. One price for the whole day, from £750. Check your date today.",
     "share_image": "/media/brand/share-image.jpg"
   },
   "hero": {
-    "tagline": "Wedding & commercial photography and film · Derbyshire",
+    "tagline": "Wedding photographer & videographer in Derbyshire",
     "reel": "/media/films/reel.mp4",
     "reel_poster": "/media/photos/reel-poster.jpg",
-    "button_text": "Watch a film"
+    "button_text": "Watch a film",
+    "reel_mobile": "/media/films/reel-mobile.mp4"
   },
   "weddings": {
     "title": "Weddings",
-    "text": "Photography and film, from getting ready to the last dance. Natural, unposed, and true to how your day felt.",
+    "text": "Wedding photography and film across Derbyshire and beyond, from getting ready to the last dance. Natural, unposed, and true to how your day felt. One price covers the whole day, and your photos and film arrive within 3–6 weeks.",
     "image": "/media/photos/bandstand-couple.jpg",
     "image_alt": "Bride and groom facing each other under a green bandstand",
-    "link_text": "Enquire about your date"
+    "link_text": "Enquire about your date",
+    "venues": "Venues include Shottle Hall, West Mill in Darley Abbey, and weddings in London."
   },
   "commercial": {
     "title": "Commercial",
-    "text": "Adverts, promo films, product shoots and corporate events, crafted around what you need people to feel and do.",
+    "text": "Adverts, promotional films, product photography and corporate events for businesses in Derbyshire and across the UK, crafted around what you need people to feel and do.",
     "image": "/media/photos/biffs-beetle-front.jpg",
     "image_alt": "Restored 1967 VW Beetle on a tree-lined lane",
     "link_text": "Start a project"
@@ -74,7 +76,7 @@
     "title_emphasis": "worth rewatching.",
     "phone": "07964 672974",
     "email": "info@benjaminhaywood.co.uk",
-    "area": "Based in Derbyshire, working across the UK",
+    "area": "Based in Belper, Derbyshire, working across the UK",
     "enquiry_types": [
       "Wedding",
       "Advert / promo film",
@@ -82,10 +84,12 @@
       "Product photography",
       "Something else"
     ],
-    "thank_you": "Thank you! We've got your message and will be in touch soon."
+    "thank_you": "Thank you! We've got your message and will be in touch soon.",
+    "town": "Belper"
   },
   "social": {
     "facebook": "https://www.facebook.com/p/Zen-Visuals-61572277799280/",
-    "instagram": ""
+    "instagram": "",
+    "google_business": ""
   }
 }

@@ -5,6 +5,8 @@
   // Hero reel: keep muted for autoplay; pause for people who prefer less motion.
   const hero = document.querySelector('.hero-video');
   if (hero) {
+    // Phones get a lighter version of the reel.
+    if (hero.dataset.mobileSrc && window.matchMedia('(max-width: 760px)').matches) hero.src = hero.dataset.mobileSrc;
     hero.muted = true;
     if (reduceMotion) hero.pause();
     else { const p = hero.play(); if (p && p.catch) p.catch(() => {}); }

@@ -26,6 +26,9 @@ content:
           - { name: featured, label: "Show as the big featured film (tick only one)", type: boolean }
           - { name: video, label: "Video file (MP4, under 20MB)", type: file, required: true }
           - { name: poster, label: Cover image, type: image, required: true }
+          - { name: description, label: "Short description (for Google video results)", type: text }
+          - { name: duration_seconds, label: "Length in seconds (e.g. 240)", type: number }
+          - { name: date_added, label: Date added, type: date }
 
   - name: photos
     label: Photos
@@ -65,6 +68,21 @@ content:
           - { name: name, label: Name, type: string, required: true }
           - { name: text, label: Review, type: text, required: true }
 
+  - name: faq
+    label: FAQ
+    type: file
+    path: content/faq.json
+    format: json
+    fields:
+      - { name: title, label: Section heading, type: string }
+      - name: faqs
+        label: Questions (drag to reorder)
+        type: object
+        list: true
+        fields:
+          - { name: question, label: Question, type: string, required: true }
+          - { name: answer, label: Answer, type: text, required: true }
+
   - name: site
     label: Page text & prices
     type: file
@@ -78,6 +96,7 @@ content:
           - { name: tagline, label: Line under the logo, type: string }
           - { name: reel, label: "Background reel (short silent MP4, under 10MB)", type: file }
           - { name: reel_poster, label: Still shown while the reel loads, type: image }
+          - { name: reel_mobile, label: "Smaller reel for phones (MP4, under 3MB)", type: file }
           - { name: button_text, label: Button text, type: string }
       - name: weddings
         label: Weddings section
@@ -88,6 +107,7 @@ content:
           - { name: image, label: Image, type: image }
           - { name: image_alt, label: Image description, type: string }
           - { name: link_text, label: Link text, type: string }
+          - { name: venues, label: "Venues line (optional)", type: string }
       - name: commercial
         label: Commercial section
         type: object
@@ -141,6 +161,7 @@ content:
           - { name: phone, label: Phone, type: string }
           - { name: email, label: Email, type: string }
           - { name: area, label: Area line, type: string }
+          - { name: town, label: "Town you are based in (for Google)", type: string }
           - { name: enquiry_types, label: Enquiry form options, type: string, list: true }
           - { name: thank_you, label: Message after sending the form, type: text }
       - name: social
@@ -149,6 +170,7 @@ content:
         fields:
           - { name: facebook, label: Facebook page link, type: string }
           - { name: instagram, label: "Instagram link (leave empty to hide)", type: string }
+          - { name: google_business, label: "Google Business Profile link (leave empty to hide)", type: string }
       - name: seo
         label: Google & sharing
         type: object

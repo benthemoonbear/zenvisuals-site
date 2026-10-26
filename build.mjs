@@ -15,6 +15,9 @@ const site = load('site.json');
 const { films } = load('films.json');
 const { photos } = load('photos.json');
 const { reviews } = load('reviews.json');
+const faqFile = existsSync(join(ROOT, 'content', 'faq.json')) ? load('faq.json') : { faqs: [] };
+const faqs = faqFile.faqs || [];
+const faqTitle = faqFile.title || 'Questions';
 
 // ---------- helpers ----------
 const esc = (s = '') => String(s)
@@ -78,10 +81,14 @@ const commercialPhotos = photos.filter((p) => p.category === 'commercial');
 const c = site.contact;
 const telHref = 'tel:' + c.phone.replace(/[^0-9+]/g, '');
 
-const jsonLd = {
-  '@context': 'https://schema.org',
+const abs = (u) => (/^https?:/.test(u) ? u : SITE_URL + u);
+const isoDuration = (s) => `PT${Math.floor(s / 60)}M${Math.round(s % 60)}S`;
+const business = {
   '@type': 'ProfessionalService',
+  '@id': SITE_URL + '/#business',
   name: 'Zen Visuals',
+  founder: [{ '@type': 'Person', name: 'Zuzia' }, { '@type': 'Person', name: 'Ben' }],
+  priceRange: '£750–£1,650',
   description: site.seo.description,
   url: SITE_URL + '/',
   image: SITE_URL + site.seo.share_image,
@@ -89,8 +96,8 @@ const jsonLd = {
   telephone: c.phone,
   email: c.email,
   areaServed: ['Derbyshire', 'United Kingdom'],
-  address: { '@type': 'PostalAddress', addressRegion: 'Derbyshire', addressCountry: 'GB' },
-  sameAs: [site.social.facebook, site.social.instagram].filter(Boolean),
+  address: { '@type': 'PostalAddress', ...(c.town ? { addressLocality: c.town } : {}), addressRegion: 'Derbyshire', addressCountry: 'GB' },
+  sameAs: [site.social.facebook, site.social.instagram, site.social.google_business].filter(Boolean),
   makesOffer: site.pricing.packages.map((p) => ({
     '@type': 'Offer',
     name: 'Wedding ' + p.name,
@@ -98,6 +105,22 @@ const jsonLd = {
     priceCurrency: 'GBP',
   })),
 };
+const videos = films.filter((f) => f.video).map((f) => ({
+  '@type': 'VideoObject',
+  name: f.title,
+  description: f.description || `${f.title}, filmed by Zen Visuals.`,
+  thumbnailUrl: abs(f.poster),
+  contentUrl: abs(f.video),
+  uploadDate: f.date_added || '2026-10-19',
+  ...(f.duration_seconds ? { duration: isoDuration(f.duration_seconds) } : {}),
+  publisher: { '@id': SITE_URL + '/#business' },
+}));
+const graph = [business, ...videos];
+if (faqs.length) graph.push({
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.question, acceptedAnswer: { '@type': 'Answer', text: f.answer } })),
+});
+const jsonLd = { '@context': 'https://schema.org', '@graph': graph };
 
 // ---------- page ----------
 const page = `<!doctype html>
@@ -136,6 +159,7 @@ const page = `<!doctype html>
     <a href="#films">Films</a>
     <a href="#about">About</a>
     <a href="#pricing">Pricing</a>
+    ${faqs.length ? '<a href="#faq">FAQ</a>' : ''}
     <a href="#contact" class="nav-cta">Contact</a>
   </nav>
 </header>
@@ -143,11 +167,11 @@ const page = `<!doctype html>
 <main id="main">
 
 <section class="hero" id="top">
-  <video class="hero-video" src="${esc(site.hero.reel)}" poster="${esc(site.hero.reel_poster)}" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>
+  <video class="hero-video" src="${esc(site.hero.reel)}"${site.hero.reel_mobile ? ` data-mobile-src="${esc(site.hero.reel_mobile)}"` : ''} poster="${esc(site.hero.reel_poster)}" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>
   <div class="hero-shade"></div>
   <div class="hero-inner">
-    <h1 class="hero-logo"><img src="/media/brand/logo-cream.png" alt="Zen Visuals"${dims('/media/brand/logo-cream.png')}></h1>
-    <p class="hero-tagline">${esc(site.hero.tagline)}</p>
+    <div class="hero-logo"><img src="/media/brand/logo-cream.png" alt="Zen Visuals"${dims('/media/brand/logo-cream.png')}></div>
+    <h1 class="hero-tagline">${esc(site.hero.tagline)}</h1>
   </div>
   <div class="hero-actions">
     <button type="button" class="btn-ghost" data-film-src="${esc(featured.video)}" data-film-title="${esc(featured.title)}" data-film-poster="${esc(featured.poster)}">${playIcon(10)}${esc(site.hero.button_text)}</button>
@@ -159,6 +183,7 @@ const page = `<!doctype html>
     <img src="${esc(site.weddings.image)}" alt="${esc(site.weddings.image_alt)}"${dims(site.weddings.image)} loading="lazy" decoding="async" class="path-img">
     <h2 class="path-title">${esc(site.weddings.title)}</h2>
     <p class="path-text">${esc(site.weddings.text)}</p>
+    ${site.weddings.venues ? `<p class="path-note">${esc(site.weddings.venues)}</p>` : ''}
     <a href="#contact" class="text-link" data-enquiry="Wedding">${esc(site.weddings.link_text)}</a>
   </article>
   <article id="commercial" class="path">
@@ -204,7 +229,7 @@ const page = `<!doctype html>
 <section class="wrap-narrow reviews" id="reviews">
   <figure class="review-featured">
     <div class="stars" role="img" aria-label="5 out of 5 stars">★★★★★</div>
-    <p class="rating">${esc(site.reviews.rating_text)}</p>
+    <p class="rating">${site.social.google_business ? `<a href="${esc(site.social.google_business)}" rel="noopener" target="_blank">${esc(site.reviews.rating_text)}</a>` : esc(site.reviews.rating_text)}</p>
     <blockquote>“${esc(site.reviews.featured_quote)}”</blockquote>
     <figcaption>${esc(site.reviews.featured_name)}</figcaption>
   </figure>
@@ -236,7 +261,17 @@ const page = `<!doctype html>
   </div>
 </section>
 
-<section class="contact" id="contact">
+${faqs.length ? `<section class="wrap-narrow faq" id="faq">
+  <h2 class="section-title">${esc(faqTitle)}</h2>
+  <div class="faq-list">
+    ${faqs.map((f, i) => `<details class="faq-item"${i === 0 ? ' open' : ''}>
+      <summary><h3>${esc(f.question)}</h3></summary>
+      <p>${esc(f.answer)}</p>
+    </details>`).join('\n    ')}
+  </div>
+</section>
+
+` : ''}<section class="contact" id="contact">
   <div class="wrap-narrow contact-inner">
     <div class="contact-intro">
       <h2 class="contact-title">${esc(c.title)} <em>${esc(c.title_emphasis)}</em></h2>
@@ -268,6 +303,7 @@ const page = `<!doctype html>
     <div class="footer-links">
       ${site.social.instagram ? `<a href="${esc(site.social.instagram)}" rel="noopener" target="_blank">Instagram</a>` : ''}
       ${site.social.facebook ? `<a href="${esc(site.social.facebook)}" rel="noopener" target="_blank">Facebook</a>` : ''}
+      ${site.social.google_business ? `<a href="${esc(site.social.google_business)}" rel="noopener" target="_blank">Google reviews</a>` : ''}
       <span>© ${new Date().getFullYear()} Zen Visuals</span>
     </div>
   </footer>

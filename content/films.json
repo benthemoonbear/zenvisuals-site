@@ -5,56 +5,80 @@
       "category": "wedding",
       "featured": true,
       "video": "/media/films/robyn-gabriel.mp4",
-      "poster": "/media/photos/robyn-gabriel-walk.jpg"
+      "poster": "/media/photos/robyn-gabriel-walk.jpg",
+      "description": "Robyn and Gabriel's wedding film: a church ceremony, portraits across the estate grounds and a packed dance floor, filmed by Zen Visuals in Derbyshire.",
+      "duration_seconds": 242,
+      "date_added": "2026-10-19"
     },
     {
       "title": "Harrison & Soraya",
       "category": "wedding",
       "featured": false,
       "video": "/media/films/harrison-soraya.mp4",
-      "poster": "/media/photos/poster-harrison-soraya.jpg"
+      "poster": "/media/photos/poster-harrison-soraya.jpg",
+      "description": "Harrison and Soraya's wedding film, from getting ready and the ceremony to portraits in the fields and the first dance.",
+      "duration_seconds": 211,
+      "date_added": "2026-10-19"
     },
     {
       "title": "Lucas & Chantelle",
       "category": "wedding",
       "featured": false,
       "video": "/media/films/lucas-chantelle.mp4",
-      "poster": "/media/photos/poster-lucas-chantelle.jpg"
+      "poster": "/media/photos/poster-lucas-chantelle.jpg",
+      "description": "Lucas and Chantelle's wedding film: bridal prep, ceremony, garden portraits, speeches and the evening celebration.",
+      "duration_seconds": 246,
+      "date_added": "2026-10-19"
     },
     {
       "title": "Luke & Arali",
       "category": "wedding",
       "featured": false,
       "video": "/media/films/luke-arali.mp4",
-      "poster": "/media/photos/luke-arali-smile.jpg"
+      "poster": "/media/photos/luke-arali-smile.jpg",
+      "description": "Luke and Arali's wedding highlight film, from the morning preparations to golden-hour portraits and the party.",
+      "duration_seconds": 269,
+      "date_added": "2026-10-19"
     },
     {
       "title": "Biff’s Detailing — ’67 VW Beetle",
       "category": "commercial",
       "featured": false,
       "video": "/media/films/biffs-beetle.mp4",
-      "poster": "/media/photos/biffs-beetle-front.jpg"
+      "poster": "/media/photos/biffs-beetle-front.jpg",
+      "description": "Promo film for Biff's Detailing featuring a restored 1967 Volkswagen Beetle, by Zen Visuals.",
+      "duration_seconds": 84,
+      "date_added": "2026-10-19"
     },
     {
       "title": "Katie Jobling Art",
       "category": "commercial",
       "featured": false,
       "video": "/media/films/katie-jobling-art.mp4",
-      "poster": "/media/photos/katie-jobling-paintings.jpg"
+      "poster": "/media/photos/katie-jobling-paintings.jpg",
+      "description": "Brand film for watercolour artist Katie Jobling, showing her studio and painting process.",
+      "duration_seconds": 198,
+      "date_added": "2026-10-19"
     },
     {
       "title": "The Thermal Heat Company",
       "category": "commercial",
       "featured": false,
       "video": "/media/films/thermal-heat-company.mp4",
-      "poster": "/media/photos/thermal-heat-boiler.jpg"
+      "poster": "/media/photos/thermal-heat-boiler.jpg",
+      "description": "Customer information film for The Thermal Heat Company, a plumbing and heating firm, explaining what to expect on installation day.",
+      "duration_seconds": 114,
+      "date_added": "2026-10-19"
     },
     {
       "title": "Stanton",
       "category": "commercial",
       "featured": false,
       "video": "/media/films/stanton.mp4",
-      "poster": "/media/photos/stanton-workshop.jpg"
+      "poster": "/media/photos/stanton-workshop.jpg",
+      "description": "Black and white brand film for Stanton, filmed in their workshop.",
+      "duration_seconds": 60,
+      "date_added": "2026-10-19"
     }
   ]
 }
