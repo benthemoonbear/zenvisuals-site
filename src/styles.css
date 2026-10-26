@@ -251,3 +251,116 @@ dialog::backdrop { background: rgba(14, 13, 11, 0.95); }
 @media (max-width: 420px) {
   .topbar:not(.is-solid) nav a:nth-child(2), .topbar:not(.is-solid) nav a:nth-child(4), .topbar:not(.is-solid) nav a[href="#faq"] { display: none; }
 }
+
+/* =========================================================
+   Motion & mobile polish
+   ========================================================= */
+:root { --ease-out: cubic-bezier(.16, 1, .3, 1); interpolate-size: allow-keywords; }
+
+/* Scroll reveal (only when JS is running, so nothing is ever hidden without it) */
+.js .reveal { opacity: 0; transform: translate3d(0, 28px, 0); transition: opacity 1s var(--ease-out), transform 1.1s var(--ease-out); transition-delay: var(--d, 0ms); will-change: opacity, transform; }
+.js .reveal.is-in { opacity: 1; transform: none; }
+.js .reveal-img { opacity: 0; transform: scale(1.04); transition: opacity 1.2s var(--ease-out), transform 1.6s var(--ease-out); transition-delay: var(--d, 0ms); }
+.js .reveal-img.is-in { opacity: 1; transform: none; }
+
+/* Hero entrance */
+@keyframes rise { from { opacity: 0; transform: translate3d(0, 24px, 0); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slowzoom { from { transform: scale(1.08); } to { transform: scale(1); } }
+.hero-video, .hero-image { animation: fade 1.6s ease both, slowzoom 9s var(--ease-out) both; }
+.hero-logo { animation: rise 1.4s var(--ease-out) .2s both; }
+.hero-tagline { animation: rise 1.2s var(--ease-out) .55s both; }
+.hero-actions { animation: rise 1.2s var(--ease-out) .85s both; }
+.hero-inner--page > * { animation: rise 1.1s var(--ease-out) both; }
+.hero-inner--page > :nth-child(2) { animation-delay: .1s; }
+.hero-inner--page > :nth-child(3) { animation-delay: .2s; }
+.hero-inner--page > :nth-child(4) { animation-delay: .35s; }
+.hero-parallax { will-change: transform, opacity; }
+
+/* Buttons feel tappable */
+.btn-ghost, .btn-light, .btn-dark, .film-thumb, .g-item, .path-media { transition: transform .35s var(--ease-out), background-color .3s ease, opacity .3s ease; }
+.btn-ghost:active, .btn-light:active, .btn-dark:active { transform: scale(.96); }
+.film-thumb:active, .g-item:active, .path-media:active { transform: scale(.985); }
+
+/* FAQ opens smoothly (where supported) */
+.faq-item::details-content { block-size: 0; overflow: clip; transition: block-size .5s var(--ease-out), content-visibility .5s allow-discrete; }
+.faq-item[open]::details-content { block-size: auto; }
+.faq-item summary::after { transition: transform .4s var(--ease-out); }
+
+/* Film player and photo viewer open gently */
+@keyframes pop { from { opacity: 0; transform: translate3d(0, 16px, 0) scale(.97); } to { opacity: 1; transform: none; } }
+dialog[open] { animation: pop .45s var(--ease-out); }
+dialog[open]::backdrop { animation: fade .35s ease; }
+
+/* Menu button (phones) */
+.menu-toggle { display: none; position: relative; width: 44px; height: 44px; margin-left: auto; border: 0; background: transparent; cursor: pointer; z-index: 60; }
+.menu-toggle span { position: absolute; left: 11px; right: 11px; height: 1.5px; background: var(--cream); border-radius: 2px; transition: transform .5s var(--ease-out), top .5s var(--ease-out); }
+.menu-toggle span:first-child { top: 17px; }
+.menu-toggle span:last-child { top: 26px; }
+.menu-open .menu-toggle span:first-child { top: 21.5px; transform: rotate(45deg); }
+.menu-open .menu-toggle span:last-child { top: 21.5px; transform: rotate(-45deg); }
+
+.mobile-menu {
+  position: fixed; inset: 0; z-index: 45; background: var(--ink); color: var(--cream);
+  display: flex; flex-direction: column; justify-content: center; gap: 28px;
+  padding: 96px var(--gutter) calc(40px + env(safe-area-inset-bottom));
+  clip-path: circle(0% at calc(100% - 38px) 38px); visibility: hidden;
+  transition: clip-path .8s var(--ease-out), visibility 0s linear .8s;
+}
+.menu-open .mobile-menu { clip-path: circle(150% at calc(100% - 38px) 38px); visibility: visible; transition: clip-path .8s var(--ease-out), visibility 0s; }
+.mobile-menu nav { display: flex; flex-direction: column; gap: 4px; }
+.mobile-menu nav a { font-family: var(--serif); font-size: clamp(36px, 10vw, 52px); line-height: 1.15; color: var(--cream); text-decoration: none; opacity: 0; transform: translate3d(0, 18px, 0); transition: opacity .6s var(--ease-out), transform .7s var(--ease-out); }
+.menu-open .mobile-menu nav a { opacity: 1; transform: none; }
+.mobile-menu nav a:nth-child(1) { transition-delay: .12s; } .mobile-menu nav a:nth-child(2) { transition-delay: .16s; }
+.mobile-menu nav a:nth-child(3) { transition-delay: .2s; } .mobile-menu nav a:nth-child(4) { transition-delay: .24s; }
+.mobile-menu nav a:nth-child(5) { transition-delay: .28s; } .mobile-menu nav a:nth-child(6) { transition-delay: .32s; }
+.mobile-menu nav a:nth-child(7) { transition-delay: .36s; } .mobile-menu nav a:nth-child(8) { transition-delay: .4s; }
+.mobile-menu-sub { display: flex; flex-wrap: wrap; gap: 10px 20px; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
+.mobile-menu-sub a { color: var(--sage-light); }
+.mobile-menu-phone { color: var(--sage); text-decoration: none; font-size: 17px; }
+.menu-open { overflow: hidden; }
+.menu-open .topbar { z-index: 50; background: transparent; backdrop-filter: none; }
+.menu-open .topbar .topbar-logo { opacity: 1; pointer-events: auto; }
+
+/* Hide scrollbars on swipe rows */
+.film-grid::-webkit-scrollbar { display: none; }
+
+@media (max-width: 760px) {
+  .topbar, .topbar:not(.is-solid) { justify-content: space-between; padding: 10px var(--gutter); padding-top: calc(10px + env(safe-area-inset-top)); }
+  .topbar nav { display: none; }
+  .menu-toggle { display: block; }
+  .topbar:not(.is-solid) .topbar-logo { position: static; }
+  .menu-open .topbar { background: transparent; backdrop-filter: none; }
+  .menu-open .topbar .topbar-logo { opacity: 1; pointer-events: auto; }
+
+  /* Films become swipeable rows */
+  .film-grid--2, .film-grid--3 {
+    display: grid; grid-auto-flow: column; grid-auto-columns: 84%; grid-template-columns: none;
+    gap: 14px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;
+    margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter) 8px; scroll-padding: 0 var(--gutter);
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .film-grid > * { scroll-snap-align: start; }
+  .film-title { font-size: 20px; }
+  .play-ring { width: 52px; height: 52px; }
+  .featured .play-ring { width: 72px; height: 72px; }
+
+  .hero-logo img { width: min(78vw, 360px); }
+  .hero-tagline { font-size: 12px; letter-spacing: .2em; max-width: 30ch; line-height: 1.7; }
+  .hero-actions { bottom: calc(28px + env(safe-area-inset-bottom)); }
+  .paths { gap: 64px; }
+  .section-title { margin-bottom: 36px; }
+  .about-img { max-width: none; flex-basis: 100%; }
+  .review-featured { margin-bottom: 56px; }
+  .review-list { gap: 32px; }
+  .contact-inner { padding-bottom: 64px; }
+  .price-grid { gap: 12px; }
+  .faq-item summary { padding: 20px 0; }
+  .page-title { font-size: clamp(40px, 11vw, 56px); }
+  .hero--page { min-height: 480px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0ms !important; transition-duration: .01ms !important; transition-delay: 0ms !important; }
+  .js .reveal, .js .reveal-img { opacity: 1; transform: none; }
+}

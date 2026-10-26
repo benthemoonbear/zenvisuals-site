@@ -152,7 +152,8 @@ const head = ({ title, description, url, image, graph, preload }) => `<!doctype 
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>document.documentElement.classList.add('js')</script>
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
 <meta name="robots" content="index, follow, max-image-preview:large, max-video-preview:-1">
@@ -192,7 +193,22 @@ const topbar = (base) => `<header class="topbar" id="topbar">
     ${faqs.length ? `<a href="${base}#faq">FAQ</a>` : ''}
     <a href="${base ? '' : ''}#contact" class="nav-cta">Contact</a>
   </nav>
+  <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu"><span></span><span></span></button>
 </header>
+<div class="mobile-menu" id="mobile-menu" inert>
+  <nav aria-label="Mobile">
+    <a href="${base}#weddings">Weddings</a>
+    <a href="${base}#commercial">Commercial</a>
+    <a href="${base}#films">Films</a>
+    <a href="${base}#photos">Photographs</a>
+    <a href="${base}#about">About us</a>
+    <a href="${base}#pricing">Pricing</a>
+    ${faqs.length ? `<a href="${base}#faq">Questions</a>` : ''}
+    <a href="#contact">Contact</a>
+  </nav>
+  ${landingPages.length ? `<div class="mobile-menu-sub">${landingPages.map((p) => `<a href="/${esc(p.slug)}/">${esc(p.nav_label || p.h1)}</a>`).join('')}</div>` : ''}
+  <a href="${telHref}" class="mobile-menu-phone">${esc(c.phone)}</a>
+</div>
 `;
 
 const reviewsBlock = () => `<section class="wrap-narrow reviews" id="reviews">

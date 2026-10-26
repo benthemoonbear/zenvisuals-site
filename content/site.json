@@ -1,11 +1,11 @@
 {
   "seo": {
-    "title": "Wedding Photographer & Videographer Derbyshire | Zen Visuals",
+    "title": "Wedding Photographers & Videographers Derbyshire | Zen Visuals",
     "description": "Wedding photography and film by Zuzia and Ben, based in Belper, Derbyshire. One price for the whole day, from £750. Check your date today.",
     "share_image": "/media/brand/share-image.jpg"
   },
   "hero": {
-    "tagline": "Wedding photographer & videographer in Derbyshire",
+    "tagline": "Wedding photographers & videographers in Derbyshire",
     "reel": "/media/films/reel.mp4",
     "reel_poster": "/media/photos/reel-poster.jpg",
     "button_text": "Watch a film",
@@ -91,6 +91,6 @@
   "social": {
     "facebook": "https://www.facebook.com/p/Zen-Visuals-61572277799280/",
     "instagram": "",
-    "google_business": ""
+    "google_business": "https://maps.app.goo.gl/8twQZr1Vc69SZbMW7"
   }
 }
