@@ -28,10 +28,68 @@
     window.matchMedia('(min-width: 761px)').addEventListener('change', (e) => { if (e.matches) setMenu(false); });
   }
 
+  // Typing effect: the line under the logo, and any [data-type] text when it scrolls into view.
+  const typeOut = (el, delay = 0) => {
+    const full = el.textContent.trim();
+    if (!full) return;
+    const h = el.getBoundingClientRect().height;
+    el.setAttribute('aria-label', full);
+    el.style.minHeight = h + 'px';
+    el.innerHTML = '<span class="type-text" aria-hidden="true"></span><span class="type-caret" aria-hidden="true"></span>';
+    const text = el.firstChild;
+    const caret = el.lastChild;
+    let i = 0;
+    const step = () => {
+      text.textContent = full.slice(0, ++i);
+      if (i < full.length) setTimeout(step, full[i - 1] === ' ' ? 70 : 34 + Math.random() * 30);
+      else { caret.classList.add('is-done'); el.style.minHeight = ''; }
+    };
+    setTimeout(step, delay);
+  };
+  if (!reduceMotion) {
+    const tagline = document.querySelector('.hero-tagline');
+    if (tagline) typeOut(tagline, 1100);
+    const typeLater = document.querySelectorAll('[data-type]');
+    if (typeLater.length && 'IntersectionObserver' in window) {
+      const tio = new IntersectionObserver((entries) => entries.forEach((en) => {
+        if (en.isIntersecting) { tio.unobserve(en.target); typeOut(en.target, 250); }
+      }), { threshold: 0.6 });
+      typeLater.forEach((el) => tio.observe(el));
+    }
+  }
+
+  // Headings rise in word by word.
+  const splitWords = (el) => {
+    let n = 0;
+    const walk = (node) => {
+      [...node.childNodes].forEach((child) => {
+        if (child.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          child.textContent.split(/(\s+)/).forEach((part) => {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+            const w = document.createElement('span'); w.className = 'w';
+            const inner = document.createElement('span'); inner.textContent = part; inner.style.setProperty('--i', n++);
+            w.appendChild(inner); frag.appendChild(w);
+          });
+          child.replaceWith(frag);
+        } else if (child.nodeType === 1) walk(child);
+      });
+    };
+    el.setAttribute('aria-label', el.textContent.trim());
+    walk(el);
+    el.classList.add('split');
+  };
+
   // Gentle reveal as sections scroll into view.
   if (!reduceMotion && 'IntersectionObserver' in window) {
+    const sio = new IntersectionObserver((entries) => entries.forEach((en) => {
+      if (en.isIntersecting) { en.target.classList.add('is-in'); sio.unobserve(en.target); }
+    }), { rootMargin: '0px 0px -10% 0px' });
+    document.querySelectorAll('.section-title, .about-title, .path-title').forEach((el) => { splitWords(el); sio.observe(el); });
+
     const groups = [
-      '.section-title', '.eyebrow', '.pricing-intro', '.path', '.film-thumb.featured', '.film-title--featured',
+      '.eyebrow', '.pricing-intro', '.path', '.film-thumb.featured', '.film-title--featured',
       '.film-card', '.about-text', '.review-featured', '.review', '.price-card', '.price-commercial',
       '.faq-item', '.prose > *', '.contact-intro', '.contact-form', '.related', '.footer > *',
     ];
@@ -68,6 +126,19 @@
       });
     };
     window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  // Menu bar tucks away while scrolling down and returns when scrolling up.
+  const topbarEl = document.getElementById('topbar');
+  if (topbarEl) {
+    let lastY = window.scrollY;
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      const open = document.documentElement.classList.contains('menu-open');
+      if (!open && y > 300 && y - lastY > 6) topbarEl.classList.add('is-hidden');
+      else if (lastY - y > 6 || y < 300 || open) topbarEl.classList.remove('is-hidden');
+      lastY = y;
+    }, { passive: true });
   }
 
   // Top bar turns solid once you scroll past the hero.

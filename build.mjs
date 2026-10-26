@@ -62,7 +62,7 @@ const dims = (p) => { const d = imageSize(p); return d ? ` width="${d.w}" height
 // <picture> with lighter WebP versions when they exist (photo-800.webp / photo-1600.webp).
 function pic(src, alt, { cls = '', sizes = '100vw', eager = false } = {}) {
   const base = src.replace(/\.(jpe?g|png)$/i, '');
-  const variants = [800, 1600].filter((w) => existsSync(fileOf(`${base}-${w}.webp`)));
+  const variants = [800, 1600, 2400].filter((w) => existsSync(fileOf(`${base}-${w}.webp`)));
   const img = `<img src="${esc(src)}" alt="${esc(alt)}"${dims(src)}${cls ? ` class="${cls}"` : ''} ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
   if (!variants.length) return img;
   const srcset = variants.map((w) => `${esc(base)}-${w}.webp ${w}w`).join(', ');
@@ -251,7 +251,7 @@ const pricingBlock = (withCommercial = true) => `<section class="wrap-narrow pri
 const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="contact">
   <div class="wrap-narrow contact-inner">
     <div class="contact-intro">
-      <h2 class="contact-title">${esc(c.title)} <em>${esc(c.title_emphasis)}</em></h2>
+      <h2 class="contact-title">${esc(c.title)} <em data-type>${esc(c.title_emphasis)}</em></h2>
       <div class="contact-details">
         <a href="${telHref}">${esc(c.phone)}</a>
         <a href="mailto:${esc(c.email)}" class="underlined">${esc(c.email)}</a>
