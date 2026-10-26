@@ -655,6 +655,8 @@ rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'assets'), { recursive: true });
 mkdirSync(join(OUT, 'thank-you'), { recursive: true });
 cpSync(join(ROOT, 'media'), join(OUT, 'media'), { recursive: true });
+// Files that must sit at the root of the site as they are (e.g. Google Search Console verification).
+if (existsSync(join(ROOT, 'public'))) cpSync(join(ROOT, 'public'), OUT, { recursive: true });
 cpSync(join(ROOT, 'src', 'styles.css'), join(OUT, 'assets', 'styles.css'));
 cpSync(join(ROOT, 'src', 'main.js'), join(OUT, 'assets', 'main.js'));
 writeFileSync(join(OUT, 'index.html'), home);
