@@ -409,7 +409,7 @@ const home = head({ title: site.seo.title, description: site.seo.description, ur
   </div>
   <div class="hero-copy">
     <h1 class="hero-title" data-load style="--d:2600ms"><span data-type-now data-type-delay="2900">${esc(site.hero.tagline)}</span></h1>
-    <p class="hero-sub" data-load style="--d:2750ms">Zuzia and Ben, based in ${esc(c.town || 'Derbyshire')}. One price for your whole day.</p>
+    <p class="hero-sub" data-load style="--d:2750ms">Zuzia and Ben, based in ${esc(c.town || 'Derbyshire')}, behind the camera since 2014.</p>
     <button type="button" class="btn btn-light hero-play" data-load style="--d:2900ms" ${filmAttrs(featured)}>${playIcon(11)}${esc(site.hero.button_text)}</button>
   </div>
   <div class="hero-mark" data-hero-mark>${logo('hero-logo', 'Zen Visuals')}</div>
@@ -476,6 +476,7 @@ const home = head({ title: site.seo.title, description: site.seo.description, ur
     <figure class="about-pic">${pic(site.about.image, site.about.image_alt, { sizes: '240px' })}</figure>
     <dl class="about-facts">
       <div><dt>Who</dt><dd>Zuzia and Ben</dd></div>
+      <div><dt>Experience</dt><dd>Ben since 2014, Zuzia since 2023</dd></div>
       <div><dt>Based in</dt><dd>${esc(c.town || 'Derbyshire')}, Derbyshire</dd></div>
       <div><dt>Married</dt><dd>March 2023</dd></div>
     </dl>
@@ -618,6 +619,7 @@ const llms = `# Zen Visuals
 - Wedding film: ${site.pricing.packages.find((p) => p.name === 'Film')?.price || ''} for the whole day
 - Photography and film together: ${site.pricing.packages.find((p) => /\+/.test(p.name))?.price || ''}
 - One price for the whole day, no hourly packages
+- Ben has worked as a photographer and videographer since 2014; Zuzia joined in 2023
 ${faqs.map((f) => `- ${f.question} ${f.answer}`).join('\n')}
 - Rating: ${site.reviews.rating_text}
 - Contact: ${c.phone}, ${c.email}
