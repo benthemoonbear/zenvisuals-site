@@ -6,10 +6,10 @@
   },
   "hero": {
     "tagline": "Wedding photographers & videographers in Derbyshire",
-    "reel": "/media/films/reel.mp4",
-    "reel_poster": "/media/photos/reel-poster.jpg",
+    "reel": "/media/films/reel-weddings.mp4",
+    "reel_poster": "/media/photos/reel-weddings-poster.jpg",
     "button_text": "Watch a film",
-    "reel_mobile": "/media/films/reel-mobile.mp4"
+    "reel_mobile": "/media/films/reel-weddings-mobile.mp4"
   },
   "weddings": {
     "title": "Weddings",
