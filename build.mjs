@@ -371,7 +371,7 @@ const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="
   <div class="footer-bg" aria-hidden="true">
     <video class="footer-reel" data-src="${esc(site.hero.reel_mobile || site.hero.reel)}" poster="${esc(site.hero.reel_poster)}" muted loop playsinline preload="none"></video>
   </div>
-  <p class="footer-legal">© ${new Date().getFullYear()} Zen Visuals · Wedding photographers &amp; videographers in ${esc(c.town || 'Derbyshire')}, Derbyshire</p>
+  <p class="footer-legal">© ${new Date().getFullYear()} Zen Visuals · Wedding photographers &amp; videographers in ${esc(c.town || 'Derbyshire')}, Derbyshire · Website by <a href="https://seamlinestudios.co.uk" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px">Seamline Studio</a></p>
 </footer>
 `;
 
