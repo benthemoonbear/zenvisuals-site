@@ -25,7 +25,7 @@
     const blocked = (e) => e.ctrlKey || root.classList.contains('menu-open') || document.querySelector('dialog[open]')
       || (e.target instanceof Element && e.target.closest('textarea, select, [data-native-scroll]'));
     const tick = () => {
-      current += (target - current) * 0.11;
+      current += (target - current) * 0.085;
       if (Math.abs(target - current) < 0.4) { current = target; running = false; }
       window.scrollTo(0, current);
       if (running) requestAnimationFrame(tick);
@@ -174,7 +174,7 @@
   const heroMark = document.querySelector('[data-hero-mark]');
   const heroFilm = document.querySelector('.hero-film');
   const footerMark = document.querySelector('[data-footer-mark]');
-  const drifters = [...document.querySelectorAll('.shot-frame')];
+  const drifters = [...document.querySelectorAll('.shot-frame, .about-pic')];
   // Chapters: one wedding film per screen; scrolling moves from one to the next.
   const phone = window.matchMedia('(max-width: 760px)').matches;
   const chapterSets = reduceMotion ? [] : [...document.querySelectorAll('[data-chapters]')].map((wrap) => {
@@ -198,13 +198,17 @@
       if (!v) return;
       if (j === i) playSafe(v); else v.pause();
     });
+    const swap = (el, text) => {
+      if (!el || el.textContent === text) return;
+      el.classList.remove('is-swap'); void el.offsetWidth;
+      el.textContent = text; el.classList.add('is-swap');
+    };
     const set = (i) => {
       if (i === active) return;
       active = i;
-      items.forEach((it, j) => it.classList.toggle('is-active', j === i));
       nums.forEach((n, j) => n.classList.toggle('is-on', j === i));
-      if (title) title.textContent = items[i].dataset.title;
-      if (meta) meta.textContent = items[i].dataset.meta;
+      swap(title, items[i].dataset.title);
+      swap(meta, items[i].dataset.meta);
       play(i);
     };
     return {
@@ -212,11 +216,23 @@
         const r = wrap.getBoundingClientRect();
         if (r.bottom < -vh || r.top > vh * 2) { if (loaded) items.forEach((it) => { const v = it.querySelector('.chapter-loop'); if (v) v.pause(); }); return; }
         load();
+        // the stage grows out of the page as it arrives, then pins
+        wrap.style.setProperty('--e', clamp(1 - r.top / vh, 0, 1).toFixed(4));
         const run = r.height - vh;
-        const c = run > 0 ? clamp(-r.top / run, 0, 0.9999) : 0;
+        const c = run > 0 ? clamp(-r.top / run, 0, 1) : 0;
         const n = items.length;
-        const pos = c * n;                 // 0..n
-        const i = Math.min(n - 1, Math.floor(pos));
+        const pos = c * n;                 // chapter j is centred when pos = j + 0.5
+        // every value follows the scroll position directly, so a flick on a phone carries the film with it
+        items.forEach((it, j) => {
+          let d = pos - 0.5 - j;           // 0 = this chapter fills the screen; <0 still to come; >0 going
+          if ((j === 0 && d < 0) || (j === n - 1 && d > 0)) d = 0;
+          d = clamp(d, -1, 1.2);
+          const a = d < 0 ? clamp(1 + (d + 0.18) / 0.42, 0, 1) : d > 1 ? 0 : 1;
+          it.style.setProperty('--a', a.toFixed(3));
+          it.style.setProperty('--k', d.toFixed(3));
+          it.classList.toggle('is-off', a === 0);
+        });
+        const i = clamp(Math.round(pos - 0.5), 0, n - 1);
         fills.forEach((f, j) => f.style.setProperty('--fill', clamp(pos - j, 0, 1).toFixed(3)));
         if (r.top <= vh && r.bottom >= 0) { set(i); if (items[i].querySelector('.chapter-loop')?.paused) play(i); }
         else items.forEach((it) => { const v = it.querySelector('.chapter-loop'); if (v) v.pause(); });
@@ -237,7 +253,7 @@
         const r = el.getBoundingClientRect();
         if (r.bottom < -100 || r.top > vh + 100) continue;
         const t = clamp((r.top + r.height / 2 - vh / 2) / vh, -1, 1); // -1 above centre, 1 below
-        el.style.setProperty('--drift', `${(t * -3).toFixed(2)}%`);
+        el.style.setProperty('--drift', `${(t * -5).toFixed(2)}%`);
       }
       if (footerMark) {
         const r = footerMark.getBoundingClientRect();

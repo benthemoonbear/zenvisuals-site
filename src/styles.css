@@ -468,6 +468,24 @@ main {
     radial-gradient(80% 60% at 0% 100%, rgba(122, 74, 53, 0.16), rgba(122, 74, 53, 0) 70%),
     var(--night);
 }
+
+/* FLOW: where the browser can tie animation to the scroll position itself, arrivals follow the
+   finger instead of firing once. It runs off the main thread, so it stays smooth on phones.
+   Browsers without it keep the timed arrivals above. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .js [data-reveal] { transition: none; animation: flow-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 62%; }
+    .js .split .w > span { transition: none; animation: flow-word linear both; animation-timeline: view(); animation-range: entry calc(8% + var(--i) * 5%) entry calc(60% + var(--i) * 5%); }
+    .js .shot-frame { transition: none; animation: flow-open linear both; animation-timeline: view(); animation-range: entry 0% entry 80%; }
+    .js .shot-frame img { transition: none; animation: flow-settle linear both; animation-timeline: view(); animation-range: entry 0% cover 55%; }
+    .js .offer { animation: flow-card linear both; animation-timeline: view(); animation-range: entry 0% entry 55%; transform-origin: 50% 0; }
+  }
+}
+@keyframes flow-rise { from { opacity: 0; translate: 0 48px; } to { opacity: 1; translate: none; } }
+@keyframes flow-word { from { translate: 0 105%; } to { translate: none; } }
+@keyframes flow-open { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
+@keyframes flow-settle { from { scale: 1.22; } to { scale: 1.04; } }
+@keyframes flow-card { from { opacity: 0.2; scale: 0.94; translate: 0 60px; } to { opacity: 1; scale: 1; translate: none; } }
 /* taste-skill-ignore-end */
 
 /* ---------- depth: subtle drop shadows and a bolder voice ---------- */
@@ -500,6 +518,24 @@ main {
 .faq-item h3 { font-weight: 500; }
 .about-facts dd, .about-record h3 { font-weight: 600; }
 .voice-lead blockquote p { font-size: clamp(26px, 2.5vw, 36px); }
+
+/* FLOW: where the browser can tie animation to the scroll position itself, arrivals follow the
+   finger instead of firing once. It runs off the main thread, so it stays smooth on phones.
+   Browsers without it keep the timed arrivals above. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .js [data-reveal] { transition: none; animation: flow-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 62%; }
+    .js .split .w > span { transition: none; animation: flow-word linear both; animation-timeline: view(); animation-range: entry calc(8% + var(--i) * 5%) entry calc(60% + var(--i) * 5%); }
+    .js .shot-frame { transition: none; animation: flow-open linear both; animation-timeline: view(); animation-range: entry 0% entry 80%; }
+    .js .shot-frame img { transition: none; animation: flow-settle linear both; animation-timeline: view(); animation-range: entry 0% cover 55%; }
+    .js .offer { animation: flow-card linear both; animation-timeline: view(); animation-range: entry 0% entry 55%; transform-origin: 50% 0; }
+  }
+}
+@keyframes flow-rise { from { opacity: 0; translate: 0 48px; } to { opacity: 1; translate: none; } }
+@keyframes flow-word { from { translate: 0 105%; } to { translate: none; } }
+@keyframes flow-open { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
+@keyframes flow-settle { from { scale: 1.22; } to { scale: 1.04; } }
+@keyframes flow-card { from { opacity: 0.2; scale: 0.94; translate: 0 60px; } to { opacity: 1; scale: 1; translate: none; } }
 /* taste-skill-ignore-end */
 
 /* ---------- dialogs ---------- */
@@ -695,7 +731,8 @@ dialog[open] { animation: dialog-in 520ms var(--ease-expo); }
   .js .hero-mark { scale: calc(1 - var(--p, 0) * 0.1); translate: -50% calc(-50% - var(--p, 0) * 10svh); opacity: clamp(0, calc(1 - var(--p, 0) * 1.3), 1); }
   .js .hero-film { translate: 0 calc(var(--p, 0) * 12svh); scale: calc(1 - var(--p, 0) * 0.06); border-radius: calc(var(--p, 0) * 36px); }
   .js .hero-copy, .js .phero-copy { opacity: clamp(0, calc(1 - var(--p, 0) * 2.4), 1); }
-  .js .shot-frame img { translate: 0 var(--drift, 0); }
+  .js .shot-frame img, .js .about-pic img { translate: 0 var(--drift, 0); }
+  .js .about-pic img { scale: 1.12; }
   .js .footer-mark { scale: calc(0.92 + var(--f, 1) * 0.08); }
 }
 @media (prefers-reduced-motion: no-preference) and (max-width: 760px) {
@@ -822,8 +859,11 @@ body::after {
 .ch-dot-fill { position: absolute; inset: 0; background: var(--on-night); transform: scaleX(var(--fill, 0)); transform-origin: 0 50%; }
 .ch-num { opacity: 0.35; transition: opacity 400ms ease; font-family: var(--serif); font-style: italic; font-size: 16px; letter-spacing: 0.1em; }
 .ch-num.is-on { opacity: 1; }
-.chapter { position: absolute; top: 8svh; bottom: 8svh; left: 0; right: 0; opacity: 0; visibility: hidden; transition: opacity 900ms ease, visibility 0s linear 900ms; }
-.chapter.is-active { opacity: 1; visibility: visible; transition: opacity 900ms ease; z-index: 1; }
+.chapter { position: absolute; top: 8svh; bottom: 8svh; left: 0; right: 0; }
+.js .chapter { opacity: var(--a, 0); will-change: opacity; }
+.js .chapter:first-of-type { opacity: var(--a, 1); }
+.js .chapter.is-off { visibility: hidden; }
+.chapter:nth-of-type(2) { z-index: 2; } .chapter:nth-of-type(3) { z-index: 3; } .chapter:nth-of-type(4) { z-index: 4; }
 .chapter-media { position: absolute; inset: 0; overflow: clip; background: #000; }
 .chapter-media img, .chapter-loop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .chapter-loop { opacity: 0; transition: opacity 800ms ease; }
@@ -842,18 +882,23 @@ body::after {
 .chapter-title { font: italic 400 clamp(48px, 7vw, 112px)/0.95 var(--serif); letter-spacing: -0.03em; }
 .chapter-desc { font-size: var(--fs-body); color: rgba(241, 238, 231, 0.82); max-width: 44ch; }
 .chapter-card .btn { margin-top: 8px; }
-.js .chapter-card > * { opacity: 0; translate: 0 22px; transition: opacity 700ms ease, translate 1000ms var(--ease-expo); }
-.js .chapter.is-active .chapter-card > * { opacity: 1; translate: none; }
-.js .chapter.is-active .chapter-card > :nth-child(2) { transition-delay: 90ms; }
-.js .chapter.is-active .chapter-card > :nth-child(3) { transition-delay: 180ms; }
-.js .chapter.is-active .chapter-card > :nth-child(4) { transition-delay: 270ms; }
-.js .chapter-media img, .js .chapter-loop { scale: 1.08; transition: scale 1600ms var(--ease-expo), opacity 800ms ease; }
-.js .chapter.is-active .chapter-media img, .js .chapter.is-active .chapter-loop { scale: 1; }
+/* --k runs from -1 (still to come) through 0 (on screen) to 1 (leaving): the picture pushes in, the words ride with the scroll */
+.js .chapter-media img, .js .chapter-loop {
+  scale: calc(1.04 + max(var(--k, 0), var(--k, 0) * -1) * 0.14);
+  translate: 0 calc(var(--k, 0) * -7%);
+  will-change: transform;
+}
+.js .chapter-card { translate: 0 calc(var(--k, 0) * -90px); opacity: clamp(0, calc(1 - max(var(--k, 0) * 3.2, var(--k, 0) * -2.4)), 1); will-change: transform, opacity; }
+.js .chapter-card > :nth-child(2) { translate: 0 calc(var(--k, 0) * -26px); }
+.js .chapter-card > :nth-child(3) { translate: 0 calc(var(--k, 0) * -44px); }
+.js .chapter-card > :nth-child(4) { translate: 0 calc(var(--k, 0) * -62px); }
+[data-ch-title].is-swap, [data-ch-meta].is-swap { animation: ch-swap 700ms var(--ease-expo); }
+@keyframes ch-swap { from { opacity: 0; translate: 0 0.7em; filter: blur(4px); } to { opacity: 1; translate: none; filter: none; } }
 .index-head { padding: clamp(96px, 10vw, 160px) var(--m) 0; }
 .index-head + .index { padding-top: clamp(32px, 4vw, 56px); }
 @media (prefers-reduced-motion: no-preference) {
   .js .chapters { height: calc((var(--n, 3) + 1) * 100svh); }
-  .js .chapters-stage { position: sticky; top: 0; }
+  .js .chapters-stage { position: sticky; top: 0; scale: calc(0.9 + var(--e, 1) * 0.1); border-radius: calc((1 - var(--e, 1)) * 28px); transform-origin: 50% 0; }
 }
 /* without the script, or with reduced motion, the chapters simply stack */
 .no-js .chapter, .reduced .chapter { position: relative; inset: auto; height: 84svh; opacity: 1; visibility: visible; }
@@ -873,4 +918,22 @@ body::after {
   .chapter-media::after { background: linear-gradient(to top, rgba(14, 13, 12, 0.85), rgba(14, 13, 12, 0.2) 55%, rgba(14, 13, 12, 0) 100%); }
   .offer { margin: var(--gap) 10px 0; }
 }
+
+/* FLOW: where the browser can tie animation to the scroll position itself, arrivals follow the
+   finger instead of firing once. It runs off the main thread, so it stays smooth on phones.
+   Browsers without it keep the timed arrivals above. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .js [data-reveal] { transition: none; animation: flow-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 62%; }
+    .js .split .w > span { transition: none; animation: flow-word linear both; animation-timeline: view(); animation-range: entry calc(8% + var(--i) * 5%) entry calc(60% + var(--i) * 5%); }
+    .js .shot-frame { transition: none; animation: flow-open linear both; animation-timeline: view(); animation-range: entry 0% entry 80%; }
+    .js .shot-frame img { transition: none; animation: flow-settle linear both; animation-timeline: view(); animation-range: entry 0% cover 55%; }
+    .js .offer { animation: flow-card linear both; animation-timeline: view(); animation-range: entry 0% entry 55%; transform-origin: 50% 0; }
+  }
+}
+@keyframes flow-rise { from { opacity: 0; translate: 0 48px; } to { opacity: 1; translate: none; } }
+@keyframes flow-word { from { translate: 0 105%; } to { translate: none; } }
+@keyframes flow-open { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
+@keyframes flow-settle { from { scale: 1.22; } to { scale: 1.04; } }
+@keyframes flow-card { from { opacity: 0.2; scale: 0.94; translate: 0 60px; } to { opacity: 1; scale: 1; translate: none; } }
 /* taste-skill-ignore-end */
