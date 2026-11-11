@@ -239,6 +239,27 @@
       },
     };
   });
+  // The edit: the playhead and timecode run along the timeline as the section passes.
+  const edits = reduceMotion ? [] : [...document.querySelectorAll('[data-edit]')].map((sec) => {
+    const suite = sec.querySelector('.suite');
+    const tc = sec.querySelector('[data-edit-tc]');
+    const v = sec.querySelector('.suite-loop');
+    const two = (n) => String(n).padStart(2, '0');
+    let loaded = false;
+    return (vh) => {
+      const r = suite.getBoundingClientRect();
+      const on = r.bottom > 0 && r.top < vh;
+      if (v) {
+        if (on && !loaded) { loaded = true; v.src = phone ? v.dataset.srcMobile : v.dataset.src; v.addEventListener('playing', () => v.classList.add('is-playing')); }
+        if (loaded) { if (on) { if (v.paused) playSafe(v); } else v.pause(); }
+      }
+      if (!on) return;
+      const t = clamp((vh - r.top) / (vh + r.height), 0, 1);
+      suite.style.setProperty('--t', t.toFixed(4));
+      const frames = Math.round(t * 241 * 25);
+      if (tc) tc.textContent = `00:${two(Math.floor(frames / 1500))}:${two(Math.floor(frames / 25) % 60)}:${two(frames % 25)}`;
+    };
+  });
   if (!reduceMotion) {
     let ticking = false;
     const update = () => {
@@ -249,6 +270,7 @@
         heroEl.style.setProperty('--p', p.toFixed(4));
       }
       for (const ch of chapterSets) ch.update(vh);
+      for (const ed of edits) ed(vh);
       for (const el of drifters) {
         const r = el.getBoundingClientRect();
         if (r.bottom < -100 || r.top > vh + 100) continue;

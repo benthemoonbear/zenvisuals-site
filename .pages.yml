@@ -192,6 +192,20 @@ content:
             fields:
               - { name: title, label: Step heading, type: string }
               - { name: text, label: Step text, type: text }
+      - name: editing
+        label: Editing section
+        type: object
+        fields:
+          - { name: title, label: Heading, type: string }
+          - { name: text, label: Text, type: text }
+          - { name: note, label: Small note under the timeline, type: string }
+          - name: steps
+            label: Steps
+            type: object
+            list: true
+            fields:
+              - { name: title, label: Step heading, type: string }
+              - { name: text, label: Step text, type: text }
       - name: pricing
         label: Pricing
         type: object

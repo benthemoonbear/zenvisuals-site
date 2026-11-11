@@ -332,6 +332,37 @@ const pricingBlock = (withCommercial = true) => `<section class="offer" id="pric
 </section>
 `;
 
+const editBlock = () => {
+  const e = site.editing;
+  if (!e || !e.title) return '';
+  const film = films.find((f) => /robyn-gabriel/.test(f.video || '')) || featured;
+  const l = loopFor(film);
+  const widths = [9, 6, 11, 7, 8, 12, 6, 9, 7, 10, 8, 7];
+  const music = [22, 31, 27, 20];
+  return `<section class="edit" id="editing" data-edit aria-labelledby="edit-title">
+  <div class="edit-head">
+    <h2 class="h-display" id="edit-title">${emLast(e.title, 1)}</h2>
+    <p data-reveal>${esc(e.text || '')}</p>
+  </div>
+  <div class="suite" data-reveal aria-hidden="true">
+    <div class="suite-bar"><span class="suite-lights"><i></i><i></i><i></i></span><span class="suite-name">${esc(film.title)} · timeline</span><span class="suite-tc" data-edit-tc>00:00:00:00</span></div>
+    <div class="suite-viewer">${pic(film.poster, '', { sizes: '(max-width: 760px) 100vw, 900px' })}${l ? `<video class="suite-loop" data-src="${l.desktop}" data-src-mobile="${l.mobile}" poster="${film.poster}" muted loop playsinline preload="none"></video>` : ''}</div>
+    <div class="suite-timeline">
+      <div class="suite-ruler"></div>
+      <div class="track track-v">${widths.map((w, i) => `<span class="clip" style="flex:${w};background-image:url(/media/edit/frame-${String(i + 1).padStart(2, '0')}.webp)"></span>`).join('')}</div>
+      <div class="track track-a"><span class="clip clip-wave"></span></div>
+      <div class="track track-m">${music.map((w) => `<span class="clip" style="flex:${w}"></span>`).join('')}</div>
+      <div class="playhead"></div>
+    </div>
+  </div>
+  ${e.note ? `<p class="edit-note" data-reveal>${esc(e.note)}</p>` : ''}
+  ${e.steps && e.steps.length ? `<ol class="steps edit-steps">
+    ${e.steps.map((st) => `<li class="step" data-reveal><h3 class="h-head">${esc(st.title)}</h3><p>${esc(st.text)}</p></li>`).join('\n    ')}
+  </ol>` : ''}
+</section>
+`;
+};
+
 const bookingBlock = () => (site.booking && site.booking.steps && site.booking.steps.length ? `<section class="booking" id="booking" aria-labelledby="booking-title">
   <h2 class="h-display" id="booking-title">${emLast(site.booking.title || 'How booking works', 2)}</h2>
   <ol class="steps">
@@ -507,6 +538,7 @@ const home = head({ title: site.seo.title, description: site.seo.description, ur
   </div>
 </section>
 
+${editBlock()}
 <section class="photos" id="photos" aria-labelledby="photos-title">
   <h2 class="h-display" id="photos-title">In <em data-type>photographs</em><span class="sr">: wedding photography in Derbyshire</span></h2>
   ${stagger(galleryPhotos)}
@@ -598,6 +630,8 @@ ${pFilms.length ? `<section class="films films--page" id="films" aria-labelledby
   <div class="films-head"><h2 class="h-display" id="films-title">Our <em data-type>films</em><span class="sr">: ${esc((p.nav_label || '').toLowerCase())} in Derbyshire</span></h2></div>
   ${isCommercial ? filmIndex(pFilms) : chapters(pFilms.slice(0, 4))}
 </section>` : ''}
+
+${pFilms.length ? editBlock() : ''}
 
 ${pPhotos.length ? `<section class="photos" id="photos" aria-labelledby="photos-title">
   <h2 class="h-display" id="photos-title">In <em data-type>photographs</em><span class="sr">: ${isCommercial ? 'commercial and product photography' : 'wedding photography'} in Derbyshire</span></h2>

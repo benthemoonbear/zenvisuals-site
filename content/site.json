@@ -114,5 +114,24 @@
         "text": "Everything is ready within 3 to 6 weeks. The rest of the balance is due any time up to two weeks after the wedding."
       }
     ]
+  },
+  "editing": {
+    "title": "Hours in the edit for every minute",
+    "text": "Filming is only half of it. Every minute of finished film takes hours at the desk in DaVinci Resolve: choosing the moments, shaping the story, grading the colour and mixing the sound until it feels like your day.",
+    "note": "Frames and soundtrack from Robyn and Gabriel's wedding film.",
+    "steps": [
+      {
+        "title": "The cut",
+        "text": "We go through everything we filmed, keep the moments that matter and build them into the story of your day."
+      },
+      {
+        "title": "The colour",
+        "text": "Every shot is graded by hand, so skin tones look natural and the whole film sits together whatever the light was doing."
+      },
+      {
+        "title": "The sound",
+        "text": "Vows, speeches and music are cleaned up and mixed, so you hear every word."
+      }
+    ]
   }
 }
