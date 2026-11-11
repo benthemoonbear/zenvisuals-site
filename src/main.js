@@ -173,9 +173,56 @@
   // ---------- scroll-linked moves, one loop ----------
   const heroMark = document.querySelector('[data-hero-mark]');
   const heroFilm = document.querySelector('.hero-film');
-  const opening = document.querySelector('[data-opening]');
   const footerMark = document.querySelector('[data-footer-mark]');
   const drifters = [...document.querySelectorAll('.shot-frame')];
+  // Chapters: one wedding film per screen; scrolling moves from one to the next.
+  const phone = window.matchMedia('(max-width: 760px)').matches;
+  const chapterSets = reduceMotion ? [] : [...document.querySelectorAll('[data-chapters]')].map((wrap) => {
+    const items = [...wrap.querySelectorAll('.chapter')];
+    const nums = [...wrap.querySelectorAll('[data-ch-num]')];
+    const fills = [...wrap.querySelectorAll('[data-ch-fill]')];
+    const title = wrap.querySelector('[data-ch-title]');
+    const meta = wrap.querySelector('[data-ch-meta]');
+    let active = 0, loaded = false;
+    const load = () => {
+      if (loaded) return; loaded = true;
+      items.forEach((it) => {
+        const v = it.querySelector('.chapter-loop');
+        if (!v) return;
+        v.src = phone ? v.dataset.srcMobile : v.dataset.src;
+        v.addEventListener('playing', () => v.classList.add('is-playing'));
+      });
+    };
+    const play = (i) => items.forEach((it, j) => {
+      const v = it.querySelector('.chapter-loop');
+      if (!v) return;
+      if (j === i) playSafe(v); else v.pause();
+    });
+    const set = (i) => {
+      if (i === active) return;
+      active = i;
+      items.forEach((it, j) => it.classList.toggle('is-active', j === i));
+      nums.forEach((n, j) => n.classList.toggle('is-on', j === i));
+      if (title) title.textContent = items[i].dataset.title;
+      if (meta) meta.textContent = items[i].dataset.meta;
+      play(i);
+    };
+    return {
+      update(vh) {
+        const r = wrap.getBoundingClientRect();
+        if (r.bottom < -vh || r.top > vh * 2) { if (loaded) items.forEach((it) => { const v = it.querySelector('.chapter-loop'); if (v) v.pause(); }); return; }
+        load();
+        const run = r.height - vh;
+        const c = run > 0 ? clamp(-r.top / run, 0, 0.9999) : 0;
+        const n = items.length;
+        const pos = c * n;                 // 0..n
+        const i = Math.min(n - 1, Math.floor(pos));
+        fills.forEach((f, j) => f.style.setProperty('--fill', clamp(pos - j, 0, 1).toFixed(3)));
+        if (r.top <= vh && r.bottom >= 0) { set(i); if (items[i].querySelector('.chapter-loop')?.paused) play(i); }
+        else items.forEach((it) => { const v = it.querySelector('.chapter-loop'); if (v) v.pause(); });
+      },
+    };
+  });
   if (!reduceMotion) {
     let ticking = false;
     const update = () => {
@@ -185,12 +232,7 @@
         const p = clamp(window.scrollY / (heroEl.offsetHeight || vh), 0, 1);
         heroEl.style.setProperty('--p', p.toFixed(4));
       }
-      if (opening) {
-        const r = opening.getBoundingClientRect();
-        const run = r.height - vh;
-        const o = run > 0 ? clamp(-r.top / (run * 0.75), 0, 1) : 1;
-        opening.style.setProperty('--o', o.toFixed(4));
-      }
+      for (const ch of chapterSets) ch.update(vh);
       for (const el of drifters) {
         const r = el.getBoundingClientRect();
         if (r.bottom < -100 || r.top > vh + 100) continue;

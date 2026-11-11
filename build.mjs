@@ -84,6 +84,35 @@ const emLast = (text, n = 2, attr = 'data-type') => {
   if (w.length <= n) return `<em ${attr}>${esc(text)}</em>`;
   return `${esc(w.slice(0, -n).join(' '))} <em ${attr}>${esc(w.slice(-n).join(' '))}</em>`;
 };
+// Short muted loops cut from the films, for the chapters that play as you scroll.
+const loopFor = (f) => {
+  const slug = (f.video || '').split('/').pop().replace(/\.mp4$/, '');
+  const base = join(ROOT, 'media', 'films', 'loops', slug);
+  return existsSync(base + '.mp4') ? { desktop: `/media/films/loops/${slug}.mp4`, mobile: existsSync(base + '-mobile.mp4') ? `/media/films/loops/${slug}-mobile.mp4` : `/media/films/loops/${slug}.mp4` } : null;
+};
+const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+const chapters = (list) => `<div class="chapters" data-chapters style="--n:${list.length}">
+    <div class="chapters-stage">
+      <div class="letterbox letterbox-top" aria-hidden="true"><span data-ch-title>${esc(list[0].title)}</span><span class="letterbox-right"><span data-ch-meta>${esc(kind(list[0]))}${list[0].duration_seconds ? ` · ${minutes(list[0].duration_seconds)}` : ''}</span></span></div>
+      ${list.map((f, i) => { const l = loopFor(f); return `<div class="chapter${i === 0 ? ' is-active' : ''}" data-chapter="${i}" data-title="${esc(f.title)}" data-meta="${esc(kind(f))}${f.duration_seconds ? ` · ${minutes(f.duration_seconds)}` : ''}">
+        <div class="chapter-media">
+          ${pic(f.poster, `Still from ${f.title}, ${kind(f).toLowerCase()} by Zen Visuals`, { sizes: '100vw' })}
+          ${l ? `<video class="chapter-loop" data-src="${esc(l.desktop)}" data-src-mobile="${esc(l.mobile)}" poster="${esc(f.poster)}" muted loop playsinline preload="none" aria-hidden="true"></video>` : ''}
+        </div>
+        <div class="chapter-card">
+          <p class="chapter-kicker">${esc(kind(f))}${f.duration_seconds ? ` · ${minutes(f.duration_seconds)}` : ''}</p>
+          <h3 class="chapter-title">${esc(f.title)}</h3>
+          ${f.description ? `<p class="chapter-desc">${esc(f.description)}</p>` : ''}
+          <button type="button" class="btn btn-light" ${filmAttrs(f)}>${playIcon(11)}Play the film</button>
+        </div>
+      </div>`; }).join('\n      ')}
+      <div class="letterbox letterbox-bottom" aria-hidden="true">
+        <span class="ch-dots">${list.map((f, i) => `<span class="ch-dot${i === 0 ? ' is-on' : ''}"><span class="ch-dot-fill" data-ch-fill="${i}"></span></span>`).join('')}</span>
+        <span class="letterbox-right">${roman.slice(0, list.length).map((r, i) => `<span class="ch-num${i === 0 ? ' is-on' : ''}" data-ch-num="${i}">${r}</span>`).join('')}</span>
+      </div>
+    </div>
+  </div>`;
+
 const minutes = (s) => (s ? `${Math.max(1, Math.round(s / 60))} min` : '');
 const filmAttrs = (f) => `data-film-src="${esc(f.video)}" data-film-title="${esc(f.title)}" data-film-poster="${esc(f.poster)}"`;
 const kind = (f) => (f.category === 'commercial' ? 'Commercial film' : 'Wedding film');
@@ -400,7 +429,8 @@ const moreLink = (slug, text) => { const p = pageBySlug(slug); return p ? `<a hr
 // ---------- homepage ----------
 const homeGraph = [business, website, ...films.filter((f) => f.video).map(videoSchema)];
 if (faqs.length) homeGraph.push(faqSchema(faqs));
-const otherFilms = films.filter((f) => f !== featured);
+const chapterFilms = [featured, ...films.filter((f) => f !== featured && f.category === 'wedding')].slice(0, 4);
+const otherFilms = films.filter((f) => !chapterFilms.includes(f));
 const galleryPhotos = weddingPhotos.filter((p) => p.image !== site.weddings.image);
 
 const home = head({ title: site.seo.title, description: site.seo.description, url: SITE_URL + '/', image: site.seo.share_image, graph: homeGraph, preload: site.hero.reel_poster })
@@ -429,6 +459,8 @@ const home = head({ title: site.seo.title, description: site.seo.description, ur
     <button type="button" class="btn btn-light hero-play" data-load style="--d:2900ms" ${filmAttrs(featured)}>${playIcon(11)}${esc(site.hero.button_text)}</button>
   </div>
   <div class="hero-mark" data-hero-mark>${logo('hero-logo', 'Zen Visuals')}</div>
+  <div class="curtain curtain-top" aria-hidden="true"></div>
+  <div class="curtain curtain-bottom" aria-hidden="true"></div>
 </section>
 
 <section class="intro" id="weddings" aria-labelledby="weddings-title">
@@ -460,17 +492,10 @@ const home = head({ title: site.seo.title, description: site.seo.description, ur
 <section class="films" id="films" aria-labelledby="films-title">
   <div class="films-head">
     <h2 class="h-display" id="films-title">Our <em data-type>films</em><span class="sr">: wedding and commercial films from Derbyshire</span></h2>
-    <p data-reveal>Wedding films of three to six minutes, and short films for businesses. Press play on any of them.</p>
+    <p data-reveal>Three wedding films, told as chapters. Scroll through them, or press play to watch one in full.</p>
   </div>
-  <div class="opening" data-opening>
-    <div class="opening-stage">
-      <div class="opening-pic">${pic(featured.poster, `Still from ${featured.title}, ${kind(featured).toLowerCase()} by Zen Visuals`, { sizes: '100vw' })}</div>
-      <div class="opening-caption">
-        <h3 class="h-head">${esc(featured.title)}</h3>
-        <button type="button" class="btn btn-light" ${filmAttrs(featured)}>${playIcon(11)}Play the film${featured.duration_seconds ? ` · ${minutes(featured.duration_seconds)}` : ''}</button>
-      </div>
-    </div>
-  </div>
+  ${chapters(chapterFilms)}
+  <div class="index-head"><h3 class="h-head" data-reveal>Films for <em>businesses</em></h3></div>
   ${filmIndex(otherFilms)}
   <div class="commercial" id="commercial">
     <h3 class="h-head" data-reveal>${esc(site.commercial.title)}</h3>
@@ -571,7 +596,7 @@ function landing(p) {
 
 ${pFilms.length ? `<section class="films films--page" id="films" aria-labelledby="films-title">
   <div class="films-head"><h2 class="h-display" id="films-title">Our <em data-type>films</em><span class="sr">: ${esc((p.nav_label || '').toLowerCase())} in Derbyshire</span></h2></div>
-  ${filmIndex(pFilms)}
+  ${isCommercial ? filmIndex(pFilms) : chapters(pFilms.slice(0, 4))}
 </section>` : ''}
 
 ${pPhotos.length ? `<section class="photos" id="photos" aria-labelledby="photos-title">
