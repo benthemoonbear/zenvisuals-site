@@ -328,6 +328,12 @@ const pricingBlock = (withCommercial = true) => `<section class="offer" id="pric
       ${withCommercial ? `<a href="#contact" class="text-link" data-enquiry="Advert / promo film">Commercial work is quoted per project</a>` : ''}
     </div>
   </div>
+  ${(site.pricing.extras || []).length ? `<div class="offer-extras" data-extras data-reveal>
+    <h3 class="extras-title">${esc(site.pricing.extras_title || 'Extras')}</h3>
+    <ul class="extras">
+      ${site.pricing.extras.map((x) => `<li class="extra"><span class="extra-name">${esc(x.name)}</span><span class="extra-price">${esc(x.price)}</span><p class="extra-text">${esc(x.description || '')}</p></li>`).join('\n      ')}
+    </ul>
+  </div>` : ''}
   <script type="application/json" data-offer-data>${JSON.stringify(Object.fromEntries(Object.entries(offers).map(([k, o]) => [k, { words: o.words, price: o.price, text: offerText(o) }]))).replace(/</g, '\\u003c')}</script>
 </section>
 `;
@@ -352,6 +358,7 @@ const editBlock = () => {
       <div class="track track-v">${widths.map((w, i) => `<span class="clip" style="flex:${w};background-image:url(/media/edit/frame-${String(i + 1).padStart(2, '0')}.webp)"></span>`).join('')}</div>
       <div class="track track-a"><span class="clip clip-wave"></span></div>
       <div class="track track-m">${music.map((w) => `<span class="clip" style="flex:${w}"></span>`).join('')}</div>
+      <div class="track track-s">${[[4, 'Dress'], [18, 'Rings'], [33, 'Kiss'], [47, 'Confetti'], [71, 'Champagne'], [86, 'First dance']].map(([x, n]) => `<span class="sfx" style="left:${x}%">${n}</span>`).join('')}</div>
       <div class="playhead"></div>
     </div>
   </div>
@@ -359,6 +366,13 @@ const editBlock = () => {
   ${e.steps && e.steps.length ? `<ol class="steps edit-steps">
     ${e.steps.map((st) => `<li class="step" data-reveal><h3 class="h-head">${esc(st.title)}</h3><p>${esc(st.text)}</p></li>`).join('\n    ')}
   </ol>` : ''}
+  ${e.sound && e.sound.title ? `<div class="sound" data-sound>
+    <h3 class="h-display sound-title" data-reveal>${emLast(e.sound.title, 1)}</h3>
+    <div class="sound-body">
+      <p data-reveal>${esc(e.sound.text || '')}</p>
+      ${(e.sound.moments || []).length ? `<ul class="moments" data-reveal>${e.sound.moments.map((m, i) => `<li style="--i:${i}">${esc(m)}</li>`).join('')}</ul>` : ''}
+    </div>
+  </div>` : ''}
 </section>
 `;
 };

@@ -70,7 +70,15 @@
     "button_text": "Check your date",
     "commercial_title": "Commercial & adverts",
     "commercial_text": "Every brief is different, so we quote per project. Tell us what you have in mind and we'll come back with a price.",
-    "commercial_button": "Get a quote"
+    "commercial_button": "Get a quote",
+    "extras_title": "Add to your film",
+    "extras": [
+      {
+        "name": "Ceremony & speeches",
+        "price": "+£225",
+        "description": "Your full ceremony and every speech, filmed start to finish and edited as their own films, alongside your wedding film."
+      }
+    ]
   },
   "contact": {
     "title": "Let's make something",
@@ -132,6 +140,18 @@
         "title": "The sound",
         "text": "Vows, speeches and music are cleaned up and mixed, so you hear every word."
       }
-    ]
+    ],
+    "sound": {
+      "title": "Sound you'd only notice if it was gone",
+      "text": "At the bigger moments we add subtle sound design: small effects layered under the music and the real audio. You'll hardly notice them while you watch, but you'd miss them if they weren't there.",
+      "moments": [
+        "The dress going on",
+        "Rings",
+        "The first kiss",
+        "Confetti",
+        "Champagne",
+        "The first dance"
+      ]
+    }
   }
 }

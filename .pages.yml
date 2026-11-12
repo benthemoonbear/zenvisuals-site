@@ -199,6 +199,13 @@ content:
           - { name: title, label: Heading, type: string }
           - { name: text, label: Text, type: text }
           - { name: note, label: Small note under the timeline, type: string }
+          - name: sound
+            label: Sound design
+            type: object
+            fields:
+              - { name: title, label: Heading, type: string }
+              - { name: text, label: Text, type: text }
+              - { name: moments, label: "Moments (short, one per line)", type: string, list: true }
           - name: steps
             label: Steps
             type: object
@@ -211,6 +218,15 @@ content:
         type: object
         fields:
           - { name: intro, label: Intro text, type: text }
+          - { name: extras_title, label: Extras heading, type: string }
+          - name: extras
+            label: "Extras (added to a film package)"
+            type: object
+            list: true
+            fields:
+              - { name: name, label: Name, type: string }
+              - { name: price, label: "Price (e.g. +£225)", type: string }
+              - { name: description, label: Description, type: text }
           - name: packages
             label: Wedding packages
             type: object

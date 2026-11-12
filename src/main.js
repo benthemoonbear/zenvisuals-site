@@ -323,6 +323,7 @@
   document.querySelectorAll('[data-offer]').forEach((offer) => {
     const data = JSON.parse(offer.querySelector('[data-offer-data]').textContent);
     const picks = [...offer.querySelectorAll('[data-pick]')];
+    const extras = offer.querySelector('[data-extras]');
     const words = offer.querySelector('[data-offer-words]');
     const price = offer.querySelector('[data-offer-price]');
     const text = offer.querySelector('[data-offer-text]');
@@ -348,6 +349,7 @@
       if (pressed && !others.length) { picks.forEach((x) => x.setAttribute('aria-pressed', String(x !== b))); }
       else b.setAttribute('aria-pressed', String(!pressed));
       render();
+      if (extras) extras.hidden = !picks.some((x) => x.dataset.pick === 'film' && x.getAttribute('aria-pressed') === 'true');
     }));
   });
 
