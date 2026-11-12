@@ -643,20 +643,20 @@ ${editBlock()}
 
 <section class="about" id="about" aria-labelledby="about-title">
   <div class="about-side" data-reveal>
-    <figure class="about-pic">${pic(site.about.image, site.about.image_alt, { sizes: '240px' })}</figure>
-    <dl class="about-facts">
+    <figure class="about-pic">${pic(site.about.image, site.about.image_alt, { sizes: '(max-width: 760px) 100vw, 40vw' })}</figure>
+  </div>
+  <div class="about-main">
+    <h2 class="h-display about-title" id="about-title">${esc(site.about.title)} <em data-type>${esc(site.about.title_emphasis)}</em></h2>
+    ${site.about.paragraphs.map((p) => `<p class="about-text" data-reveal>${esc(p)}</p>`).join('\n    ')}
+    <dl class="about-facts" data-reveal>
       <div><dt>Who</dt><dd>Zuzia and Ben</dd></div>
       <div><dt>Experience</dt><dd>Ben since 2014, Zuzia since 2023</dd></div>
       <div><dt>Based in</dt><dd>${esc(c.town || 'Derbyshire')}, Derbyshire</dd></div>
       <div><dt>Married</dt><dd>March 2023</dd></div>
     </dl>
-  </div>
-  <div class="about-main">
-    <h2 class="h-display about-title" id="about-title">${esc(site.about.title)} <em data-type>${esc(site.about.title_emphasis)}</em></h2>
-    ${site.about.paragraphs.map((p) => `<p class="about-text" data-reveal>${esc(p)}</p>`).join('\n    ')}
     <div class="about-record">
-      <div data-reveal><h3>Venues</h3><ul role="list">${['Shottle Hall', 'The West Mill', 'Weddings in London'].map((n) => { const v = venues.find((x) => x.name.toLowerCase() === n.toLowerCase()); return `<li>${v ? `<a href="${venuePath(v.name)}">${esc(n)}</a>` : esc(n)}</li>`; }).join('')}${venues.length ? '<li><a href="/venues/">All Derbyshire venues</a></li>' : ''}</ul></div>
-      <div data-reveal><h3>Where we work</h3><ul role="list">${areaPages.length ? areaPages.map((a) => `<li><a href="/${esc(a.slug)}/">${esc(a.nav_label || a.h1)}</a></li>`).join('') : '<li>Belper and Derby</li><li>Matlock and Ashbourne</li><li>The Peak District</li>'}<li>The rest of the UK</li></ul></div>
+      <div data-reveal><h3>Venues we've worked at</h3><ul class="chips" role="list">${venues.filter((x) => x.worked).map((v) => `<li><a href="${venuePath(v.name)}">${esc(v.name)}</a></li>`).join('')}<li>Weddings in London</li>${venues.length ? '<li><a class="chip-more" href="/venues/">All venues</a></li>' : ''}</ul></div>
+      <div data-reveal><h3>Where we work</h3><ul class="chips" role="list">${areaPages.length ? areaPages.map((a) => `<li><a href="/${esc(a.slug)}/">${esc(a.nav_label || a.h1)}</a></li>`).join('') : '<li>Belper and Derby</li><li>Matlock and Ashbourne</li><li>The Peak District</li>'}<li>The rest of the UK</li></ul></div>
     </div>
   </div>
 </section>

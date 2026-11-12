@@ -1469,4 +1469,44 @@ html:not(.js) .reel-stage, .reduced .reel-stage { overflow-x: auto; scroll-snap-
   .sound-body { grid-template-columns: 1fr; }
 }
 @media (max-width: 760px) { .reel { margin-top: 24px; } }
+
+/* FIX: italic letters lean past their box (the tail of a g or p), and gradient text only paints inside
+   the box, so the first letter of a gradient word lost its tail. Give the paint room on every side. */
+.h-display em, .h-head em, .sound-title em, .voices-num, .chapter-title, .offer-title em, .about .h-display em, .commercial .h-head em, .index-row.is-active .index-name {
+  padding: 0.04em 0.12em 0.22em 0.16em; margin: -0.04em -0.12em -0.22em -0.16em;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+
+/* ABOUT: compact and bold. A big portrait beside the story, facts as cards, places as chips */
+.about { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 4vw, 80px); align-items: start; max-width: 1600px; }
+.about-side { position: sticky; top: 96px; }
+.about-pic { width: 100%; aspect-ratio: 4 / 5; border-radius: 6px; box-shadow: 0 0 0 1px rgba(217, 168, 138, 0.2), 0 50px 100px -40px rgba(0, 0, 0, 0.9), 0 0 90px -30px rgba(201, 150, 122, 0.25); }
+.about-main { padding-right: 0; }
+.about-main .about-title { margin-bottom: 24px; font-size: clamp(48px, 5.4vw, 104px); line-height: 0.95; }
+.about-text { font: 500 clamp(16px, 1.05vw, 19px)/1.6 var(--sans); color: var(--on-night-soft); max-width: 58ch; }
+.about-text:first-of-type { font: 400 clamp(26px, 2.3vw, 40px)/1.18 var(--serif); color: var(--on-night); max-width: 30ch; margin-bottom: 0.5em; }
+.about-text + .about-text { margin-top: 0.7em; }
+.about-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: clamp(28px, 3vw, 44px); }
+.about-facts > div { padding: 16px 16px 14px; border-radius: 10px; background: linear-gradient(160deg, rgba(36, 32, 28, 0.94), rgba(22, 20, 18, 0.94)); box-shadow: inset 0 0 0 1px rgba(241, 238, 231, 0.1); display: grid; gap: 6px; align-content: start; }
+.about-facts dt { font-size: 11px; }
+.about-facts dd { font: 400 clamp(19px, 1.4vw, 24px)/1.15 var(--serif); color: var(--on-night); }
+.about-record { grid-template-columns: 1fr; gap: 24px; margin-top: clamp(28px, 3vw, 44px); }
+.about-record h3 { font-size: 12px; margin-bottom: 12px; }
+.chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.chips li { font-size: 14px; color: var(--on-night-soft); line-height: 1; }
+.chips li:not(:has(a)) { padding: 10px 14px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(241, 238, 231, 0.12); }
+.chips a { display: inline-block; padding: 10px 14px; border-radius: 999px; color: var(--on-night); font-weight: 500; text-decoration: none; background: linear-gradient(135deg, rgba(201, 150, 122, 0.12), rgba(36, 32, 28, 0.6)); box-shadow: inset 0 0 0 1px rgba(217, 168, 138, 0.3); transition: background 300ms ease, color 300ms ease; }
+.chips a:hover { background: var(--g-copper); color: #1A1916; }
+.chips .chip-more { background: none; box-shadow: none; color: #E2B79C; font-style: italic; font-family: var(--serif); font-size: 17px; padding-left: 6px; }
+@media (max-width: 1100px) { .about-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .about { display: flex; flex-direction: column; }
+  .about-side { position: static; order: -1; width: 100%; }
+  .about-pic { width: 100%; aspect-ratio: 4 / 3; }
+  .about-main .about-title { font-size: 46px; }
+  .about-text:first-of-type { font-size: 25px; }
+  .about-text { font-size: 16px; }
+}
+.about { margin-left: auto; margin-right: auto; }
+@media (min-width: 1800px) { .about { max-width: 1800px; grid-template-columns: minmax(0, 4fr) minmax(0, 6fr); } }
 /* taste-skill-ignore-end */
