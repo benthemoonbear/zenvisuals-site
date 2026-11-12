@@ -356,6 +356,8 @@
       else b.setAttribute('aria-pressed', String(!pressed));
       render();
       if (extras) extras.hidden = !picks.some((x) => x.dataset.pick === 'film' && x.getAttribute('aria-pressed') === 'true');
+      const isOn = (k) => picks.some((x) => x.dataset.pick === k && x.getAttribute('aria-pressed') === 'true');
+      if (window.zenPick) window.zenPick(isOn('photo'), isOn('film'));
     }));
   });
 
@@ -404,6 +406,45 @@
       if (opt) select.value = opt.value;
     });
   });
+
+  // ---------- price calculator inside the enquiry form ----------
+  const calc = document.querySelector('[data-calc]');
+  if (calc) {
+    const packs = [...calc.querySelectorAll('input[name="package"]')];
+    const extrasBox = calc.querySelector('[data-calc-extras]');
+    const extras = [...calc.querySelectorAll('input[name="extras"]')];
+    const totalEl = calc.querySelector('[data-calc-total]');
+    const est = calc.querySelector('[data-calc-estimate]');
+    const money = (n) => '£' + Math.round(n).toLocaleString('en-GB');
+    let shown = 0;
+    const tween = (to) => {
+      if (reduceMotion) { totalEl.textContent = money(to); shown = to; return; }
+      const from = shown, t0 = performance.now();
+      const step = (t) => { const k = Math.min(1, (t - t0) / 600); const e = 1 - Math.pow(1 - k, 3); totalEl.textContent = money(from + (to - from) * e); if (k < 1) requestAnimationFrame(step); else shown = to; };
+      requestAnimationFrame(step);
+    };
+    const update = (animate = true) => {
+      const p = packs.find((x) => x.checked);
+      const film = p && p.dataset.film === '1';
+      extras.forEach((x) => { x.disabled = !film; if (!film) x.checked = false; });
+      if (extrasBox) extrasBox.classList.toggle('is-off', !film);
+      const chosen = extras.filter((x) => x.checked);
+      const total = (p ? +p.dataset.price : 0) + chosen.reduce((a, x) => a + +x.dataset.price, 0);
+      est.value = p ? [p.value, ...chosen.map((x) => x.value)].join(' + ') + ' = ' + money(total) : '';
+      if (animate) tween(total); else { totalEl.textContent = money(total); shown = total; }
+    };
+    calc.addEventListener('change', () => update());
+    update(false);
+    // only weddings need it
+    const type = document.getElementById('enquiry-type');
+    const showCalc = () => { calc.hidden = type && type.value !== 'Wedding'; calc.disabled = calc.hidden; };
+    if (type) { type.addEventListener('change', showCalc); showCalc(); }
+    // choosing photography / film on the price card carries over to the form
+    window.zenPick = (photo, film) => {
+      const p = packs.find((x) => x.dataset.photo === (photo ? '1' : '0') && x.dataset.film === (film ? '1' : '0'));
+      if (p && !p.checked) { p.checked = true; update(); }
+    };
+  }
 
   // ---------- enquiry form: send without leaving the page (falls back to /thank-you/ without JS) ----------
   const form = document.querySelector('.contact-form');

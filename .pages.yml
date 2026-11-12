@@ -29,6 +29,9 @@ content:
           - { name: description, label: "Short description (for Google video results)", type: text }
           - { name: duration_seconds, label: "Length in seconds (e.g. 240)", type: number }
           - { name: date_added, label: Date added, type: date }
+          - { name: venue, label: "Venue (e.g. Shottle Hall) — gives the film its own venue page", type: string }
+          - { name: location, label: "Town or area (e.g. Belper, Derbyshire)", type: string }
+          - { name: story, label: "The story of the day (a few sentences, shown on the film's own page)", type: text }
 
   - name: photos
     label: Photos

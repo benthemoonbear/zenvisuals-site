@@ -118,7 +118,7 @@ const chapters = (list) => `<div class="chapters" data-chapters style="--n:${lis
           <p class="chapter-kicker">${esc(kind(f))}${f.duration_seconds ? ` · ${minutes(f.duration_seconds)}` : ''}</p>
           <h3 class="chapter-title">${esc(f.title)}</h3>
           ${f.description ? `<p class="chapter-desc">${esc(f.description)}</p>` : ''}
-          <button type="button" class="btn btn-light" ${filmAttrs(f)}>${playIcon(11)}Play the film</button>
+          <button type="button" class="btn btn-light" ${filmAttrs(f)}>${playIcon(11)}Play the film</button><a class="chapter-more" href="${filmPath(f)}">The story<span class="sr"> of ${esc(f.title)}</span></a>
         </div>
       </div>`; }).join('\n      ')}
       <div class="letterbox letterbox-bottom" aria-hidden="true">
@@ -131,6 +131,10 @@ const chapters = (list) => `<div class="chapters" data-chapters style="--n:${lis
 const minutes = (s) => (s ? `${Math.max(1, Math.round(s / 60))} min` : '');
 const filmAttrs = (f) => `data-film-src="${esc(f.video)}" data-film-title="${esc(f.title)}" data-film-poster="${esc(f.poster)}"`;
 const kind = (f) => (f.category === 'commercial' ? 'Commercial film' : 'Wedding film');
+// every film has its own page at /films/<video file name>/
+const filmSlug = (f) => (f.video || f.title).split('/').pop().replace(/\.mp4$/i, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const filmPath = (f) => `/films/${filmSlug(f)}/`;
+const slugify = (x) => String(x).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 // Films as an index of names, with one frame that shows the film you point at.
 const filmIndex = (list) => `<div class="index" data-index>
@@ -141,6 +145,7 @@ const filmIndex = (list) => `<div class="index" data-index>
           <span class="index-name">${esc(f.title)}</span>
           <span class="index-meta">${kind(f)}${f.duration_seconds ? ` · ${minutes(f.duration_seconds)}` : ''}</span>
         </button>
+        <a class="index-more" href="${filmPath(f)}">The film's page<span class="sr">: ${esc(f.title)}</span></a>
       </li>`).join('\n      ')}
     </ul>
     <div class="index-frame" aria-hidden="true">
@@ -187,6 +192,9 @@ const faqSchema = (items) => ({
 });
 
 // ---------- data ----------
+const venues = [...new Map(films.filter((f) => f.venue).map((f) => [slugify(f.venue), { name: f.venue, slug: slugify(f.venue), location: f.location || '' }])).values()];
+const venuePath = (name) => `/venues/${slugify(name)}/`;
+
 const featured = films.find((f) => f.featured) || films[0];
 const weddingFilms = films.filter((f) => f.category === 'wedding' && f !== featured);
 const commercialFilms = films.filter((f) => f.category === 'commercial' && f !== featured);
@@ -423,6 +431,18 @@ const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="
         <label>Enquiry<select name="enquiry-type" id="enquiry-type">${c.enquiry_types.map((t) => `<option${t === enquiryDefault ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></label>
         <label>Date<input type="text" name="date" placeholder="DD / MM / YYYY" inputmode="numeric"></label>
       </div>
+      <fieldset class="calc" data-calc>
+        <legend>Your wedding <span class="calc-hint">Pick what you'd like for a price straight away</span></legend>
+        <div class="calc-packages">
+          ${site.pricing.packages.map((x, i) => `<label class="calc-pack"><input type="radio" name="package" value="${esc(x.name)} (${esc(x.price)})" data-price="${x.price.replace(/[^0-9.]/g, '')}" data-film="${/film/i.test(x.name) ? 1 : 0}" data-photo="${/photo/i.test(x.name) ? 1 : 0}"${x.highlight ? ' checked' : ''}><span class="calc-pack-name">${esc(x.name)}</span><span class="calc-pack-price">${esc(x.price)}</span>${x.badge ? `<span class="calc-pack-badge">${esc(x.badge)}</span>` : ''}</label>`).join('')}
+        </div>
+        ${(site.pricing.extras || []).length ? `<div class="calc-extras" data-calc-extras>
+          ${site.pricing.extras.map((x) => `<label class="calc-extra"><input type="checkbox" name="extras" value="${esc(x.name)} (${esc(x.price)})" data-price="${x.price.replace(/[^0-9.]/g, '')}"><span>${esc(x.name)}</span><span class="calc-extra-price">${esc(x.price)}</span></label>`).join('')}
+          <p class="calc-note">Extras go with a film package.</p>
+        </div>` : ''}
+        <p class="calc-total">Your estimate <strong data-calc-total>${esc((site.pricing.packages.find((x) => x.highlight) || site.pricing.packages[0]).price)}</strong></p>
+        <input type="hidden" name="estimate" data-calc-estimate value="">
+      </fieldset>
       <label>Phone (optional)<input type="tel" name="phone" autocomplete="tel"></label>
       <label>Message<textarea name="message" rows="4" required></textarea></label>
       <button type="submit" class="btn btn-light">Send enquiry</button>
@@ -587,7 +607,7 @@ ${editBlock()}
     <h2 class="h-display about-title" id="about-title">${esc(site.about.title)} <em data-type>${esc(site.about.title_emphasis)}</em></h2>
     ${site.about.paragraphs.map((p) => `<p class="about-text" data-reveal>${esc(p)}</p>`).join('\n    ')}
     <div class="about-record">
-      <div data-reveal><h3>Venues</h3><ul role="list"><li>Shottle Hall</li><li>West Mill, Darley Abbey</li><li>Weddings in London</li></ul></div>
+      <div data-reveal><h3>Venues</h3><ul role="list">${['Shottle Hall', 'West Mill, Darley Abbey', 'Weddings in London'].map((n) => { const v = venues.find((x) => n.toLowerCase().startsWith(x.name.toLowerCase())); return `<li>${v ? `<a href="${venuePath(v.name)}">${esc(n)}</a>` : esc(n)}</li>`; }).join('')}</ul></div>
       <div data-reveal><h3>Where we work</h3><ul role="list"><li>Belper and Derby</li><li>Matlock and Ashbourne</li><li>The Peak District</li><li>The rest of the UK</li></ul></div>
     </div>
   </div>
@@ -683,6 +703,116 @@ ${others.length ? `<section class="related" aria-labelledby="related-title">
 ${contactAndFooter(enquiry)}` + dialogsAndScripts();
 }
 
+// ---------- film pages: one page per film, with the film itself as the main content ----------
+const paras = (t) => String(t || '').split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean);
+const filmCards = (list) => `<ul class="film-cards" role="list">
+    ${list.map((f) => `<li data-reveal><a class="film-card" href="${filmPath(f)}">
+      <span class="film-card-pic">${pic(f.poster, '', { sizes: '(max-width: 760px) 100vw, 33vw' })}</span>
+      <span class="film-card-name">${esc(f.title)}</span>
+      <span class="film-card-meta">${kind(f)}${f.duration_seconds ? ` · ${minutes(f.duration_seconds)}` : ''}${f.venue ? ` · ${esc(f.venue)}` : ''}</span>
+    </a></li>`).join('\n    ')}
+  </ul>`;
+
+function filmPage(f) {
+  const url = SITE_URL + filmPath(f);
+  const isCommercial = f.category === 'commercial';
+  const parent = landingPages.find((p) => p.film_category === f.category && (isCommercial || /video/i.test(p.slug))) || landingPages.find((p) => p.film_category === f.category);
+  const where = [f.venue, f.location].filter(Boolean).join(', ');
+  const title = isCommercial ? `${f.title} | Commercial film by Zen Visuals` : `${f.title} | ${f.venue ? `Wedding film at ${f.venue}` : 'Derbyshire wedding film'} | Zen Visuals`;
+  const description = (f.description || `${f.title}, filmed by Zen Visuals.`).slice(0, 158);
+  const related = [...films.filter((x) => x !== f && x.category === f.category), ...films.filter((x) => x !== f && x.category !== f.category)].slice(0, 3);
+  const l = loopFor(f);
+  const enquiry = isCommercial ? 'Advert / promo film' : 'Wedding';
+  const crumbs = [{ name: 'Home', item: SITE_URL + '/' }, ...(parent ? [{ name: parent.nav_label || parent.h1, item: pageUrl(parent.slug) }] : []), { name: f.title, item: url }];
+  const graph = [
+    business,
+    { '@type': 'WebPage', '@id': url, url, name: title, description, isPartOf: { '@id': SITE_URL + '/#website' }, primaryImageOfPage: abs(f.poster), mainEntity: { '@id': url + '#video' } },
+    { '@type': 'BreadcrumbList', itemListElement: crumbs.map((x, i) => ({ '@type': 'ListItem', position: i + 1, name: x.name, item: x.item })) },
+    { ...videoSchema(f), '@id': url + '#video', url, embedUrl: url, ...(where ? { contentLocation: { '@type': 'Place', name: where } } : {}) },
+  ];
+  const story = paras(f.story);
+  return head({ title, description, url, image: f.poster, graph, preload: null })
+  + topbar('/') + `
+<main id="main">
+
+<section class="fhero" id="top" data-hero>
+  <div class="fhero-media">${pic(f.poster, `Still from ${f.title}, ${kind(f).toLowerCase()}`, { sizes: '100vw', eager: true })}${l ? `<video class="fhero-loop" src="${l.desktop}" data-src-mobile="${l.mobile}" poster="${f.poster}" autoplay muted loop playsinline aria-hidden="true"></video>` : ''}</div>
+  <div class="letterbox letterbox-top" aria-hidden="true"></div>
+  <div class="fhero-copy">
+    <nav class="breadcrumb" aria-label="Breadcrumb" data-load style="--d:200ms">${crumbs.map((x, i) => i < crumbs.length - 1 ? `<a href="${x.item.replace(SITE_URL, '') || '/'}">${esc(x.name)}</a> <span aria-hidden="true">/</span> ` : `<span>${esc(x.name)}</span>`).join('')}</nav>
+    <p class="chapter-kicker" data-load style="--d:320ms">${kind(f)}${f.duration_seconds ? ` · ${minutes(f.duration_seconds)}` : ''}${where ? ` · ${f.venue ? `<a href="${venuePath(f.venue)}">${esc(f.venue)}</a>` : ''}${f.location ? `${f.venue ? ', ' : ''}${esc(f.location)}` : ''}` : ''}</p>
+    <h1 class="chapter-title" data-load style="--d:420ms">${esc(f.title)}</h1>
+    <div class="fhero-actions" data-load style="--d:560ms">
+      <button type="button" class="btn btn-light" ${filmAttrs(f)}>${playIcon(11)}Play the film</button>
+      <a href="#contact" class="btn btn-ghost" data-enquiry="${enquiry}">${isCommercial ? 'Get a quote' : 'Check your date'}</a>
+    </div>
+  </div>
+  <div class="letterbox letterbox-bottom" aria-hidden="true"></div>
+</section>
+
+<section class="fstory" aria-labelledby="fstory-title">
+  <h2 class="h-display" id="fstory-title">${isCommercial ? 'About the <em data-type>film</em>' : 'The <em data-type>day</em>'}</h2>
+  <div class="fstory-text">
+    ${(story.length ? story : [f.description || '']).map((x) => `<p data-reveal>${esc(x)}</p>`).join('\n    ')}
+  </div>
+</section>
+
+<section class="fwatch" aria-label="Watch ${esc(f.title)}">
+  <div class="fwatch-frame" data-reveal>
+    <video controls preload="none" playsinline poster="${f.poster}" src="${f.video}" title="${esc(f.title)}"></video>
+  </div>
+</section>
+
+${isCommercial ? '' : editBlock()}
+${reviewsBlock(isCommercial ? 'commercial' : 'all')}
+
+<section class="related related--films" aria-labelledby="more-films">
+  <h2 class="h-display" id="more-films">More <em data-type>films</em></h2>
+  ${filmCards(related)}
+  ${parent ? `<div class="related-links"><a href="/">Home</a><a href="/${esc(parent.slug)}/">${esc(parent.nav_label || parent.h1)}</a></div>` : ''}
+</section>
+
+${contactAndFooter(enquiry)}` + dialogsAndScripts();
+}
+
+// ---------- venue pages: switched on when a film has a venue ----------
+function venuePage(v) {
+  const url = SITE_URL + venuePath(v.name);
+  const vFilms = films.filter((f) => f.venue && slugify(f.venue) === v.slug);
+  const vPhotos = photos.filter((x) => x.venue && slugify(x.venue) === v.slug);
+  const where = [v.name, v.location].filter(Boolean).join(', ');
+  const title = `${v.name} wedding photographer & videographer | Zen Visuals`;
+  const description = `Wedding films and photographs at ${where} by Zen Visuals, Derbyshire wedding photographers and videographers. See our work there and check your date.`.slice(0, 158);
+  const graph = [
+    business,
+    { '@type': 'WebPage', '@id': url, url, name: title, description, isPartOf: { '@id': SITE_URL + '/#website' }, about: { '@type': 'Place', name: where } },
+    { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL + '/' }, { '@type': 'ListItem', position: 2, name: v.name, item: url }] },
+    ...vFilms.map((f) => ({ ...videoSchema(f), url: SITE_URL + filmPath(f) })),
+  ];
+  const lead = vFilms[0];
+  return head({ title, description, url, image: (lead || {}).poster || site.seo.share_image, graph, preload: null })
+  + topbar('/') + `
+<main id="main">
+<section class="phero" id="top" data-hero>
+  <div class="phero-copy">
+    <nav class="breadcrumb" aria-label="Breadcrumb" data-load style="--d:100ms"><a href="/">Home</a> <span aria-hidden="true">/</span> <span>${esc(v.name)}</span></nav>
+    <h1 class="h-display" data-load style="--d:180ms">Weddings at <em>${esc(v.name)}</em></h1>
+    <p class="phero-lead" data-load style="--d:300ms">We've filmed and photographed weddings at ${esc(where)}. Here's our work there. If you're getting married there too, we already know the place.</p>
+    <a href="#contact" class="btn btn-accent" data-enquiry="Wedding" data-load style="--d:420ms">Check your date</a>
+  </div>
+  ${lead ? `<figure class="phero-pic" data-hero-pic>${pic(lead.poster, `Still from ${lead.title} at ${v.name}`, { sizes: '(max-width: 760px) 100vw, 50vw', eager: true })}</figure>` : ''}
+</section>
+${vFilms.length ? `<section class="films films--page" id="films" aria-labelledby="films-title">
+  <div class="films-head"><h2 class="h-display" id="films-title">Films at <em>${esc(v.name)}</em></h2></div>
+  ${chapters(vFilms.slice(0, 4))}
+</section>` : ''}
+${vPhotos.length ? `<section class="photos" id="photos" aria-labelledby="photos-title"><h2 class="h-display" id="photos-title">In <em>photographs</em></h2>${stagger(vPhotos)}</section>` : ''}
+${reviewsBlock('wedding')}
+${pricingBlock(false)}
+${bookingBlock()}
+${contactAndFooter('Wedding')}` + dialogsAndScripts();
+}
+
 // ---------- simple pages ----------
 const simplePage = (title, heading, text) => `<!doctype html>
 <html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -703,6 +833,8 @@ const imgTags = (list) => list.map((src) => `<image:image><image:loc>${esc(abs(s
 const vidTags = (list) => list.filter((f) => f.video).map((f) => `<video:video><video:thumbnail_loc>${esc(abs(f.poster))}</video:thumbnail_loc><video:title>${esc(f.title)}</video:title><video:description>${esc(f.description || f.title)}</video:description><video:content_loc>${esc(abs(f.video))}</video:content_loc>${f.duration_seconds ? `<video:duration>${Math.round(f.duration_seconds)}</video:duration>` : ''}<video:publication_date>${esc(f.date_added || '2026-10-19')}</video:publication_date></video:video>`).join('');
 const sitemapEntries = [
   `<url><loc>${SITE_URL}/</loc><lastmod>${TODAY}</lastmod>${imgTags(photos.map((p) => p.image))}${vidTags(films)}</url>`,
+  ...films.map((f) => `<url><loc>${SITE_URL}${filmPath(f)}</loc><lastmod>${TODAY}</lastmod>${imgTags([f.poster])}${vidTags([f])}</url>`),
+  ...venues.map((v) => `<url><loc>${SITE_URL}${venuePath(v.name)}</loc><lastmod>${TODAY}</lastmod></url>`),
   ...landingPages.map((p) => {
     const pPhotos = p.photo_category ? photos.filter((x) => x.category === p.photo_category).slice(0, p.photo_limit || 9) : [];
     const pFilms = p.film_category ? films.filter((f) => f.category === p.film_category) : [];
@@ -735,7 +867,7 @@ ${faqs.map((f) => `- ${f.question} ${f.answer}`).join('\n')}
 ${landingPages.map((p) => `- [${p.h1}](${pageUrl(p.slug)}): ${p.seo_description}`).join('\n')}
 
 ## Films
-${films.map((f) => `- ${f.title} (${f.category}): ${f.description || ''}`).join('\n')}
+${films.map((f) => `- [${f.title}](${SITE_URL}${filmPath(f)}) (${f.category}${f.venue ? `, ${f.venue}` : ''}): ${f.description || ''}`).join('\n')}
 `;
 
 // ---------- write ----------
@@ -751,6 +883,14 @@ writeFileSync(join(OUT, 'index.html'), home);
 for (const p of landingPages) {
   mkdirSync(join(OUT, p.slug), { recursive: true });
   writeFileSync(join(OUT, p.slug, 'index.html'), landing(p));
+}
+for (const f of films) {
+  mkdirSync(join(OUT, 'films', filmSlug(f)), { recursive: true });
+  writeFileSync(join(OUT, 'films', filmSlug(f), 'index.html'), filmPage(f));
+}
+for (const v of venues) {
+  mkdirSync(join(OUT, 'venues', v.slug), { recursive: true });
+  writeFileSync(join(OUT, 'venues', v.slug, 'index.html'), venuePage(v));
 }
 writeFileSync(join(OUT, 'thank-you', 'index.html'), thanks);
 writeFileSync(join(OUT, '404.html'), notFound);
