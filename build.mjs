@@ -281,7 +281,7 @@ const head = ({ title, description, url, image, graph, preload, ogType = 'websit
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<script>document.documentElement.classList.add('js')</script>
+<script>(function(){var d=document.documentElement,n=navigator,l=false;d.classList.add('js');try{if((n.deviceMemory&&n.deviceMemory<=4)||(n.hardwareConcurrency&&n.hardwareConcurrency<=4)||(n.connection&&n.connection.saveData))l=true;if(!l){var g=document.createElement('canvas').getContext('webgl',{failIfMajorPerformanceCaveat:true});if(!g)l=true;else{var e=g.getExtension('WEBGL_debug_renderer_info');if(e&&/swiftshader|llvmpipe|software|basic render|mesa offscreen/i.test(g.getParameter(e.UNMASKED_RENDERER_WEBGL)))l=true;var x=g.getExtension('WEBGL_lose_context');x&&x.loseContext();}}}catch(z){}if(l)d.classList.add('lite');})()</script>
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
 <meta name="robots" content="index, follow, max-image-preview:large, max-video-preview:-1">
@@ -315,31 +315,8 @@ ${ldScript(graph)}
 `;
 
 // base = '' on the homepage (links jump within the page) and '/' elsewhere.
-const topbar = (base) => `<header class="bar" id="topbar">
-  <a href="${base ? '/' : '#top'}" class="bar-logo" aria-label="Zen Visuals, ${base ? 'home' : 'back to top'}">${toned(logo('bar-mark', ''), 'bar-tone')}</a>
-  <nav class="bar-nav" aria-label="Main">
-    <a href="${base}#films">Films</a>
-    <a href="${base}#photos">Photographs</a>
-    <a href="${base}#pricing">Pricing</a>
-    <a href="${base}#about">About</a>
-    <a href="#contact" class="btn btn-accent bar-cta" data-enquiry="Wedding">Check your date</a>
-  </nav>
-  <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu"><span class="menu-word">Menu</span></button>
-</header>
-<div class="mobile-menu" id="mobile-menu" inert>
-  <nav aria-label="Mobile">
-    <a href="${base}#weddings">Weddings</a>
-    <a href="${base}#films">Films</a>
-    <a href="${base}#photos">Photographs</a>
-    <a href="${base}#about">About us</a>
-    <a href="${base}#pricing">Pricing</a>
-    ${faqs.length ? `<a href="${base}#faq">Questions</a>` : ''}
-    <a href="#contact">Contact</a>
-  </nav>
-  ${landingPages.length ? `<div class="mobile-menu-sub">${[...servicePages, ...guidePages].map((p) => `<a href="/${esc(p.slug)}/">${esc(p.nav_label || p.h1)}</a>`).join('')}${venues.length ? '<a href="/venues/">Wedding venues</a>' : ''}</div>` : ''}
-  <a href="${telHref}" class="mobile-menu-phone">${esc(c.phone)}</a>
-</div>
-`;
+// The top menu has been removed: navigation lives in the page itself and the footer.
+const topbar = () => '';
 
 // Reviews: weddings pages show wedding reviews under the big quote; the business page leads with a business review.
 const stars = (cls = 'stars') => `<span class="${cls}" role="img" aria-label="5 out of 5 stars">${'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1.5l2.6 5.6 6.1.7-4.5 4.2 1.2 6L10 15l-5.4 3 1.2-6-4.5-4.2 6.1-.7z"/></svg>'.repeat(5)}</span>`;

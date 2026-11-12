@@ -1542,4 +1542,40 @@ main { background:
 @keyframes star-core { 0% { opacity: 0; } 20% { opacity: 0.9; } 100% { opacity: 0; } }
 /* every so often a star glints again, very gently */
 @keyframes star-twinkle { 0%, 88%, 100% { scale: 1; rotate: 0deg; } 92% { scale: 1.25; rotate: 45deg; } 96% { scale: 1; rotate: 90deg; } }
+
+/* ========== PERFORMANCE ==========
+   Everything stays; the costly ways of drawing it are swapped for cheap ones where the device needs it.
+   .lite is set in the page head for devices with no graphics acceleration, little memory or few cores. */
+
+/* every visitor: sections far off screen are not drawn until you get near them */
+.edit, .about, .booking, .faq, .contact, .related, .venue-guide { content-visibility: auto; contain-intrinsic-size: auto 1200px; }
+
+/* the grain no longer blends with everything beneath it (it looks the same on a dark page) */
+body::after { mix-blend-mode: normal; opacity: 0.045; will-change: transform; }
+
+/* phones: the grain holds still, the per-frame colour filters in the photo reel become plain fades,
+   and the glow behind gradient words is drawn once as a text shadow rather than a live filter */
+@media (max-width: 760px) {
+  body::after { animation: none !important; }
+  .js .reel-frame { filter: none; }
+  .h-display em, .h-head em, .sound-title em, .facts dt, .voices-num, .chapter-title, .index-row.is-active .index-name, .step .h-head::before { filter: none; }
+}
+
+/* devices without graphics acceleration */
+.lite body::after { animation: none !important; opacity: 0.04; }
+.lite .js .reel-frame, .lite.js .reel-frame { filter: none !important; }
+.lite .h-display em, .lite .h-head em, .lite .sound-title em, .lite .facts dt, .lite .voices-num, .lite .chapter-title, .lite .index-row.is-active .index-name, .lite .step .h-head::before { filter: none !important; }
+.lite .hero-mark, .lite .footer-mark, .lite .shot-btn, .lite .intro-pic, .lite .about-pic-wrap { filter: none !important; }
+.lite body, .lite .h-display, .lite .h-head, .lite .chapter-title, .lite .voice-lead blockquote p, .lite .voice-hook, .lite .venue-name, .lite .film-card-name { text-shadow: none; }
+.lite .h-display, .lite .chapter-title, .lite .voice-lead blockquote p { text-shadow: 0 0 18px rgba(241, 230, 212, 0.16); }
+/* section glows: one painted background instead of a masked layer per section */
+.lite .intro::before, .lite .films::after, .lite .about::before, .lite .commercial::before, .lite .edit::before, .lite .photos::before, .lite .voices::before, .lite .booking::before, .lite .faq::before, .lite .contact::before { -webkit-mask-image: none; mask-image: none; }
+.lite .voices-bg { -webkit-mask-image: none; mask-image: none; }
+.lite .voices-bg img { animation: none !important; }
+.lite .chapters { -webkit-mask-image: none; mask-image: none; }
+/* footer reel: blur a small copy and stretch it, which looks the same for a fraction of the work */
+.lite .footer-reel { filter: blur(3px) brightness(0.5) saturate(0.9); width: 12%; height: 12%; transform: scale(8.4); transform-origin: 0 0; image-rendering: auto; }
+.lite .footer-bg { overflow: hidden; }
+/* reveals: no blur in arrivals */
+.lite [data-reveal], .lite .split .w > span { filter: none !important; }
 /* taste-skill-ignore-end */
