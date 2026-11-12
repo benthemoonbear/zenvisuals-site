@@ -239,6 +239,12 @@
       },
     };
   });
+  // Once the wordmark has settled, a soft sheen crosses it.
+  if (!reduceMotion) {
+    const sheen = document.querySelectorAll('[data-sheen]');
+    if (sheen.length) setTimeout(() => sheen.forEach((a) => { try { a.beginElement(); } catch (e) {} }), 3900);
+  }
+
   // The edit: the playhead and timecode run along the timeline as the section passes.
   const edits = reduceMotion ? [] : [...document.querySelectorAll('[data-edit]')].map((sec) => {
     const suite = sec.querySelector('.suite');

@@ -90,6 +90,10 @@ const loopFor = (f) => {
   const base = join(ROOT, 'media', 'films', 'loops', slug);
   return existsSync(base + '.mp4') ? { desktop: `/media/films/loops/${slug}.mp4`, mobile: existsSync(base + '-mobile.mp4') ? `/media/films/loops/${slug}-mobile.mp4` : `/media/films/loops/${slug}.mp4` } : null;
 };
+// the hero wordmark carries a soft sheen that crosses it once, after it has come into focus
+const heroLogo = () => logo('hero-logo', 'Zen Visuals')
+  .replace('fill="currentColor"', 'fill="url(#mark-sheen)"')
+  .replace(/(<svg[^>]*>)/, `$1<defs><linearGradient id="mark-sheen" gradientUnits="userSpaceOnUse" x1="-700" y1="0" x2="-200" y2="140"><stop offset="0" style="stop-color:currentColor"/><stop offset="0.5" stop-color="#FFF4E2"/><stop offset="1" style="stop-color:currentColor"/><animate data-sheen attributeName="x1" values="-700;957" dur="2.4s" begin="indefinite" fill="freeze" calcMode="spline" keySplines="0.45 0 0.25 1"/><animate data-sheen attributeName="x2" values="-200;1457" dur="2.4s" begin="indefinite" fill="freeze" calcMode="spline" keySplines="0.45 0 0.25 1"/></linearGradient></defs>`);
 const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
 const chapters = (list) => `<div class="chapters" data-chapters style="--n:${list.length}">
     <div class="chapters-stage">
@@ -503,7 +507,7 @@ const home = head({ title: site.seo.title, description: site.seo.description, ur
     <p class="hero-sub" data-load style="--d:2750ms">Zuzia and Ben, based in ${esc(c.town || 'Derbyshire')}, behind the camera since 2014.</p>
     <button type="button" class="btn btn-light hero-play" data-load style="--d:2900ms" ${filmAttrs(featured)}>${playIcon(11)}${esc(site.hero.button_text)}</button>
   </div>
-  <div class="hero-mark" data-hero-mark>${logo('hero-logo', 'Zen Visuals')}</div>
+  <div class="hero-mark" data-hero-mark>${heroLogo()}</div>
   <div class="curtain curtain-top" aria-hidden="true"></div>
   <div class="curtain curtain-bottom" aria-hidden="true"></div>
 </section>
