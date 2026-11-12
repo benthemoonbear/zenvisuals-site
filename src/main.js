@@ -259,7 +259,8 @@
       if (reduceMotion) return false;
       const r = wrap.getBoundingClientRect();
       if (r.bottom < -vh || r.top > vh * 1.5) return false;
-      const p = dist ? clamp(-r.top / dist, 0, 1) : 0;
+      const stageTop = parseFloat(getComputedStyle(wrap.firstElementChild).top) || 0;
+      const p = dist ? clamp((stageTop - r.top) / dist, 0, 1) : 0;
       shown += (p - shown) * 0.18;
       if (Math.abs(p - shown) < 0.0005) shown = p;
       track.style.transform = `translate3d(${(-shown * dist).toFixed(1)}px,0,0)`;

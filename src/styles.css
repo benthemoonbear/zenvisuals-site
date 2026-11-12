@@ -910,7 +910,7 @@ body::after {
 @keyframes flow-word { from { translate: 0 105%; } to { translate: none; } }
 @keyframes flow-open { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
 @keyframes flow-settle { from { scale: 1.22; } to { scale: 1.04; } }
-@keyframes flow-card { from { opacity: 0.2; scale: 0.94; translate: 0 60px; } to { opacity: 1; scale: 1; translate: none; } }
+@keyframes flow-card { from { scale: 0.96; translate: 0 48px; } to { scale: 1; translate: none; } }
 
 /* the edit: a timeline built from a real film, with a playhead that follows the scroll */
 .edit { padding: var(--gap) var(--m) 0; }
@@ -1422,4 +1422,26 @@ html:not(.js) .reel-stage, .reduced .reel-stage { overflow-x: auto; scroll-snap-
   .facts > div { padding: 18px 16px 16px; }
   .facts > div::before { left: 16px; }
 }
+
+/* FIX: the price card arrived as a blank cream panel while its words waited to scroll in.
+   The card now arrives whole, with everything on it already there. */
+.js .offer [data-reveal], .js .offer [data-reveal] * { animation: none !important; opacity: 1 !important; translate: none !important; filter: none; transition: none; }
+.js .offer .split .w > span { animation: none !important; translate: none !important; }
+
+/* POLISH */
+/* the photo reel on phones: a shorter gate centred on screen, bigger frames, no empty bands */
+@media (max-width: 760px) {
+  .js .reel-stage { height: 78svh; top: 11svh; gap: 14px; }
+  .reel-frame { height: min(56svh, 500px); }
+  .reel-frame.is-wide { width: 90vw; height: auto; }
+  .reel-track { gap: 12px; }
+}
+/* price card: softer shadow and a little room to breathe on phones */
+.offer { box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(217, 168, 138, 0.2); }
+/* hover and press feedback on every tappable card */
+.venue-item:active, .step:active, .voice-card:active, .film-card:active { translate: 0 -2px; transition-duration: 120ms; }
+/* focus rings that match the palette */
+:focus-visible { outline: 2px solid #E2B79C; outline-offset: 3px; border-radius: 4px; }
+/* nicer wrapping on headings and leads */
+.h-display, .h-head, .chapter-title { text-wrap: balance; }
 /* taste-skill-ignore-end */
