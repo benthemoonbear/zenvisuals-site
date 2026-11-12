@@ -1305,4 +1305,18 @@ html { scrollbar-color: #5a4236 #0e0d0c; }
   .venue-area > .h-head { position: static; }
   .venue-area > .venue-list, .venue-area > .venue-area-link { grid-column: 1; }
 }
+
+/* GLOW: a soft, warm light around the type, as if it sits in the film's light */
+body { text-shadow: 0 0 18px rgba(241, 230, 212, 0.14); }
+.h-display, .h-head, .chapter-title, .voice-lead blockquote p, .voice-hook, .venue-name, .film-card-name, .index-name, .extra-name, .calc-pack-price {
+  text-shadow: 0 0 22px rgba(241, 230, 212, 0.2), 0 0 2px rgba(241, 230, 212, 0.12);
+}
+/* gradient-filled words glow through a filter, so the colour stays clean */
+.h-display em, .h-head em, .sound-title em, .facts dt, .voices-num, .chapter-title, .index-row.is-active .index-name, .step .h-head::before {
+  text-shadow: none; filter: drop-shadow(0 0 14px rgba(226, 183, 156, 0.28));
+}
+.hero-mark, .footer-mark { filter: drop-shadow(0 0 30px rgba(241, 230, 212, 0.18)) drop-shadow(0 12px 34px rgba(0, 0, 0, 0.35)); }
+/* dark type on light cards and inside fields stays crisp */
+.offer, .offer *, .btn-light, .btn-light *, input, select, textarea, .venue-tag, .calc-pack-badge { text-shadow: none; }
+.offer .h-display em, .offer-title em, .offer .facts dt { filter: none; }
 /* taste-skill-ignore-end */
