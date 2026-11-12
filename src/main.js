@@ -239,6 +239,44 @@
       },
     };
   });
+  // The photo reel: vertical scroll drives the strip sideways; each frame wakes as it crosses the centre.
+  const reels = [...document.querySelectorAll('[data-reel]')].map((wrap) => {
+    const track = wrap.querySelector('[data-reel-track]');
+    const frames = [...wrap.querySelectorAll('[data-reel-frame]')];
+    const idx = wrap.querySelector('[data-reel-i]');
+    const fill = wrap.querySelector('[data-reel-fill]');
+    let dist = 0, shown = 0, last = -1;
+    const measure = () => {
+      if (reduceMotion) return;
+      dist = Math.max(0, track.scrollWidth - innerWidth);
+      wrap.style.height = `${innerHeight + dist}px`;
+    };
+    measure();
+    addEventListener('resize', measure);
+    addEventListener('load', measure);
+    track.querySelectorAll('img').forEach((im) => im.addEventListener('load', measure));
+    return (vh) => {
+      if (reduceMotion) return false;
+      const r = wrap.getBoundingClientRect();
+      if (r.bottom < -vh || r.top > vh * 1.5) return false;
+      const p = dist ? clamp(-r.top / dist, 0, 1) : 0;
+      shown += (p - shown) * 0.18;
+      if (Math.abs(p - shown) < 0.0005) shown = p;
+      track.style.transform = `translate3d(${(-shown * dist).toFixed(1)}px,0,0)`;
+      fill.style.transform = `scaleX(${shown.toFixed(4)})`;
+      const mid = innerWidth / 2;
+      let best = 0, bestD = 1e9;
+      frames.forEach((f, i) => {
+        const fr = f.getBoundingClientRect();
+        const c = clamp(((fr.left + fr.width / 2) - mid) / (innerWidth * 0.6), -1.2, 1.2);
+        f.style.setProperty('--c', c.toFixed(3));
+        if (Math.abs(c) < bestD) { bestD = Math.abs(c); best = i; }
+      });
+      if (best !== last) { last = best; idx.textContent = String(best + 1).padStart(2, '0'); }
+      return shown !== p;
+    };
+  });
+
   // Once the wordmark has settled, a soft sheen crosses it.
   if (!reduceMotion) {
     const sheen = document.querySelectorAll('[data-sheen]');
@@ -284,6 +322,9 @@
       }
       for (const ch of chapterSets) ch.update(vh);
       for (const ed of edits) ed(vh);
+      let again = false;
+      for (const rl of reels) if (rl(vh)) again = true;
+      if (again && !ticking) { ticking = true; requestAnimationFrame(update); }
       for (const el of drifters) {
         const r = el.getBoundingClientRect();
         if (r.bottom < -100 || r.top > vh + 100) continue;
@@ -389,16 +430,35 @@
     if (heroVideo && !reduceMotion) playSafe(heroVideo);
   });
 
-  // ---------- photo viewer ----------
+  // ---------- photo viewer: cross-fades between photographs, arrows, keys and swipes ----------
   const lightbox = document.getElementById('lightbox');
   const lightImg = document.getElementById('lightbox-img');
+  const lightCount = lightbox && lightbox.querySelector('[data-light-count]');
+  let lightSet = [], lightAt = 0;
+  const showPhoto = (i, dir = 0) => {
+    lightAt = (i + lightSet.length) % lightSet.length;
+    const b = lightSet[lightAt];
+    const swap = () => { lightImg.src = b.dataset.photo; lightImg.alt = b.dataset.alt || ''; lightImg.style.setProperty('--dir', dir); lightImg.classList.remove('is-out'); lightImg.classList.add('is-in'); };
+    if (dir && !reduceMotion) { lightImg.classList.remove('is-in'); lightImg.style.setProperty('--dir', dir); lightImg.classList.add('is-out'); setTimeout(swap, 220); } else swap();
+    if (lightCount) lightCount.textContent = lightSet.length > 1 ? `${String(lightAt + 1).padStart(2, '0')} / ${String(lightSet.length).padStart(2, '0')}` : '';
+  };
   document.querySelectorAll('[data-photo]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      lightImg.src = btn.dataset.photo;
-      lightImg.alt = btn.dataset.alt || '';
+      const group = btn.closest('[data-reel], .stagger, section') || document;
+      lightSet = [...group.querySelectorAll('[data-photo]')];
+      lightbox.classList.toggle('is-single', lightSet.length < 2);
+      showPhoto(lightSet.indexOf(btn));
       lightbox.showModal();
     });
   });
+  if (lightbox) {
+    lightbox.querySelector('[data-light-prev]').addEventListener('click', () => showPhoto(lightAt - 1, -1));
+    lightbox.querySelector('[data-light-next]').addEventListener('click', () => showPhoto(lightAt + 1, 1));
+    lightbox.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') showPhoto(lightAt + 1, 1); if (e.key === 'ArrowLeft') showPhoto(lightAt - 1, -1); });
+    let sx = null;
+    lightbox.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; }, { passive: true });
+    lightbox.addEventListener('touchend', (e) => { if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) showPhoto(lightAt + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1); sx = null; });
+  }
   document.querySelectorAll('dialog').forEach((d) => {
     d.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => d.close()));
     d.addEventListener('click', (e) => { if (e.target === d) d.close(); });

@@ -1341,4 +1341,51 @@ body { text-shadow: 0 0 18px rgba(241, 230, 212, 0.14); }
 :root { --gap: clamp(88px, 9vw, 150px); }
 .films { margin-top: clamp(24px, 3vw, 48px); padding-top: clamp(72px, 7vw, 120px); }
 @media (max-width: 760px) { :root { --gap: 88px; } .films { padding-top: 72px; } }
+
+/* PHOTO REEL: the photographs travel past like frames through a gate */
+.reel { position: relative; margin-top: clamp(40px, 5vw, 72px); }
+.reel-stage { position: relative; display: flex; flex-direction: column; justify-content: center; gap: clamp(16px, 2.4svh, 28px); overflow: clip; }
+.js .reel-stage { position: sticky; top: 0; height: 100svh; }
+.reel-bar { display: flex; justify-content: space-between; align-items: center; padding: 0 var(--m); font: 500 13px/1 var(--sans); letter-spacing: 0.2em; text-transform: uppercase; color: var(--on-night-soft); font-variant-numeric: tabular-nums; }
+.reel-bar [data-reel-i] { color: var(--on-night); }
+.reel-track { display: flex; align-items: center; gap: clamp(14px, 2vw, 32px); padding: 0 var(--m); width: max-content; will-change: transform; }
+.reel-frame { margin: 0; flex: none; height: min(68svh, 760px); --c: 0; }
+.reel-frame.is-wide { aspect-ratio: 3 / 2; }
+.reel-frame.is-tall { aspect-ratio: 3 / 4; }
+.reel-btn { display: block; width: 100%; height: 100%; cursor: zoom-in; border-radius: 4px; overflow: clip; box-shadow: 0 0 0 1px rgba(217, 168, 138, 0.14), 0 40px 80px -30px rgba(0, 0, 0, 0.85); }
+.reel-pic { display: block; width: 100%; height: 100%; overflow: clip; }
+.reel-pic img { width: 116%; max-width: none; height: 100%; object-fit: cover; margin-left: -8%; }
+.js .reel-frame {
+  scale: calc(1 - min(1, max(var(--c), var(--c) * -1)) * 0.1);
+  opacity: calc(1 - min(1, max(var(--c), var(--c) * -1)) * 0.5);
+  filter: saturate(calc(1 - min(1, max(var(--c), var(--c) * -1)) * 0.45)) brightness(calc(1 - min(1, max(var(--c), var(--c) * -1)) * 0.25));
+}
+.js .reel-pic img { translate: calc(var(--c) * -6%) 0; }
+.reel-btn:hover .reel-pic img { scale: 1.03; transition: scale 1200ms var(--ease-expo); }
+.reel-progress { position: relative; width: min(320px, 40vw); height: 1px; background: rgba(241, 238, 231, 0.18); overflow: hidden; }
+.reel-progress span { position: absolute; inset: 0; background: var(--g-copper); transform: scaleX(0); transform-origin: 0 50%; }
+.reel-hint { font-size: 12px; opacity: 0.7; }
+/* without the script or with reduced motion: a plain sideways scroller */
+html:not(.js) .reel-stage, .reduced .reel-stage { overflow-x: auto; scroll-snap-type: x mandatory; }
+@media (prefers-reduced-motion: reduce) {
+  .js .reel-stage { position: relative; height: auto; overflow-x: auto; scroll-snap-type: x mandatory; padding: 24px 0; }
+  .reel-frame { scroll-snap-align: center; }
+  .reel-progress, .reel-hint { display: none; }
+}
+@media (max-width: 760px) {
+  .reel-frame { height: min(58svh, 520px); }
+  .reel-frame.is-wide { height: auto; width: 86vw; }
+  .reel-bar { font-size: 11px; }
+}
+
+/* photo viewer: cross-fade with a little drift, arrows either side */
+.lightbox img { transition: opacity 300ms ease, translate 500ms var(--ease-expo), scale 600ms var(--ease-expo); }
+.lightbox img.is-out { opacity: 0; translate: calc(var(--dir, 0) * -40px) 0; }
+.lightbox img.is-in { opacity: 1; translate: 0 0; }
+.lightbox-nav { position: fixed; top: 50%; translate: 0 -50%; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; color: var(--on-night); background: rgba(14, 13, 12, 0.5); box-shadow: inset 0 0 0 1px rgba(241, 238, 231, 0.2); font: 300 34px/1 var(--serif); transition: background 300ms ease; }
+.lightbox-nav:hover { background: var(--g-copper); color: #1A1916; }
+.lightbox-prev { left: clamp(10px, 2vw, 32px); } .lightbox-next { right: clamp(10px, 2vw, 32px); }
+.lightbox-count { position: fixed; bottom: 22px; left: 50%; translate: -50% 0; pointer-events: none; text-align: center; font: 500 13px/1 var(--sans); letter-spacing: 0.2em; color: var(--on-night-soft); font-variant-numeric: tabular-nums; }
+.lightbox.is-single .lightbox-nav { display: none; }
+@media (max-width: 760px) { .lightbox-nav { width: 48px; height: 48px; font-size: 28px; top: auto; bottom: 14px; translate: none; } .lightbox-count { bottom: 30px; } }
 /* taste-skill-ignore-end */

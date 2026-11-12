@@ -164,23 +164,20 @@ const shot = (p, j, col) => `<figure class="shot shot-${j + 1} ${isTall(p) ? 'sh
           <span class="shot-frame">${pic(p.image, p.alt, { sizes: '(max-width: 760px) 100vw, 58vw' })}</span>
         </button>
       </figure>`;
-const stagger = (items) => {
-  const pairs = [];
-  for (let i = 0; i < items.length; i += 2) pairs.push(items.slice(i, i + 2));
-  return `<div class="stagger">
-    ${pairs.map((pair, i) => {
-      const leftFirst = i % 2 === 0;
-      const w1 = isTall(pair[0]) ? 4 : 7;
-      const w2 = pair[1] ? (isTall(pair[1]) ? 4 : (w1 === 4 ? 6 : 4)) : 0;
-      const c1 = leftFirst ? `1 / ${1 + w1}` : `${13 - w1} / 13`;
-      const c2 = leftFirst ? `${13 - w2} / 13` : `${w2 === 4 ? 2 : 1} / ${(w2 === 4 ? 2 : 1) + w2}`;
-      return `<div class="pair">
-      ${shot(pair[0], 0, c1)}
-      ${pair[1] ? shot(pair[1], 1, c2) : ''}
-    </div>`;
-    }).join('\n    ')}
-  </div>`;
-};
+// The gallery runs as a reel: scrolling down carries the photographs sideways past the lens.
+const stagger = (items) => `<div class="reel" data-reel style="--n:${items.length}">
+  <div class="reel-stage">
+    <div class="reel-bar reel-bar--top" aria-hidden="true"><span>Photographs</span><span><span data-reel-i>01</span> / ${String(items.length).padStart(2, '0')}</span></div>
+    <div class="reel-track" data-reel-track>
+      ${items.map((p, i) => `<figure class="reel-frame ${isTall(p) ? 'is-tall' : 'is-wide'}" data-reel-frame>
+        <button type="button" class="reel-btn" data-photo="${esc(p.image)}" data-alt="${esc(p.alt)}" aria-label="View larger: ${esc(p.alt)}">
+          <span class="reel-pic">${pic(p.image, p.alt, { sizes: '(max-width: 760px) 90vw, 60vw' })}</span>
+        </button>
+      </figure>`).join('\n      ')}
+    </div>
+    <div class="reel-bar reel-bar--bottom" aria-hidden="true"><span class="reel-progress"><span data-reel-fill></span></span><span class="reel-hint">Scroll</span></div>
+  </div>
+</div>`;
 
 const faqList = (items) => `<div class="faq-list">
     ${items.map((f) => `<details class="faq-item" data-reveal>
@@ -543,6 +540,9 @@ const dialogsAndScripts = () => `
 <dialog class="lightbox" id="lightbox" aria-label="Photo viewer">
   <button type="button" class="btn btn-ghost lightbox-close" data-close>Close</button>
   <img id="lightbox-img" alt="">
+  <button type="button" class="lightbox-nav lightbox-prev" data-light-prev aria-label="Previous photo"><span aria-hidden="true">‹</span></button>
+  <button type="button" class="lightbox-nav lightbox-next" data-light-next aria-label="Next photo"><span aria-hidden="true">›</span></button>
+  <p class="lightbox-count" data-light-count aria-live="polite"></p>
 </dialog>
 
 <script>window.ZEN_THANKS = ${JSON.stringify(c.thank_you)};</script>
