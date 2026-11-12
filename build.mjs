@@ -570,16 +570,16 @@ const home = head({ title: site.seo.title, description: site.seo.description, ur
       var start = function () { var p = v.play(); if (p && p.catch) p.catch(function () {}); };
       start();
       // Low Power Mode and some browsers block autoplay: try again on the first touch or scroll.
-      var retry = function () { if (v.paused) start(); };
+      var retry = function () { if (v.paused && !v.currentTime) start(); };
       ['touchstart', 'scroll', 'click'].forEach(function (e) { window.addEventListener(e, retry, { passive: true, once: true }); });
       document.addEventListener('visibilitychange', function () { if (!document.hidden) retry(); });
     })(document.currentScript.previousElementSibling);</script>
     <noscript><style>.hero-video { display: none; }</style></noscript>
   </div>
   <div class="hero-copy">
-    <h1 class="hero-title" data-load style="--d:2600ms"><span data-type-now data-type-delay="2900">${esc(site.hero.tagline)}</span></h1>
-    <p class="hero-sub" data-load style="--d:2750ms">Zuzia and Ben, based in ${esc(c.town || 'Derbyshire')}, behind the camera since 2014.</p>
-    <button type="button" class="btn btn-light hero-play" data-load style="--d:2900ms" ${filmAttrs(featured)}>${playIcon(11)}${esc(site.hero.button_text)}</button>
+    <h1 class="hero-title" data-load style="--d:1900ms"><span data-type-now data-type-delay="2200">${esc(site.hero.tagline)}</span></h1>
+    <p class="hero-sub" data-load style="--d:2050ms">Zuzia and Ben, based in ${esc(c.town || 'Derbyshire')}, behind the camera since 2014.</p>
+    <button type="button" class="btn btn-light hero-play" data-load style="--d:2200ms" ${filmAttrs(featured)}>${playIcon(11)}${esc(site.hero.button_text)}</button>
   </div>
   <div class="hero-mark" data-hero-mark>${heroLogo()}</div>
   <div class="curtain curtain-top" aria-hidden="true"></div>

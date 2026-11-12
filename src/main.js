@@ -4,7 +4,27 @@
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-  const playSafe = (v) => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+  // Per-frame work never asks the browser for layout: positions are measured once and reused until something
+  // on the page changes size, and a style is only written when its value has actually changed.
+  const geo = new Map();
+  const box = (el) => {
+    let g = geo.get(el);
+    if (!g) { const r = el.getBoundingClientRect(); g = { top: r.top + window.scrollY, h: r.height }; geo.set(el, g); }
+    const top = g.top - window.scrollY;
+    return { top, bottom: top + g.h, height: g.h };
+  };
+  const invalidate = () => geo.clear();
+  window.addEventListener('resize', invalidate);
+  window.addEventListener('load', invalidate);
+  if ('ResizeObserver' in window) new ResizeObserver(invalidate).observe(document.body);
+  const lite = root.classList.contains('lite');
+  const setVar = (el, k, v) => { const m = el.__z || (el.__z = {}); if (m[k] !== v) { m[k] = v; el.style.setProperty(k, v); } };
+  const setTf = (el, v) => { if (el.__tf !== v) { el.__tf = v; el.style.transform = v; } };
+  let holding = false;            // lite: videos wait while the page is moving
+  let rerun = () => {};
+  let footerReel = () => {};      // set up further down, called from the scroll loop           // re-applies the scroll-linked state once the page settles
+  const wanted = new Set();       // clips asked to play while held
+  const playSafe = (v) => { if (holding && v.id !== 'player-video') { wanted.add(v); return; } const p = v.play(); if (p && p.catch) p.catch(() => {}); };
 
   // ---------- header reel: play on screen, pause off screen ----------
   const heroVideo = document.querySelector('.hero-video');
@@ -25,7 +45,7 @@
     const blocked = (e) => e.ctrlKey || root.classList.contains('menu-open') || document.querySelector('dialog[open]')
       || (e.target instanceof Element && e.target.closest('textarea, select, [data-native-scroll]'));
     const tick = () => {
-      current += (target - current) * 0.085;
+      current += (target - current) * 0.13;
       if (Math.abs(target - current) < 0.4) { current = target; running = false; }
       window.scrollTo(0, current);
       if (running) requestAnimationFrame(tick);
@@ -213,11 +233,11 @@
     };
     return {
       update(vh) {
-        const r = wrap.getBoundingClientRect();
+        const r = box(wrap);
         if (r.bottom < -vh || r.top > vh * 2) { if (loaded) items.forEach((it) => { const v = it.querySelector('.chapter-loop'); if (v) v.pause(); }); return; }
         load();
         // the stage grows out of the page as it arrives, then pins
-        wrap.style.setProperty('--e', clamp(1 - r.top / vh, 0, 1).toFixed(4));
+        setVar(wrap, '--e', clamp(1 - r.top / vh, 0, 1).toFixed(3));
         const run = r.height - vh;
         const c = run > 0 ? clamp(-r.top / run, 0, 1) : 0;
         const n = items.length;
@@ -228,12 +248,12 @@
           if ((j === 0 && d < 0) || (j === n - 1 && d > 0)) d = 0;
           d = clamp(d, -1, 1.2);
           const a = d < 0 ? clamp(1 + (d + 0.18) / 0.42, 0, 1) : d > 1 ? 0 : 1;
-          it.style.setProperty('--a', a.toFixed(3));
-          it.style.setProperty('--k', d.toFixed(3));
+          setVar(it, '--a', a.toFixed(3));
+          setVar(it, '--k', d.toFixed(3));
           it.classList.toggle('is-off', a === 0);
         });
         const i = clamp(Math.round(pos - 0.5), 0, n - 1);
-        fills.forEach((f, j) => f.style.setProperty('--fill', clamp(pos - j, 0, 1).toFixed(3)));
+        fills.forEach((f, j) => setVar(f, '--fill', clamp(pos - j, 0, 1).toFixed(3)));
         if (r.top <= vh && r.bottom >= 0) { set(i); if (items[i].querySelector('.chapter-loop')?.paused) play(i); }
         else items.forEach((it) => { const v = it.querySelector('.chapter-loop'); if (v) v.pause(); });
       },
@@ -245,11 +265,15 @@
     const frames = [...wrap.querySelectorAll('[data-reel-frame]')];
     const idx = wrap.querySelector('[data-reel-i]');
     const fill = wrap.querySelector('[data-reel-fill]');
-    let dist = 0, shown = 0, last = -1;
+    let dist = 0, shown = 0, last = -1, stageTop = 0, stageLeft = 0, offs = [];
     const measure = () => {
       if (reduceMotion) return;
       dist = Math.max(0, track.scrollWidth - innerWidth);
       wrap.style.height = `${innerHeight + dist}px`;
+      stageTop = parseFloat(getComputedStyle(wrap.firstElementChild).top) || 0;
+      const tr = track.getBoundingClientRect();
+      stageLeft = tr.left + shown * dist;
+      offs = frames.map((f) => ({ l: f.offsetLeft, w: f.offsetWidth }));
     };
     measure();
     addEventListener('resize', measure);
@@ -257,20 +281,19 @@
     track.querySelectorAll('img').forEach((im) => im.addEventListener('load', measure));
     return (vh) => {
       if (reduceMotion) return false;
-      const r = wrap.getBoundingClientRect();
+      const r = box(wrap);
       if (r.bottom < -vh || r.top > vh * 1.5) return false;
-      const stageTop = parseFloat(getComputedStyle(wrap.firstElementChild).top) || 0;
       const p = dist ? clamp((stageTop - r.top) / dist, 0, 1) : 0;
       shown += (p - shown) * 0.18;
       if (Math.abs(p - shown) < 0.0005) shown = p;
-      track.style.transform = `translate3d(${(-shown * dist).toFixed(1)}px,0,0)`;
-      fill.style.transform = `scaleX(${shown.toFixed(4)})`;
+      setTf(track, `translate3d(${(-shown * dist).toFixed(1)}px,0,0)`);
+      setTf(fill, `scaleX(${shown.toFixed(3)})`);
       const mid = innerWidth / 2;
       let best = 0, bestD = 1e9;
       frames.forEach((f, i) => {
-        const fr = f.getBoundingClientRect();
-        const c = clamp(((fr.left + fr.width / 2) - mid) / (innerWidth * 0.6), -1.2, 1.2);
-        f.style.setProperty('--c', c.toFixed(3));
+        const o = offs[i] || { l: 0, w: 0 };
+        const c = clamp(((stageLeft + o.l - shown * dist + o.w / 2) - mid) / (innerWidth * 0.6), -1.2, 1.2);
+        setVar(f, '--c', c.toFixed(3));
         if (Math.abs(c) < bestD) { bestD = Math.abs(c); best = i; }
       });
       if (best !== last) { last = best; idx.textContent = String(best + 1).padStart(2, '0'); }
@@ -278,17 +301,89 @@
     };
   });
 
+  // Without graphics acceleration, decoding video and scrolling compete for the same processor:
+  // background clips hold their frame while the page moves and carry on the moment it stops.
+  // Even a paused video is redrawn on every scrolled frame in software, so a still photo of the current frame
+  // stands in for it while the page moves; it looks identical and costs next to nothing to move.
+  if (lite) {
+    let held = [], idle;
+    const stills = new Map();
+    const freeze = (v) => {
+      v.pause();
+      if (!v.videoWidth || v.readyState < 2) return;
+      let img = stills.get(v);
+      if (!img) {
+        img = new Image();
+        img.alt = ''; img.setAttribute('aria-hidden', 'true'); img.hidden = true; img.decoding = 'async';
+        img.className = `${v.className} video-still`;
+        v.after(img); stills.set(v, img);
+      }
+      // match the clip exactly as it sits now, without replaying its entrance
+      const cs = getComputedStyle(v);
+      Object.assign(img.style, { position: 'absolute', margin: '0', left: `${v.offsetLeft}px`, top: `${v.offsetTop}px`, width: `${v.offsetWidth}px`, height: `${v.offsetHeight}px`, objectFit: cs.objectFit, objectPosition: cs.objectPosition, transformOrigin: cs.transformOrigin, animation: 'none', transition: 'none', scale: cs.scale, translate: cs.translate, rotate: cs.rotate, transform: cs.transform, opacity: cs.opacity, filter: cs.filter });
+      const w = Math.min(1920, v.videoWidth), h = Math.round(v.videoHeight * w / v.videoWidth);
+      const show = (b) => {
+        if (!b || !v.paused || !held.includes(v)) return;
+        const url = URL.createObjectURL(b);
+        img.onload = () => {
+          if (img.__u) URL.revokeObjectURL(img.__u);
+          img.__u = url;
+          if (v.paused && held.includes(v)) { img.hidden = false; v.style.visibility = 'hidden'; }
+        };
+        img.src = url;
+      };
+      // the frame is copied and encoded away from the main thread where the browser allows it
+      const grab = window.createImageBitmap ? createImageBitmap(v) : Promise.resolve(v);
+      grab.then((src) => {
+        if (!v.paused || !held.includes(v)) return;
+        if (window.OffscreenCanvas) {
+          const c = new OffscreenCanvas(w, h); c.getContext('2d').drawImage(src, 0, 0, w, h);
+          return c.convertToBlob({ type: 'image/jpeg', quality: 0.86 }).then(show);
+        }
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(src, 0, 0, w, h);
+        c.toBlob(show, 'image/jpeg', 0.86);
+      }).catch(() => {});
+    };
+    const thaw = (v) => {
+      const img = stills.get(v);
+      const show = () => { v.style.visibility = ''; if (img) img.hidden = true; };
+      const r = v.getBoundingClientRect();
+      if (!v.__covered && r.bottom > 0 && r.top < innerHeight) { playSafe(v); v.addEventListener('playing', show, { once: true }); setTimeout(show, 400); } else show();
+    };
+    const hold = () => {
+      if (!holding) { holding = true; held = [...document.querySelectorAll('video')].filter((v) => v.id !== 'player-video' && !v.paused); held.forEach(freeze); }
+      clearTimeout(idle);
+      idle = setTimeout(() => {
+        holding = false;
+        const h = held; held = [];
+        // chapter loops are restarted by the chapter logic itself, so a clip that has scrolled away stays paused
+        h.forEach((v) => { if (v.classList.contains('chapter-loop')) { v.style.visibility = ''; const s = stills.get(v); if (s) s.hidden = true; } else thaw(v); });
+        wanted.forEach((v) => { if (!h.includes(v) && !v.classList.contains('chapter-loop')) thaw(v); });
+        wanted.clear();
+        rerun();
+      }, 180);
+    };
+    // a wheel turn arrives a frame before the page moves, so the stills are ready sooner
+    window.addEventListener('scroll', hold, { passive: true });
+    window.addEventListener('wheel', hold, { passive: true });
+  }
+
+  // Once the wordmark is fully drawn its mask is no longer needed; dropping it saves redrawing it on every frame.
+  const heroLogo = document.querySelector('.hero-logo');
+  if (heroLogo) heroLogo.addEventListener('animationend', (e) => { if (e.animationName === 'mark-draw') heroLogo.classList.add('is-drawn'); });
+
   // Once the wordmark has settled, a soft sheen crosses it.
   if (!reduceMotion) {
     const sheen = document.querySelectorAll('[data-sheen]');
-    if (sheen.length) setTimeout(() => sheen.forEach((a) => { try { a.beginElement(); } catch (e) {} }), 3900);
+    if (sheen.length) setTimeout(() => sheen.forEach((a) => { try { a.beginElement(); } catch (e) {} }), 2800);
   }
 
   // a fine copper line across the top shows how far down the page you are
   const readLine = document.createElement('div');
   readLine.className = 'scroll-line'; readLine.setAttribute('aria-hidden', 'true');
   document.body.appendChild(readLine);
-  const setRead = () => readLine.style.setProperty('--read', (scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight)).toFixed(4));
+  const setRead = () => setVar(readLine, '--read', (scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight)).toFixed(3));
   addEventListener('scroll', setRead, { passive: true }); setRead();
 
   // The edit: the playhead and timecode run along the timeline as the section passes.
@@ -299,7 +394,7 @@
     const two = (n) => String(n).padStart(2, '0');
     let loaded = false;
     return (vh) => {
-      const r = suite.getBoundingClientRect();
+      const r = box(suite);
       const on = r.bottom > 0 && r.top < vh;
       if (v) {
         if (on && !loaded) { loaded = true; v.src = phone ? v.dataset.srcMobile : v.dataset.src; v.addEventListener('playing', () => v.classList.add('is-playing')); }
@@ -307,7 +402,7 @@
       }
       if (!on) return;
       const t = clamp((vh - r.top) / (vh + r.height), 0, 1);
-      suite.style.setProperty('--t', t.toFixed(4));
+      setVar(suite, '--t', t.toFixed(4));
       const frames = Math.round(t * 241 * 25);
       if (tc) tc.textContent = `00:${two(Math.floor(frames / 1500))}:${two(Math.floor(frames / 25) % 60)}:${two(frames % 25)}`;
     };
@@ -317,47 +412,57 @@
     const update = () => {
       ticking = false;
       const vh = window.innerHeight;
+      // the one live read happens before any writes: the footer is pinned, so its position can't be cached
+      const fm = footerMark ? footerMark.getBoundingClientRect() : null;
       if (heroEl && heroMark) {
-        const p = clamp(window.scrollY / (heroEl.offsetHeight || vh), 0, 1);
-        heroEl.style.setProperty('--p', p.toFixed(4));
+        const p = clamp(window.scrollY / (box(heroEl).height || vh), 0, 1);
+        setVar(heroEl, '--p', p.toFixed(3));
       }
+      footerReel(vh);
       for (const ch of chapterSets) ch.update(vh);
       for (const ed of edits) ed(vh);
       let again = false;
       for (const rl of reels) if (rl(vh)) again = true;
       if (again && !ticking) { ticking = true; requestAnimationFrame(update); }
-      for (const el of drifters) {
-        const r = el.getBoundingClientRect();
+      if (!lite) for (const el of drifters) {
+        const r = box(el);
         if (r.bottom < -100 || r.top > vh + 100) continue;
         const t = clamp((r.top + r.height / 2 - vh / 2) / vh, -1, 1); // -1 above centre, 1 below
-        el.style.setProperty('--drift', `${(t * -5).toFixed(2)}%`);
+        setVar(el, '--drift', `${(t * -5).toFixed(1)}%`);
       }
-      if (footerMark) {
-        const r = footerMark.getBoundingClientRect();
-        const f = clamp(1 - (r.bottom - vh) / (vh * 0.6), 0, 1);
-        footerMark.style.setProperty('--f', f.toFixed(4));
+      if (fm) {
+        const f = clamp(1 - (fm.bottom - vh) / (vh * 0.6), 0, 1);
+        setVar(footerMark, '--f', f.toFixed(3));
       }
     };
     const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    rerun = onScroll;
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
     update();
   }
 
   // The wordmark at the foot of the page plays the reel through its letters.
+  // The footer sits pinned behind the page the whole time, so it plays only once the page has moved aside to show it.
   const footerEl = document.querySelector('.footer');
-  if (footerMark && footerEl && !reduceMotion && 'IntersectionObserver' in window) {
+  const mainEl = document.querySelector('main');
+  if (footerMark && footerEl && mainEl && !reduceMotion) {
     const reel = footerEl.querySelector('.footer-reel');
-    let loaded = false;
-    new IntersectionObserver(([en]) => {
-      if (en.isIntersecting) {
+    let loaded = false, on = null;
+    reel.__covered = true;
+    footerReel = (vh) => {
+      const show = box(mainEl).bottom < vh + 200;
+      if (show === on) return;
+      on = show; reel.__covered = !show;
+      if (show) {
         if (!loaded) {
           loaded = true; reel.src = reel.dataset.src;
           reel.addEventListener('playing', () => footerEl.classList.add('is-playing'), { once: true });
         }
         playSafe(reel);
-      } else if (loaded) reel.pause();
-    }, { rootMargin: '200px 0px' }).observe(footerMark);
+      } else if (loaded) { reel.pause(); wanted.delete(reel); }
+    };
+    rerun();
   }
 
   // ---------- film index: the frame shows the film you point at ----------
