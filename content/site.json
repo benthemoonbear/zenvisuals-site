@@ -40,7 +40,8 @@
   "reviews": {
     "rating_text": "5.0 from 22 Google reviews",
     "featured_quote": "The trust you give to those capturing the biggest day of your life is a big responsibility, but I honestly could not recommend them enough.",
-    "featured_name": "Soraya Taylor"
+    "featured_name": "Soraya Taylor",
+    "background": "/media/photos/gazebo-backlit.jpg"
   },
   "pricing": {
     "intro": "One price for your whole wedding day. No hourly packages and no watching the clock: we stay for as long as you need us.",

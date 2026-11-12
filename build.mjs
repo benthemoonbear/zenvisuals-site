@@ -303,6 +303,8 @@ const topbar = (base) => `<header class="bar" id="topbar">
 `;
 
 // Reviews: weddings pages show wedding reviews under the big quote; the business page leads with a business review.
+const stars = (cls = 'stars') => `<span class="${cls}" role="img" aria-label="5 out of 5 stars">${'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1.5l2.6 5.6 6.1.7-4.5 4.2 1.2 6L10 15l-5.4 3 1.2-6-4.5-4.2 6.1-.7z"/></svg>'.repeat(5)}</span>`;
+const firstSentence = (t) => { const m = String(t).match(/^.+?[.!?](\s|$)/); return m && m[0].length < String(t).length ? [m[0].trim(), String(t).slice(m[0].length).trim()] : [String(t), '']; };
 const reviewsBlock = (kind = 'all') => {
   const list = kind === 'all' ? reviews : reviews.filter((r) => (r.category || 'wedding') === kind);
   if (!list.length) return '';
@@ -310,18 +312,30 @@ const reviewsBlock = (kind = 'all') => {
     ? { quote: list[0].text, name: list[0].name }
     : { quote: site.reviews.featured_quote, name: site.reviews.featured_name };
   const rest = kind === 'commercial' ? list.slice(1) : list;
-  return `<section class="voices${rest.length < 3 ? ' voices--short' : ''}" id="reviews" aria-labelledby="reviews-title">
-  <h2 class="h-head voices-title" id="reviews-title" data-reveal>Kind <em>words</em><span class="sr">: reviews from our couples and clients</span></h2>
-  <figure class="voice-lead" data-reveal>
-    <blockquote><p>“${esc(lead.quote)}”</p></blockquote>
-    <figcaption>${esc(lead.name)}${site.social.google_business ? ` · <a href="${esc(site.social.google_business)}" rel="noopener" target="_blank">${esc(site.reviews.rating_text)}</a>` : ` · ${esc(site.reviews.rating_text)}`}</figcaption>
-  </figure>
-  <div class="voice-corners">
-    ${rest.map((r) => `<figure class="voice" data-reveal>
-      <blockquote><p>“${esc(r.text)}”</p></blockquote>
-      <figcaption>${esc(r.name)}</figcaption>
-    </figure>`).join('\n    ')}
+  const score = (String(site.reviews.rating_text).match(/[0-9.]+/) || ['5.0'])[0];
+  const count = String(site.reviews.rating_text).replace(/^[0-9.]+\s*/, '');
+  const bg = site.reviews.background;
+  return `<section class="voices voices--bold" id="reviews" aria-labelledby="reviews-title">
+  ${bg ? `<div class="voices-bg" aria-hidden="true">${pic(bg, '', { sizes: '100vw' })}</div>` : ''}
+  <div class="voices-top">
+    <h2 class="h-display voices-title" id="reviews-title">Kind <em data-type>words</em><span class="sr">: reviews from our couples and clients</span></h2>
+    <a class="voices-score" data-reveal ${site.social.google_business ? `href="${esc(site.social.google_business)}" rel="noopener" target="_blank"` : ''}>
+      <span class="voices-num">${esc(score)}</span>
+      <span class="voices-of">${stars()}<span>${esc(count)}</span></span>
+    </a>
   </div>
+  <figure class="voice-lead">
+    <span class="voice-mark" aria-hidden="true">“</span>
+    <blockquote><p class="split-lead" data-split>${esc(lead.quote)}</p></blockquote>
+    <figcaption data-reveal><span class="voice-rule" aria-hidden="true"></span>${esc(lead.name)}</figcaption>
+  </figure>
+  ${rest.length ? `<div class="voice-cards">
+    ${rest.map((r, i) => { const [hook, more] = firstSentence(r.text); return `<figure class="voice-card" data-reveal style="--d:${i * 90}ms">
+      ${stars('stars stars--sm')}
+      <blockquote><p class="voice-hook">“${esc(hook)}${more ? '' : '”'}</p>${more ? `<p class="voice-more">${esc(more)}”</p>` : ''}</blockquote>
+      <figcaption>${esc(r.name)}</figcaption>
+    </figure>`; }).join('\n    ')}
+  </div>` : ''}
 </section>
 `;
 };

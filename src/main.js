@@ -157,7 +157,7 @@
       if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); }
     }), { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
 
-    document.querySelectorAll('.h-display:not(h1)').forEach((el) => { splitWords(el); io.observe(el); });
+    document.querySelectorAll('.h-display:not(h1), [data-split]').forEach((el) => { splitWords(el); io.observe(el); });
     // Stagger the parts of each section in reading order.
     document.querySelectorAll('main > section, .films > div').forEach((sec) => {
       let i = 0;
