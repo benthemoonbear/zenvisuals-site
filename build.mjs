@@ -194,7 +194,10 @@ const faqSchema = (items) => ({
 });
 
 // ---------- data ----------
-const venues = [...new Map(films.filter((f) => f.venue).map((f) => [slugify(f.venue), { name: f.venue, slug: slugify(f.venue), location: f.location || '' }])).values()];
+const venueList = existsSync(join(ROOT, 'content', 'venues.json')) ? (load('venues.json').venues || []) : [];
+const venues = [...venueList.map((x) => ({ ...x, slug: x.slug || slugify(x.name) })),
+  ...[...new Map(films.filter((f) => f.venue && !venueList.some((x) => slugify(x.name) === slugify(f.venue))).map((f) => [slugify(f.venue), { name: f.venue, slug: slugify(f.venue), town: f.location || '', worked: true }])).values()]];
+const venuesIn = (area) => venues.filter((x) => (x.area || '').toLowerCase() === String(area || '').toLowerCase());
 const venuePath = (name) => `/venues/${slugify(name)}/`;
 
 const featured = films.find((f) => f.featured) || films[0];
@@ -317,7 +320,7 @@ const topbar = (base) => `<header class="bar" id="topbar">
     ${faqs.length ? `<a href="${base}#faq">Questions</a>` : ''}
     <a href="#contact">Contact</a>
   </nav>
-  ${landingPages.length ? `<div class="mobile-menu-sub">${[...servicePages, ...guidePages].map((p) => `<a href="/${esc(p.slug)}/">${esc(p.nav_label || p.h1)}</a>`).join('')}</div>` : ''}
+  ${landingPages.length ? `<div class="mobile-menu-sub">${[...servicePages, ...guidePages].map((p) => `<a href="/${esc(p.slug)}/">${esc(p.nav_label || p.h1)}</a>`).join('')}${venues.length ? '<a href="/venues/">Wedding venues</a>' : ''}</div>` : ''}
   <a href="${telHref}" class="mobile-menu-phone">${esc(c.phone)}</a>
 </div>
 `;
@@ -504,6 +507,7 @@ const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="
       ${pageLinks(areaPages)}
     </nav>` : ''}
     ${guidePages.length ? `<nav class="footer-col" aria-label="Guides"><p>Guides</p>
+      ${venues.length ? '<a href="/venues/">Wedding venues</a>' : ''}
       ${pageLinks(guidePages)}
     </nav>` : ''}
     <nav class="footer-col" aria-label="Films"><p>Films</p>
@@ -650,7 +654,7 @@ ${editBlock()}
     <h2 class="h-display about-title" id="about-title">${esc(site.about.title)} <em data-type>${esc(site.about.title_emphasis)}</em></h2>
     ${site.about.paragraphs.map((p) => `<p class="about-text" data-reveal>${esc(p)}</p>`).join('\n    ')}
     <div class="about-record">
-      <div data-reveal><h3>Venues</h3><ul role="list">${['Shottle Hall', 'West Mill, Darley Abbey', 'Weddings in London'].map((n) => { const v = venues.find((x) => n.toLowerCase().startsWith(x.name.toLowerCase())); return `<li>${v ? `<a href="${venuePath(v.name)}">${esc(n)}</a>` : esc(n)}</li>`; }).join('')}</ul></div>
+      <div data-reveal><h3>Venues</h3><ul role="list">${['Shottle Hall', 'The West Mill', 'Weddings in London'].map((n) => { const v = venues.find((x) => x.name.toLowerCase() === n.toLowerCase()); return `<li>${v ? `<a href="${venuePath(v.name)}">${esc(n)}</a>` : esc(n)}</li>`; }).join('')}${venues.length ? '<li><a href="/venues/">All Derbyshire venues</a></li>' : ''}</ul></div>
       <div data-reveal><h3>Where we work</h3><ul role="list">${areaPages.length ? areaPages.map((a) => `<li><a href="/${esc(a.slug)}/">${esc(a.nav_label || a.h1)}</a></li>`).join('') : '<li>Belper and Derby</li><li>Matlock and Ashbourne</li><li>The Peak District</li>'}<li>The rest of the UK</li></ul></div>
     </div>
   </div>
@@ -736,6 +740,14 @@ ${reviewsBlock(isCommercial ? 'commercial' : 'all')}
 ${p.show_pricing ? pricingBlock(false) : ''}
 ${isCommercial ? '' : bookingBlock()}
 ${p.faqs && p.faqs.length ? faqBlock(`Questions about ${(p.nav_label || 'our work').toLowerCase()}`, p.faqs) : ''}
+
+${(p.kind === 'area' && venuesIn(p.nav_label).length) ? `<section class="venue-guide venue-guide--area" aria-labelledby="near-title">
+  <h2 class="h-display" id="near-title">Wedding venues near <em data-type>${esc(p.nav_label)}</em></h2>
+  <ul class="venue-list" role="list">
+    ${venuesIn(p.nav_label).map((x) => `<li data-reveal><a class="venue-item" href="${venuePath(x.name)}"><span class="venue-name">${esc(x.name)}${x.worked ? ' <span class="venue-tag">We\u2019ve worked here</span>' : ''}</span><span class="venue-meta">${esc(x.kind || '')}${x.town ? ` · ${esc(x.town)}` : ''}</span></a></li>`).join('\n    ')}
+  </ul>
+  <a class="venue-area-link" href="/venues/" data-reveal>All Derbyshire venues</a>
+</section>` : ''}
 
 ${others.length ? `<section class="related related--grouped" aria-labelledby="related-title">
   <h2 class="h-head" id="related-title">More from <em>Zen Visuals</em></h2>
@@ -826,36 +838,105 @@ function venuePage(v) {
   const url = SITE_URL + venuePath(v.name);
   const vFilms = films.filter((f) => f.venue && slugify(f.venue) === v.slug);
   const vPhotos = photos.filter((x) => x.venue && slugify(x.venue) === v.slug);
-  const where = [v.name, v.location].filter(Boolean).join(', ');
-  const title = `${v.name} wedding photographer & videographer | Zen Visuals`;
-  const description = `Wedding films and photographs at ${where} by Zen Visuals, Derbyshire wedding photographers and videographers. See our work there and check your date.`.slice(0, 158);
+  const where = [v.name, v.town].filter(Boolean).join(', ');
+  const areaPage = areaPages.find((a) => (a.nav_label || '').toLowerCase() === (v.area || '').toLowerCase());
+  const nearby = venues.filter((x) => x.slug !== v.slug && x.area === v.area).slice(0, 6);
+  const title = (`${v.name} Wedding Photographer & Videographer | Zen Visuals`.length <= 66 ? `${v.name} Wedding Photographer & Videographer | Zen Visuals` : `${v.name} Wedding Videographer | Zen Visuals`);
+  const descFor = (w) => v.worked
+    ? `Wedding photography and film at ${w} by Zuzia and Ben, who've worked there before. Whole day from £750, 5.0 on Google. Check your date.`
+    : `Getting married at ${w}? Wedding photography and film by Zuzia and Ben from Belper. Whole day from £750, 5.0 on Google. Check your date.`;
+  const description = descFor(where).length <= 160 ? descFor(where) : descFor(v.name);
+  const image = (vFilms[0] || {}).poster || v.image || site.seo.share_image;
+  const faqsV = [
+    { question: `Have you photographed or filmed a wedding at ${v.name}?`, answer: v.worked ? `Yes. We've worked at ${v.name} and know the spaces and where the light falls through the day.` : `Not yet, but we're based in Belper and work across ${v.area === 'Peak District' ? 'the Peak District' : 'Derbyshire'}, so ${v.name} is well within reach. We're happy to visit beforehand so we know the spaces on the day.` },
+    { question: `How much is a wedding photographer and videographer at ${v.name}?`, answer: `Wedding photography of your whole day is £750, a 3–6 minute wedding film is £1,100, and both together are £1,650, saving £200. The price is the same at every venue.` },
+    { question: `Do you cover the whole day at ${v.name}?`, answer: `Yes. Every price covers your whole wedding day, from getting ready to the last dance, with no hourly packages.` },
+  ];
   const graph = [
     business,
-    { '@type': 'WebPage', '@id': url, url, name: title, description, isPartOf: { '@id': SITE_URL + '/#website' }, about: { '@type': 'Place', name: where } },
-    { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL + '/' }, { '@type': 'ListItem', position: 2, name: v.name, item: url }] },
+    { '@type': 'WebPage', '@id': url, url, name: title, description, isPartOf: { '@id': SITE_URL + '/#website' }, about: { '@type': 'Place', name: v.name, address: { '@type': 'PostalAddress', addressLocality: v.town || '', addressRegion: 'Derbyshire', addressCountry: 'GB' } } },
+    { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL + '/' }, { '@type': 'ListItem', position: 2, name: 'Wedding venues', item: SITE_URL + '/venues/' }, { '@type': 'ListItem', position: 3, name: v.name, item: url }] },
+    { '@type': 'Service', name: `Wedding photography and videography at ${v.name}`, serviceType: 'Wedding photography and videography', provider: { '@id': SITE_URL + '/#business' }, areaServed: { '@type': 'Place', name: where } },
+    faqSchema(faqsV),
     ...vFilms.map((f) => ({ ...videoSchema(f), url: SITE_URL + filmPath(f) })),
   ];
-  const lead = vFilms[0];
-  return head({ title, description, url, image: (lead || {}).poster || site.seo.share_image, graph, preload: null })
+  return head({ title, description, url, image, graph, preload: null })
   + topbar('/') + `
 <main id="main">
 <section class="phero" id="top" data-hero>
   <div class="phero-copy">
-    <nav class="breadcrumb" aria-label="Breadcrumb" data-load style="--d:100ms"><a href="/">Home</a> <span aria-hidden="true">/</span> <span>${esc(v.name)}</span></nav>
-    <h1 class="h-display" data-load style="--d:180ms">Weddings at <em>${esc(v.name)}</em></h1>
-    <p class="phero-lead" data-load style="--d:300ms">We've filmed and photographed weddings at ${esc(where)}. Here's our work there. If you're getting married there too, we already know the place.</p>
+    <nav class="breadcrumb" aria-label="Breadcrumb" data-load style="--d:100ms"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/venues/">Venues</a> <span aria-hidden="true">/</span> <span>${esc(v.name)}</span></nav>
+    <h1 class="h-display${v.name.length > 18 ? ' is-long' : ''}" data-load style="--d:180ms">${esc(v.name)} wedding photographer <em data-type-now>and videographer</em></h1>
+    <p class="phero-lead" data-load style="--d:300ms">${v.worked ? `We've photographed and filmed weddings at ${esc(v.name)}, and we'd love to do yours.` : `Getting married at ${esc(v.name)}? We're Zuzia and Ben, wedding photographers and videographers from Belper, and we cover ${esc(v.town || 'Derbyshire')}.`} One price covers your whole day, from £750.</p>
     <a href="#contact" class="btn btn-accent" data-enquiry="Wedding" data-load style="--d:420ms">Check your date</a>
   </div>
-  ${lead ? `<figure class="phero-pic" data-hero-pic>${pic(lead.poster, `Still from ${lead.title} at ${v.name}`, { sizes: '(max-width: 760px) 100vw, 50vw', eager: true })}</figure>` : ''}
+  <figure class="phero-pic" data-hero-pic>${pic(image, vFilms[0] ? `Still from ${vFilms[0].title}` : 'Wedding photograph by Zen Visuals', { sizes: '(max-width: 760px) 100vw, 50vw', eager: true })}</figure>
 </section>
+
+<section class="story" aria-label="About ${esc(v.name)}">
+  ${v.summary ? `<div class="story-row"><h2 class="h-head" data-reveal>About <em>${esc(v.name)}</em></h2><p data-reveal>${esc(v.summary)}</p></div>` : ''}
+  ${v.film ? `<div class="story-row"><h2 class="h-head" data-reveal>Photographing and filming at ${esc(v.name)}</h2><p data-reveal>${esc(v.film)}</p></div>` : ''}
+  <div class="story-row"><h2 class="h-head" data-reveal>What you get</h2><p data-reveal>Wedding photography of your whole day is £750. A 3–6 minute wedding film is £1,100. Both together are £1,650, saving £200. Your photographs and film are ready within 3 to 6 weeks, and half of the price secures your date.</p></div>
+</section>
+
 ${vFilms.length ? `<section class="films films--page" id="films" aria-labelledby="films-title">
-  <div class="films-head"><h2 class="h-display" id="films-title">Films at <em>${esc(v.name)}</em></h2></div>
+  <div class="films-head"><h2 class="h-display" id="films-title">Films at <em data-type>${esc(v.name)}</em></h2></div>
   ${chapters(vFilms.slice(0, 4))}
-</section>` : ''}
+</section>` : `<section class="films films--page" id="films" aria-labelledby="films-title">
+  <div class="films-head"><h2 class="h-display" id="films-title">Our <em data-type>films</em></h2><p data-reveal>A few of the weddings we've filmed across Derbyshire.</p></div>
+  ${chapters(films.filter((f) => f.category === 'wedding').slice(0, 3))}
+</section>`}
 ${vPhotos.length ? `<section class="photos" id="photos" aria-labelledby="photos-title"><h2 class="h-display" id="photos-title">In <em>photographs</em></h2>${stagger(vPhotos)}</section>` : ''}
 ${reviewsBlock('wedding')}
 ${pricingBlock(false)}
-${bookingBlock()}
+${faqBlock(`Questions about ${v.name}`, faqsV)}
+<section class="related related--grouped" aria-labelledby="related-title">
+  <h2 class="h-head" id="related-title">Nearby <em>venues</em></h2>
+  <div class="related-groups">
+    ${nearby.length ? `<div class="related-group"><h3>Also ${v.area === 'Peak District' ? 'in the Peak District' : `near ${esc(v.area || 'here')}`}</h3><div class="related-links">${nearby.map((x) => `<a href="${venuePath(x.name)}">${esc(x.name)}</a>`).join('')}</div></div>` : ''}
+    <div class="related-group"><h3>More</h3><div class="related-links"><a href="/venues/">All Derbyshire venues</a>${areaPage ? `<a href="/${esc(areaPage.slug)}/">Weddings in ${esc(areaPage.nav_label)}</a>` : ''}<a href="/wedding-photographer-videographer-prices-derbyshire/">Prices</a></div></div>
+  </div>
+</section>
+${contactAndFooter('Wedding')}` + dialogsAndScripts();
+}
+
+// ---------- venues guide: every venue in one place ----------
+function venuesHub() {
+  const url = SITE_URL + '/venues/';
+  const title = 'Derbyshire Wedding Venues Guide (2026) | Zen Visuals';
+  const description = `${venues.length} Derbyshire wedding venues near Belper, Derby, Matlock, Ashbourne and the Peak District, from mills to country houses, by local photographers.`.slice(0, 160);
+  const order = ['Belper', 'Derby', 'Matlock', 'Ashbourne', 'Peak District', 'Chesterfield'];
+  const groups = [...order, ...new Set(venues.map((x) => x.area).filter((a) => a && !order.includes(a)))].map((a) => [a, venuesIn(a)]).filter(([, l]) => l.length);
+  const graph = [
+    business,
+    { '@type': ['WebPage', 'CollectionPage'], '@id': url, url, name: title, description, isPartOf: { '@id': SITE_URL + '/#website' } },
+    { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL + '/' }, { '@type': 'ListItem', position: 2, name: 'Wedding venues', item: url }] },
+    { '@type': 'ItemList', name: 'Derbyshire wedding venues', itemListElement: venues.map((x, i) => ({ '@type': 'ListItem', position: i + 1, name: x.name, url: SITE_URL + venuePath(x.name) })) },
+  ];
+  return head({ title, description, url, image: '/media/photos/gazebo-sunset.jpg', graph, preload: null })
+  + topbar('/') + `
+<main id="main">
+<section class="phero" id="top" data-hero>
+  <div class="phero-copy">
+    <nav class="breadcrumb" aria-label="Breadcrumb" data-load style="--d:100ms"><a href="/">Home</a> <span aria-hidden="true">/</span> <span>Venues</span></nav>
+    <h1 class="h-display" data-load style="--d:180ms">Derbyshire wedding <em data-type-now>venues</em></h1>
+    <p class="phero-lead" data-load style="--d:300ms">A local guide to wedding venues near us in Belper, from Derwent Valley mills to Peak District country houses. Whichever you choose, we photograph and film the whole day for one price, from £750.</p>
+    <a href="#contact" class="btn btn-accent" data-enquiry="Wedding" data-load style="--d:420ms">Check your date</a>
+  </div>
+  <figure class="phero-pic" data-hero-pic>${pic('/media/photos/gazebo-sunset.jpg', 'Couple silhouetted inside a white gazebo at sunset', { sizes: '(max-width: 760px) 100vw, 50vw', eager: true })}</figure>
+</section>
+<section class="venue-guide" aria-label="Venues by area">
+  ${groups.map(([a, l]) => { const ap = areaPages.find((x) => (x.nav_label || '').toLowerCase() === a.toLowerCase()); return `<div class="venue-area">
+    <h2 class="h-head" data-reveal>${a === 'Peak District' ? 'The Peak <em>District</em>' : `Around <em>${esc(a)}</em>`}</h2>
+    <ul class="venue-list" role="list">
+      ${l.map((x) => `<li data-reveal><a class="venue-item" href="${venuePath(x.name)}"><span class="venue-name">${esc(x.name)}${x.worked ? ' <span class="venue-tag">We\u2019ve worked here</span>' : ''}</span><span class="venue-meta">${esc(x.kind || '')}${x.town ? ` · ${esc(x.town)}` : ''}</span><span class="venue-sum">${esc((x.summary || '').split('. ')[0].replace(/\.$/, ''))}.</span></a></li>`).join('\n      ')}
+    </ul>
+    ${ap ? `<a class="venue-area-link" href="/${esc(ap.slug)}/" data-reveal>Wedding photography and film in ${esc(ap.nav_label)}</a>` : ''}
+  </div>`; }).join('\n  ')}
+  <p class="venue-note" data-reveal>Venue details come from the venues' own descriptions and local guides, and can change, so always check with the venue directly. Getting married somewhere not listed? We cover the whole of Derbyshire and beyond.</p>
+</section>
+${reviewsBlock('wedding')}
+${pricingBlock(false)}
 ${contactAndFooter('Wedding')}` + dialogsAndScripts();
 }
 
@@ -880,7 +961,8 @@ const vidTags = (list) => list.filter((f) => f.video).map((f) => `<video:video><
 const sitemapEntries = [
   `<url><loc>${SITE_URL}/</loc><lastmod>${TODAY}</lastmod>${imgTags(photos.map((p) => p.image))}${vidTags(films)}</url>`,
   ...films.map((f) => `<url><loc>${SITE_URL}${filmPath(f)}</loc><lastmod>${TODAY}</lastmod>${imgTags([f.poster])}${vidTags([f])}</url>`),
-  ...venues.map((v) => `<url><loc>${SITE_URL}${venuePath(v.name)}</loc><lastmod>${TODAY}</lastmod></url>`),
+  ...(venues.length ? [`<url><loc>${SITE_URL}/venues/</loc><lastmod>${TODAY}</lastmod></url>`] : []),
+  ...venues.map((v) => `<url><loc>${SITE_URL}${venuePath(v.name)}</loc><lastmod>${TODAY}</lastmod>${v.image ? imgTags([v.image]) : ''}</url>`),
   ...landingPages.map((p) => {
     const pPhotos = p.photo_category ? photos.filter((x) => x.category === p.photo_category).slice(0, p.photo_limit || 9) : [];
     const pFilms = p.film_category ? films.filter((f) => f.category === p.film_category) : [];
@@ -912,6 +994,9 @@ ${faqs.map((f) => `- ${f.question} ${f.answer}`).join('\n')}
 - [Home](${SITE_URL}/): films, photographs, pricing, reviews and enquiries
 ${landingPages.map((p) => `- [${p.h1}](${pageUrl(p.slug)}): ${p.seo_description}`).join('\n')}
 
+## Wedding venues we cover
+${venues.map((v) => `- [${v.name}](${SITE_URL}${venuePath(v.name)}) (${v.town || v.area || 'Derbyshire'})${v.worked ? ': we have worked here' : ''}`).join('\n')}
+
 ## Films
 ${films.map((f) => `- [${f.title}](${SITE_URL}${filmPath(f)}) (${f.category}${f.venue ? `, ${f.venue}` : ''}): ${f.description || ''}`).join('\n')}
 `;
@@ -934,6 +1019,7 @@ for (const f of films) {
   mkdirSync(join(OUT, 'films', filmSlug(f)), { recursive: true });
   writeFileSync(join(OUT, 'films', filmSlug(f), 'index.html'), filmPage(f));
 }
+if (venues.length) { mkdirSync(join(OUT, 'venues'), { recursive: true }); writeFileSync(join(OUT, 'venues', 'index.html'), venuesHub()); }
 for (const v of venues) {
   mkdirSync(join(OUT, 'venues', v.slug), { recursive: true });
   writeFileSync(join(OUT, 'venues', v.slug, 'index.html'), venuePage(v));

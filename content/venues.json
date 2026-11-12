@@ -1,0 +1,246 @@
+{
+  "venues": [
+    {
+      "name": "Shottle Hall",
+      "slug": "shottle-hall",
+      "town": "Shottle, near Belper",
+      "area": "Belper",
+      "worked": true,
+      "kind": "Victorian country house",
+      "summary": "A Victorian country house in fourteen acres of parkland above the Ecclesbourne Valley, five minutes from Belper. Couples can marry in the hall, the marquee, the newer barn or outside at the back of the house, with the Orangery for dining.",
+      "film": "We've worked at Shottle Hall and know where the light sits through the day. The parkland and the valley view behind the house make the portraits; the hall itself gives warm, quiet light for getting ready. With so many spaces, we plan where each part of the day happens so you don't lose time moving between them.",
+      "image": "/media/photos/bride-garden-steps.jpg"
+    },
+    {
+      "name": "The West Mill",
+      "slug": "the-west-mill",
+      "town": "Darley Abbey, Derby",
+      "area": "Derby",
+      "worked": true,
+      "kind": "Grade I listed mill",
+      "summary": "A Grade I listed cotton mill from the early 1800s on the River Derwent at Darley Abbey, inside the Derwent Valley Mills World Heritage Site. Exposed brick, cast-iron columns and barrel-vaulted ceilings run over four floors, with a courtyard and a riverside walk by the weir.",
+      "film": "We've worked at West Mill. It's one of the best buildings in Derbyshire for film: tall windows, worn floors and the weir outside give every scene texture. Portraits along the river and in the courtyard, and an evening that glows under the brick vaults.",
+      "image": "/media/photos/barn-kiss.jpg"
+    },
+    {
+      "name": "Makeney Hall",
+      "slug": "makeney-hall",
+      "town": "Makeney, near Belper",
+      "area": "Belper",
+      "worked": false,
+      "kind": "Victorian country mansion",
+      "summary": "A Victorian country mansion in six acres of landscaped grounds at Makeney, just south of Belper, with a covered outdoor ceremony area in a hidden garden and views over the Derwent valley.",
+      "film": "Makeney Hall is a couple of miles from home. The hidden garden ceremony area means you can marry outside even when the weather turns, and the gardens and the valley beyond give portraits without leaving the grounds.",
+      "image": "/media/photos/gazebo-sunset.jpg"
+    },
+    {
+      "name": "Blackbrook House",
+      "slug": "blackbrook-house",
+      "town": "Belper",
+      "area": "Belper",
+      "worked": false,
+      "kind": "country house hotel",
+      "summary": "A hillside country house just outside Belper with ivy-covered walls and gardens suited to drinks receptions and outdoor ceremonies, run as a boutique venue with a homely feel.",
+      "film": "Blackbrook House is on our doorstep. The gardens and the old walls make soft, natural backdrops, and the size of the house keeps the day close and relaxed, which is exactly how we like to film.",
+      "image": "/media/photos/gazebo-backlit.jpg"
+    },
+    {
+      "name": "The Lion Hotel",
+      "slug": "the-lion-hotel",
+      "town": "Belper",
+      "area": "Belper",
+      "worked": false,
+      "kind": "town-centre hotel",
+      "summary": "A characterful hotel in the middle of Belper, with space for weddings of up to around 120 guests.",
+      "film": "The Lion is in our home town. We'd make use of Belper itself for portraits: the mills, the river gardens and the old streets are a few minutes' walk away.",
+      "image": "/media/photos/wedding-rings.jpg"
+    },
+    {
+      "name": "Horsley Lodge",
+      "slug": "horsley-lodge",
+      "town": "Horsley, near Derby",
+      "area": "Derby",
+      "worked": false,
+      "kind": "country estate venue",
+      "summary": "A long-established wedding venue at Horsley, between Belper and Derby, with both indoor and outdoor spaces for the ceremony and photographs.",
+      "film": "Horsley Lodge is fifteen minutes from us. The mix of indoor and outdoor spaces means there's always somewhere good for portraits, whatever the weather does.",
+      "image": "/media/photos/bandstand-couple.jpg"
+    },
+    {
+      "name": "Morley Hayes",
+      "slug": "morley-hayes",
+      "town": "Morley, near Derby",
+      "area": "Derby",
+      "worked": false,
+      "kind": "hotel and estate",
+      "summary": "A long-running wedding venue at Morley, near Derby, with five places to hold your ceremony, including two outdoors and a woodland lodge.",
+      "film": "The woodland lodge at Morley Hayes makes a beautiful ceremony to film, with dappled light through the trees. We'd plan the portraits around the grounds so you're back with your guests quickly.",
+      "image": "/media/photos/bride-garden-steps.jpg"
+    },
+    {
+      "name": "Breadsall Priory",
+      "slug": "breadsall-priory",
+      "town": "Breadsall, Derby",
+      "area": "Derby",
+      "worked": false,
+      "kind": "historic hotel",
+      "summary": "A hotel built around a priory dating back to the 13th century, set in gardens and parkland with a long driveway, about ten minutes from Derby city centre.",
+      "film": "The old priory walls, the gardens and the long approach give a film a sense of arrival. We'd use the parkland for portraits in the softer light later in the day.",
+      "image": "/media/photos/gazebo-sunset.jpg"
+    },
+    {
+      "name": "Mapperley Farm",
+      "slug": "mapperley-farm",
+      "town": "Mapperley, near Ilkeston",
+      "area": "Derby",
+      "worked": false,
+      "kind": "farm and barn venue",
+      "summary": "A blank-canvas farm venue with a converted barn and two woodland ceremony areas on a large acreage, where couples bring their own marquee and caterers.",
+      "film": "A woodland ceremony and a barn party is one of our favourite days to film. Blank-canvas venues reflect the couple more than any other, and we make sure the details you've chosen get their moment.",
+      "image": "/media/photos/barn-kiss.jpg"
+    },
+    {
+      "name": "Museum of Making",
+      "slug": "museum-of-making",
+      "town": "Derby city centre",
+      "area": "Derby",
+      "worked": false,
+      "kind": "Grade II listed silk mill",
+      "summary": "Derby's Museum of Making, in the Grade II listed 18th-century Silk Mill on the River Derwent, at the start of the Derwent Valley Mills World Heritage Site. It hosts weddings of up to around 180 guests.",
+      "film": "A wedding among the collections is unlike any other, and the riverside and the cathedral quarter are on the doorstep for portraits.",
+      "image": "/media/photos/groom-and-bridesmaids.jpg"
+    },
+    {
+      "name": "Calke Abbey Riding School",
+      "slug": "calke-abbey-riding-school",
+      "town": "Ticknall",
+      "area": "Derby",
+      "worked": false,
+      "kind": "Grade II listed riding school",
+      "summary": "The Grade II listed former riding school at Calke Abbey, with exposed brick and oak beams, set in more than 600 acres of National Trust parkland. It's licensed for ceremonies and hosts up to around 160 guests.",
+      "film": "Six hundred acres of parkland means the best portrait light is always somewhere close. Inside, the brick and beams give the evening a warm, rustic glow on film.",
+      "image": "/media/photos/gazebo-backlit.jpg"
+    },
+    {
+      "name": "Haarlem Mill",
+      "slug": "haarlem-mill",
+      "town": "Wirksworth",
+      "area": "Matlock",
+      "worked": false,
+      "kind": "18th-century cotton mill",
+      "summary": "A former cotton mill built in 1780 on the edge of Wirksworth, with exposed brick, festoon lights and a sun-trap terrace. It can host the whole day, from getting ready to the last dance.",
+      "film": "Mill venues are made for film, and Haarlem's terrace catches the evening sun. Matlock Bath and the High Peak Trail at Middleton Top are short drives if you'd like portraits with a view.",
+      "image": "/media/photos/barn-kiss.jpg"
+    },
+    {
+      "name": "Stancliffe Hall",
+      "slug": "stancliffe-hall",
+      "town": "Darley Dale",
+      "area": "Matlock",
+      "worked": false,
+      "kind": "country house",
+      "summary": "A family-owned and run country house at Darley Dale, in acres of landscaped gardens and tucked-away woodland.",
+      "film": "Gardens that open onto woodland give us a dozen backdrops within a few minutes' walk, so portraits feel like a stroll rather than a photoshoot.",
+      "image": "/media/photos/bride-garden-steps.jpg"
+    },
+    {
+      "name": "The Whitworth Centre",
+      "slug": "the-whitworth-centre",
+      "town": "Darley Dale",
+      "area": "Matlock",
+      "worked": false,
+      "kind": "community venue",
+      "summary": "A community-run venue at Darley Dale, including a converted former swimming pool hall and gardens, hosting weddings of up to around 180 guests.",
+      "film": "An unusual space with big character. We'd mix the hall with the gardens and Darley Dale's park for portraits.",
+      "image": "/media/photos/bandstand-couple.jpg"
+    },
+    {
+      "name": "The White Hart",
+      "slug": "the-white-hart",
+      "town": "Moorwood Moor, near Alfreton",
+      "area": "Matlock",
+      "worked": false,
+      "kind": "country inn and hotel",
+      "summary": "A converted countryside pub at Moorwood Moor, now a wedding venue and hotel, with ceremonies in an orangery and a patio overlooking the fields.",
+      "film": "The orangery gives beautiful, even light for the ceremony, and the open fields behind are perfect for golden-hour portraits.",
+      "image": "/media/photos/gazebo-sunset.jpg"
+    },
+    {
+      "name": "Yeldersley Hall",
+      "slug": "yeldersley-hall",
+      "town": "Yeldersley, near Ashbourne",
+      "area": "Ashbourne",
+      "worked": false,
+      "kind": "country hall",
+      "summary": "A country hall near Ashbourne with a grand entrance, a rustic courtyard, landscaped gardens, a greenhouse and an attached marquee, known for its sunsets over the fields.",
+      "film": "The golden hour at Yeldersley is the reason to plan your portraits late. We'd film the courtyard and gardens through the afternoon and keep twenty minutes for the sunset.",
+      "image": "/media/photos/gazebo-backlit.jpg"
+    },
+    {
+      "name": "Tissington Hall",
+      "slug": "tissington-hall",
+      "town": "Tissington, near Ashbourne",
+      "area": "Ashbourne",
+      "worked": false,
+      "kind": "17th-century Jacobean mansion",
+      "summary": "A 17th-century Jacobean mansion and family home in the estate village of Tissington, licensed for ceremonies in the hall or under the cloisters, with St Mary's Church next door. Exclusive use for up to around 80 guests.",
+      "film": "A smaller wedding in a house this beautiful is a joy to film. The village, the church and the gardens give us everything we need within a short walk.",
+      "image": "/media/photos/wedding-rings.jpg"
+    },
+    {
+      "name": "Thornbridge Hall",
+      "slug": "thornbridge-hall",
+      "town": "Ashford in the Water, near Bakewell",
+      "area": "Peak District",
+      "worked": false,
+      "kind": "Jacobean manor house",
+      "summary": "A Jacobean manor house on a private estate near Bakewell, famous for its gardens, available for exclusive use with lawns and marquee options.",
+      "film": "Thornbridge's gardens are among the finest in Derbyshire, with a different backdrop round every corner. We'd plan portraits around them and the light, so you see the best of the estate without missing your guests.",
+      "image": "/media/photos/bride-garden-steps.jpg"
+    },
+    {
+      "name": "East Lodge",
+      "slug": "east-lodge",
+      "town": "Rowsley",
+      "area": "Peak District",
+      "worked": false,
+      "kind": "country house hotel",
+      "summary": "A family-run country house hotel at Rowsley, between Matlock and Bakewell, suited to smaller weddings, with a marquee attached to the house for larger summer weddings.",
+      "film": "A smaller, intimate day suits our way of working perfectly. The grounds and the Derwent valley around Rowsley give soft, green portraits.",
+      "image": "/media/photos/gazebo-sunset.jpg"
+    },
+    {
+      "name": "The Maynard",
+      "slug": "the-maynard",
+      "town": "Grindleford, Hope Valley",
+      "area": "Peak District",
+      "worked": false,
+      "kind": "historic house hotel",
+      "summary": "A recently renovated historic house in the Hope Valley with sweeping lawns, manicured gardens and views across the valley, with dramatic portrait spots a short drive away.",
+      "film": "The Hope Valley is made for film. We'd take you to the edge of the valley for portraits if you'd like them, and keep the rest of the day relaxed at the house.",
+      "image": "/media/photos/gazebo-backlit.jpg"
+    },
+    {
+      "name": "Losehill House",
+      "slug": "losehill-house",
+      "town": "Edale, Hope Valley",
+      "area": "Peak District",
+      "worked": false,
+      "kind": "hotel and spa",
+      "summary": "A hotel beneath Lose Hill in the Hope Valley with sweeping lawns, a light-filled orangery or an outdoor ceremony with hill views, and rooms for more than fifty guests.",
+      "film": "An outdoor ceremony under Lose Hill is about as Peak District as a wedding gets. The orangery is the backup, and it's beautiful in its own right.",
+      "image": "/media/photos/groom-and-bridesmaids.jpg"
+    },
+    {
+      "name": "Peak Edge Hotel",
+      "slug": "peak-edge-hotel",
+      "town": "Stone Edge, near Chesterfield",
+      "area": "Chesterfield",
+      "worked": false,
+      "kind": "country inn and boutique hotel",
+      "summary": "A country inn with a modern boutique hotel attached, on open moorland at Stone Edge, about ten minutes from Chesterfield.",
+      "film": "Moorland on the doorstep means wide, open portraits with big skies. We'd watch the weather and pick the moment.",
+      "image": "/media/photos/bandstand-couple.jpg"
+    }
+  ]
+}

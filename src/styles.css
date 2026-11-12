@@ -1284,4 +1284,25 @@ html { scrollbar-color: #5a4236 #0e0d0c; }
 @media (max-width: 760px) { .related--grouped .related-groups { grid-column: 1 / -1; } .footer-cols { grid-template-columns: 1fr 1fr; } }
 .footer-cols { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 @media (max-width: 760px) { .footer-cols { grid-template-columns: 1fr 1fr; } }
+
+/* venues guide */
+.venue-guide { padding: var(--gap) var(--m) 0; display: grid; gap: clamp(64px, 8vw, 112px); }
+.venue-guide--area { gap: 32px; }
+.venue-area { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 24px var(--g); align-items: start; }
+.venue-area > .h-head { position: sticky; top: 96px; }
+.venue-area > .venue-list, .venue-area > .venue-area-link { grid-column: 2; }
+.venue-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.venue-item { display: grid; gap: 8px; height: 100%; padding: 22px 22px 20px; border-radius: 10px; text-decoration: none; color: var(--on-night); background: linear-gradient(160deg, rgba(36, 32, 28, 0.9), rgba(22, 20, 18, 0.9)); box-shadow: inset 0 0 0 1px rgba(241, 238, 231, 0.09); transition: translate 500ms var(--ease-expo), box-shadow 400ms ease, background 400ms ease; }
+.venue-item:hover { translate: 0 -4px; box-shadow: inset 0 0 0 1px rgba(217, 168, 138, 0.45), 0 30px 60px -30px rgba(0, 0, 0, 0.8); background: linear-gradient(160deg, rgba(122, 74, 53, 0.25), rgba(22, 20, 18, 0.95)); }
+.venue-name { font: 400 clamp(24px, 2.1vw, 30px)/1.1 var(--serif); }
+.venue-tag { display: inline-block; vertical-align: middle; margin-left: 6px; padding: 4px 8px; border-radius: 999px; font: 500 11px/1 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: #1A1916; background: var(--g-copper); }
+.venue-meta { font: 500 12px/1.4 var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: #E2B79C; }
+.venue-sum { font-size: var(--fs-small); color: var(--on-night-soft); line-height: 1.5; }
+.venue-area-link { justify-self: start; color: var(--on-night); font-size: var(--fs-small); text-decoration-color: rgba(217, 168, 138, 0.6); text-underline-offset: 4px; }
+.venue-note { max-width: 62ch; font-size: var(--fs-small); color: var(--on-night-soft); }
+@media (max-width: 760px) {
+  .venue-area { grid-template-columns: 1fr; }
+  .venue-area > .h-head { position: static; }
+  .venue-area > .venue-list, .venue-area > .venue-area-link { grid-column: 1; }
+}
 /* taste-skill-ignore-end */

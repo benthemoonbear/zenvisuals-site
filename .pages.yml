@@ -277,3 +277,27 @@ content:
           - { name: title, label: Page title in Google, type: string }
           - { name: description, label: Description in Google, type: text }
           - { name: share_image, label: Image when the link is shared, type: image }
+
+  - name: venues
+    label: Wedding venues
+    type: file
+    path: content/venues.json
+    format: json
+    fields:
+      - name: venues
+        label: Venues
+        type: object
+        list: true
+        fields:
+          - { name: name, label: Venue name, type: string, required: true }
+          - { name: town, label: "Town or village (e.g. Shottle, near Belper)", type: string }
+          - name: area
+            label: Area
+            type: select
+            options:
+              values: [Belper, Derby, Matlock, Ashbourne, Peak District, Chesterfield]
+          - { name: worked, label: "We've worked here", type: boolean }
+          - { name: kind, label: "Kind of venue (e.g. Victorian country house)", type: string }
+          - { name: summary, label: About the venue, type: text }
+          - { name: film, label: How we'd photograph and film it, type: text }
+          - { name: image, label: Picture for the page, type: image }
