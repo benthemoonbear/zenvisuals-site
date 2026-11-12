@@ -848,7 +848,7 @@ function venuePage(v) {
   const description = descFor(where).length <= 160 ? descFor(where) : descFor(v.name);
   const image = (vFilms[0] || {}).poster || v.image || site.seo.share_image;
   const faqsV = [
-    { question: `Have you photographed or filmed a wedding at ${v.name}?`, answer: v.worked ? `Yes. We've worked at ${v.name} and know the spaces and where the light falls through the day.` : `Not yet, but we're based in Belper and work across ${v.area === 'Peak District' ? 'the Peak District' : 'Derbyshire'}, so ${v.name} is well within reach. We're happy to visit beforehand so we know the spaces on the day.` },
+    { question: `Have you photographed or filmed a wedding at ${v.name}?`, answer: v.worked ? `Yes. ${vFilms.length ? `We filmed ${vFilms.map((f) => f.title).join(' and ')} at ${v.name}` : `Ben has photographed and filmed weddings at ${v.name}`}, so we know the spaces and where the light falls through the day.` : `Possibly. Ben has photographed and filmed weddings at venues across Derbyshire for more than ten years, many of them while working for another studio, so there's a good chance he knows ${v.name}. If not, we're based in Belper and happy to visit beforehand so we know the spaces on the day.` },
     { question: `How much is a wedding photographer and videographer at ${v.name}?`, answer: `Wedding photography of your whole day is £750, a 3–6 minute wedding film is £1,100, and both together are £1,650, saving £200. The price is the same at every venue.` },
     { question: `Do you cover the whole day at ${v.name}?`, answer: `Yes. Every price covers your whole wedding day, from getting ready to the last dance, with no hourly packages.` },
   ];
