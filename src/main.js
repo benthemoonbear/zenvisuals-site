@@ -245,6 +245,13 @@
     if (sheen.length) setTimeout(() => sheen.forEach((a) => { try { a.beginElement(); } catch (e) {} }), 3900);
   }
 
+  // a fine copper line across the top shows how far down the page you are
+  const readLine = document.createElement('div');
+  readLine.className = 'scroll-line'; readLine.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(readLine);
+  const setRead = () => readLine.style.setProperty('--read', (scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight)).toFixed(4));
+  addEventListener('scroll', setRead, { passive: true }); setRead();
+
   // The edit: the playhead and timecode run along the timeline as the section passes.
   const edits = reduceMotion ? [] : [...document.querySelectorAll('[data-edit]')].map((sec) => {
     const suite = sec.querySelector('.suite');

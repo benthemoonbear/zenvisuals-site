@@ -267,6 +267,7 @@ const head = ({ title, description, url, image, graph, preload }) => `<!doctype 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400..600&display=swap" rel="stylesheet">
+<meta name="view-transition" content="same-origin">
 <link rel="stylesheet" href="/assets/styles.css">
 ${preload ? `<link rel="preload" as="image" href="${esc(preload)}">` : ''}
 ${ldScript(graph)}
@@ -277,7 +278,7 @@ ${ldScript(graph)}
 
 // base = '' on the homepage (links jump within the page) and '/' elsewhere.
 const topbar = (base) => `<header class="bar" id="topbar">
-  <a href="${base ? '/' : '#top'}" class="bar-logo" aria-label="Zen Visuals, ${base ? 'home' : 'back to top'}">${logo('bar-mark', '')}</a>
+  <a href="${base ? '/' : '#top'}" class="bar-logo" aria-label="Zen Visuals, ${base ? 'home' : 'back to top'}">${toned(logo('bar-mark', ''), 'bar-tone')}</a>
   <nav class="bar-nav" aria-label="Main">
     <a href="${base}#films">Films</a>
     <a href="${base}#photos">Photographs</a>
@@ -835,7 +836,7 @@ const simplePage = (title, heading, text) => `<!doctype html>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400..600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/styles.css"></head>
 <body class="simple-page"><main class="simple">
-${logo('simple-logo', 'Zen Visuals')}
+${toned(logo('simple-logo', 'Zen Visuals'), 'simple-tone')}
 <h1 class="h-display">${esc(heading)}</h1><p>${esc(text)}</p>
 <a href="/" class="btn btn-accent">Back to the site</a>
 </main></body></html>`;
