@@ -11,6 +11,7 @@ const OUT = join(ROOT, 'dist');
 const SITE_URL = (process.env.SITE_URL || 'https://zenvisuals.co.uk').replace(/\/$/, '');
 const TODAY = new Date().toISOString().slice(0, 10);
 import { execSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 const modified = (slug) => { try { return execSync(`git log -1 --format=%cs -- content/pages/${slug}.json`, { cwd: ROOT, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim() || TODAY; } catch { return TODAY; } };
 
 const load = (f) => JSON.parse(readFileSync(join(ROOT, 'content', f), 'utf8'));
@@ -133,7 +134,7 @@ const chapters = (list) => `<div class="chapters" data-chapters style="--n:${lis
       ${list.map((f, i) => { const l = loopFor(f); return `<div class="chapter${i === 0 ? ' is-active' : ''}" data-chapter="${i}" data-title="${esc(f.title)}" data-meta="${esc(kind(f))}${f.duration_seconds ? ` · ${minutes(f.duration_seconds)}` : ''}">
         <div class="chapter-media">
           ${pic(f.poster, `Still from ${f.title}, ${kind(f).toLowerCase()} by Zen Visuals`, { sizes: '100vw' })}
-          ${l ? `<video class="chapter-loop" data-src="${esc(l.desktop)}" data-src-mobile="${esc(l.mobile)}" poster="${esc(f.poster)}" muted loop playsinline preload="none" aria-hidden="true"></video>` : ''}
+          ${l ? `<video class="chapter-loop" data-src="${esc(l.desktop)}" data-src-mobile="${esc(l.mobile)}" muted loop playsinline preload="none" aria-hidden="true"></video>` : ''}
         </div>
         <div class="chapter-card">
           <p class="chapter-kicker">${esc(kind(f))}${f.duration_seconds ? ` · ${minutes(f.duration_seconds)}` : ''}</p>
@@ -276,6 +277,24 @@ const videoSchema = (f) => ({
 const ldScript = (graph) => `<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c')}</script>`;
 
 // ---------- shared page parts ----------
+// ---------- speed: inline the stylesheet, version the script, lighter posters ----------
+// The stylesheet is small once squeezed, so it travels inside each page: nothing blocks the first paint.
+const minCss = (css) => css
+  .replace(/\/\*[\s\S]*?\*\//g, '')
+  .replace(/\s+/g, ' ')
+  .replace(/\s*([{};,])\s*/g, '$1')
+  .replace(/;}/g, '}')
+  .trim();
+const CSS = minCss(readFileSync(join(ROOT, 'src', 'styles.css'), 'utf8'));
+const JS_V = createHash('sha1').update(readFileSync(join(ROOT, 'src', 'main.js'))).digest('hex').slice(0, 10);
+// a photo's lighter WebP copy at the given width, when the build has one
+const webpOf = (src, w = 1600) => {
+  if (!src) return src;
+  const v = src.replace(/\.(jpe?g|png)$/i, '') + `-${w}.webp`;
+  return existsSync(fileOf(v)) ? v : src;
+};
+const FONTS = 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400..600&display=swap';
+
 const head = ({ title, description, url, image, graph, preload, ogType = 'website', video = null }) => `<!doctype html>
 <html lang="en-GB">
 <head>
@@ -304,10 +323,12 @@ ${video ? `<meta property="og:video" content="${abs(video)}">\n<meta property="o
 <link rel="apple-touch-icon" href="/media/brand/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400..600&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="${FONTS}" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="${FONTS}"></noscript>
 <meta name="view-transition" content="same-origin">
-<link rel="stylesheet" href="/assets/styles.css">
-${preload ? `<link rel="preload" as="image" href="${esc(preload)}">` : ''}
+<style>${CSS}</style>
+${preload ? `<link rel="preload" as="image" href="${esc(webpOf(preload, 800))}" media="(max-width: 760px)" fetchpriority="high">
+<link rel="preload" as="image" href="${esc(webpOf(preload, 1600))}" media="(min-width: 761px)" fetchpriority="high">` : ''}
 ${ldScript(graph)}
 </head>
 <body>
@@ -406,7 +427,7 @@ const editBlock = () => {
   </div>
   <div class="suite" data-reveal aria-hidden="true">
     <div class="suite-bar"><span class="suite-lights"><i></i><i></i><i></i></span><span class="suite-name">${esc(film.title)} · timeline</span><span class="suite-tc" data-edit-tc>00:00:00:00</span></div>
-    <div class="suite-viewer">${pic(film.poster, '', { sizes: '(max-width: 760px) 100vw, 900px' })}${l ? `<video class="suite-loop" data-src="${l.desktop}" data-src-mobile="${l.mobile}" poster="${film.poster}" muted loop playsinline preload="none"></video>` : ''}</div>
+    <div class="suite-viewer">${pic(film.poster, '', { sizes: '(max-width: 760px) 100vw, 900px' })}${l ? `<video class="suite-loop" data-src="${l.desktop}" data-src-mobile="${l.mobile}" muted loop playsinline preload="none"></video>` : ''}</div>
     <div class="suite-timeline">
       <div class="suite-ruler"></div>
       <div class="track track-v">${widths.map((w, i) => `<span class="clip" style="flex:${w};background-image:url(/media/edit/frame-${String(i + 1).padStart(2, '0')}.webp)"></span>`).join('')}</div>
@@ -514,7 +535,7 @@ const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="
     ${footerLogo()}
   </div>
   <div class="footer-bg" aria-hidden="true">
-    <video class="footer-reel" data-src="${esc(site.hero.reel_mobile || site.hero.reel)}" poster="${esc(site.hero.reel_poster)}" muted loop playsinline preload="none"></video>
+    <video class="footer-reel" data-src="${esc(site.hero.reel_mobile || site.hero.reel)}" poster="${esc(webpOf(site.hero.reel_poster, 800))}" muted loop playsinline preload="none"></video>
   </div>
   <p class="footer-legal"><span>© ${new Date().getFullYear()} Zen Visuals · Wedding photographers &amp; videographers in ${esc(c.town || 'Derbyshire')}, Derbyshire</span><span>Website by <a href="https://seamlinestudios.co.uk" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px">Seamline Studio</a></span></p>
 </footer>
@@ -538,7 +559,7 @@ const dialogsAndScripts = () => `
 </dialog>
 
 <script>window.ZEN_THANKS = ${JSON.stringify(c.thank_you)};</script>
-<script src="/assets/main.js" defer></script>
+<script src="/assets/main.js?v=${JS_V}" defer></script>
 </body>
 </html>
 `;
@@ -558,9 +579,10 @@ const home = head({ title: site.seo.title, description: site.seo.description, ur
 
 <section class="hero" id="top" data-hero>
   <div class="hero-film">
-    <video class="hero-video" data-desktop="${esc(site.hero.reel)}" data-mobile="${esc(site.hero.reel_mobile || site.hero.reel)}" poster="${esc(site.hero.reel_poster)}" autoplay muted loop playsinline webkit-playsinline disablepictureinpicture disableremoteplayback preload="auto" aria-hidden="true"></video>
+    <video class="hero-video" data-desktop="${esc(site.hero.reel)}" data-mobile="${esc(site.hero.reel_mobile || site.hero.reel)}" autoplay muted loop playsinline webkit-playsinline disablepictureinpicture disableremoteplayback preload="auto" aria-hidden="true" data-poster-mobile="${esc(webpOf(site.hero.reel_poster, 800))}" data-poster="${esc(webpOf(site.hero.reel_poster, 1600))}"></video>
     <script>(function (v) {
       var phone = window.matchMedia('(max-width: 760px)').matches;
+      v.poster = phone ? v.dataset.posterMobile : v.dataset.poster;
       v.muted = true; v.defaultMuted = true; v.setAttribute('muted', '');
       v.src = phone ? v.dataset.mobile : v.dataset.desktop;
       var start = function () { var p = v.play(); if (p && p.catch) p.catch(function () {}); };
@@ -787,7 +809,7 @@ function filmPage(f) {
 <main id="main">
 
 <section class="fhero" id="top" data-hero>
-  <div class="fhero-media">${pic(f.poster, `Still from ${f.title}, ${kind(f).toLowerCase()}`, { sizes: '100vw', eager: true })}${l ? `<video class="fhero-loop" src="${l.desktop}" data-src-mobile="${l.mobile}" poster="${f.poster}" autoplay muted loop playsinline aria-hidden="true"></video>` : ''}</div>
+  <div class="fhero-media">${pic(f.poster, `Still from ${f.title}, ${kind(f).toLowerCase()}`, { sizes: '100vw', eager: true })}${l ? `<video class="fhero-loop" src="${l.desktop}" data-src-mobile="${l.mobile}" autoplay muted loop playsinline aria-hidden="true"></video>` : ''}</div>
   <div class="letterbox letterbox-top" aria-hidden="true"></div>
   <div class="fhero-copy">
     <nav class="breadcrumb" aria-label="Breadcrumb" data-load style="--d:200ms">${crumbs.map((x, i) => i < crumbs.length - 1 ? `<a href="${x.item.replace(SITE_URL, '') || '/'}">${esc(x.name)}</a> <span aria-hidden="true">/</span> ` : `<span>${esc(x.name)}</span>`).join('')}</nav>
@@ -810,7 +832,7 @@ function filmPage(f) {
 
 <section class="fwatch" aria-label="Watch ${esc(f.title)}">
   <div class="fwatch-frame" data-reveal>
-    <video controls preload="none" playsinline poster="${f.poster}" src="${f.video}" title="${esc(f.title)}"></video>
+    <video controls preload="none" playsinline poster="${esc(webpOf(f.poster))}" src="${f.video}" title="${esc(f.title)}"></video>
   </div>
 </section>
 
@@ -1001,7 +1023,7 @@ mkdirSync(join(OUT, 'thank-you'), { recursive: true });
 cpSync(join(ROOT, 'media'), join(OUT, 'media'), { recursive: true });
 // Files that must sit at the root of the site as they are (e.g. Google Search Console verification).
 if (existsSync(join(ROOT, 'public'))) cpSync(join(ROOT, 'public'), OUT, { recursive: true });
-cpSync(join(ROOT, 'src', 'styles.css'), join(OUT, 'assets', 'styles.css'));
+cpSync(join(ROOT, 'src', 'styles.css'), join(OUT, 'assets', 'styles.css')); // still used by the small system pages
 cpSync(join(ROOT, 'src', 'main.js'), join(OUT, 'assets', 'main.js'));
 writeFileSync(join(OUT, 'index.html'), home);
 for (const p of landingPages) {
