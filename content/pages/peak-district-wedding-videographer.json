@@ -1,0 +1,55 @@
+{
+  "slug": "peak-district-wedding-videographer",
+  "kind": "area",
+  "nav_label": "Peak District",
+  "seo_title": "Peak District Wedding Videographer & Photographer | Zen Visuals",
+  "seo_description": "Wedding films and photography across the Peak District, from Bakewell to Buxton, by Zuzia and Ben from Belper, Derbyshire. Whole day from £750. Check your date.",
+  "eyebrow": "Peak District",
+  "h1": "Peak District wedding videographer and photographer",
+  "hero_image": "/media/photos/gazebo-backlit.jpg",
+  "hero_alt": "Close backlit embrace with sun flare under a gazebo",
+  "intro": [
+    "The Peak District starts half an hour from our door in Belper. Stone walls, high moors, the Wye and the Derwent, and some of the finest country houses in England: it's a landscape that was made for film. We're Zuzia and Ben, and we photograph and film Peak District weddings for one price that covers your whole day.",
+    "We know the roads and the weather, and we plan portraits around both, so a grey morning or a late sunset works for you rather than against you."
+  ],
+  "sections": [
+    {
+      "heading": "Peak District wedding venues",
+      "text": "Couples marrying in the Peak District choose places such as Thornbridge Hall, Hassop Hall, Losehill House, The Maynard, Cressbrook Hall, Haddon Hall, the Peacock at Rowsley, Shrigley Hall and the chapels and barns of Bakewell, Hathersage, Castleton, Buxton and Tideswell. Tell us your venue and we'll tell you if we've been."
+    },
+    {
+      "heading": "Weather, light and timing",
+      "text": "Peak District light changes fast. We watch the forecast in the week before, bring cover for rain, and keep portraits short and flexible so you spend your day with your guests, not with us."
+    },
+    {
+      "heading": "What you get",
+      "text": "Wedding photography of your whole day is £750. A 3–6 minute wedding film is £1,100. Both together are £1,650, saving £200. Your photographs and film arrive within 3 to 6 weeks."
+    },
+    {
+      "heading": "Across the Peak",
+      "text": "Most of the Peak District is within an hour of Belper, and we've travelled much further for weddings, including London. Tell us where you're marrying and we'll confirm everything before you book."
+    }
+  ],
+  "film_category": "wedding",
+  "photo_category": "wedding",
+  "photo_limit": 4,
+  "show_pricing": true,
+  "faqs": [
+    {
+      "question": "Do you travel to weddings across the Peak District?",
+      "answer": "Yes. Bakewell, Matlock, Hathersage, Castleton, Buxton and the villages between are all within an hour of us, and we travel across the UK."
+    },
+    {
+      "question": "What happens if it rains?",
+      "answer": "We've filmed plenty of wet Peak District weddings. We bring cover, use the venue's best indoor light, and keep an eye on breaks in the weather for a few minutes outside."
+    },
+    {
+      "question": "How much does a Peak District wedding videographer cost?",
+      "answer": "Our wedding film is £1,100 for the whole day. Photography and film together is £1,650."
+    },
+    {
+      "question": "Can we have a drone shot of the venue?",
+      "answer": "Ask us about your venue. Parts of the Peak District have flying restrictions, so we'll tell you what's possible there before you book."
+    }
+  ]
+}

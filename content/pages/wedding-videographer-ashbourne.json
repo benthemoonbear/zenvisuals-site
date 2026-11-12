@@ -1,0 +1,50 @@
+{
+  "slug": "wedding-videographer-ashbourne",
+  "kind": "area",
+  "nav_label": "Ashbourne",
+  "seo_title": "Wedding Videographer & Photographer Ashbourne | Zen Visuals",
+  "seo_description": "Wedding films and photography in Ashbourne and the Dove valley by Zuzia and Ben, 25 minutes away in Belper. Whole day from £750. Check your date.",
+  "eyebrow": "Ashbourne",
+  "h1": "Wedding videographer and photographer in Ashbourne",
+  "hero_image": "/media/photos/gazebo-sunset.jpg",
+  "hero_alt": "Couple silhouetted inside a white gazebo at sunset",
+  "intro": [
+    "Ashbourne sits at the gateway to the Peak District, twenty-five minutes from us in Belper, with some of Derbyshire's most-loved country wedding venues in the fields around it. We're Zuzia and Ben, and we photograph and film weddings there for one price that covers your whole day."
+  ],
+  "sections": [
+    {
+      "heading": "Weddings around Ashbourne",
+      "text": "Couples marrying around Ashbourne choose venues such as Callow Hall, Osmaston Park, Yeldersley Hall, Hassop Hall a little further north, and the village churches of Mayfield, Clifton, Tissington and Thorpe. Dovedale is a short drive for portraits."
+    },
+    {
+      "heading": "Golden hour in the Dove valley",
+      "text": "Summer evenings around Ashbourne are long and the light is soft. We plan your portraits for the last hour before sunset where we can, so your photographs and film have the glow the valley is known for."
+    },
+    {
+      "heading": "What you get",
+      "text": "Wedding photography of your whole day is £750. A 3–6 minute wedding film is £1,100. Both together are £1,650, saving £200."
+    },
+    {
+      "heading": "Twenty-five minutes from home",
+      "text": "Ashbourne, Mayfield, Tissington, Brailsford, Hulland Ward and the Dove valley are all local to us, so we arrive early and stay as late as the day runs."
+    }
+  ],
+  "film_category": "wedding",
+  "photo_category": "wedding",
+  "photo_limit": 4,
+  "show_pricing": true,
+  "faqs": [
+    {
+      "question": "Are you local to Ashbourne?",
+      "answer": "Yes. We're based in Belper, twenty-five minutes away, and we cover Ashbourne and the villages around it regularly."
+    },
+    {
+      "question": "Have you filmed at venues near Ashbourne?",
+      "answer": "We work across the whole of Derbyshire. Tell us your venue and we'll let you know if we've been there, and send you a film from somewhere similar."
+    },
+    {
+      "question": "How long is the wedding film?",
+      "answer": "Usually between 3 and 6 minutes, edited to tell the story of your whole day."
+    }
+  ]
+}

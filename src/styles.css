@@ -1277,4 +1277,11 @@ html { scrollbar-color: #5a4236 #0e0d0c; }
 }
 @keyframes vt-out { to { opacity: 0; filter: blur(6px); } }
 @keyframes vt-in { from { opacity: 0; translate: 0 18px; filter: blur(6px); } }
+.related--grouped .related-groups { grid-column: 5 / 13; display: grid; gap: 36px; }
+.related-group h3 { font: 500 12px/1.4 var(--sans); letter-spacing: 0.18em; text-transform: uppercase; color: #E2B79C; margin-bottom: 12px; }
+.related--grouped .related-links { grid-column: auto; gap: 6px 32px; }
+.related--grouped .related-links a { font-size: clamp(22px, 2vw, 28px); }
+@media (max-width: 760px) { .related--grouped .related-groups { grid-column: 1 / -1; } .footer-cols { grid-template-columns: 1fr 1fr; } }
+.footer-cols { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+@media (max-width: 760px) { .footer-cols { grid-template-columns: 1fr 1fr; } }
 /* taste-skill-ignore-end */

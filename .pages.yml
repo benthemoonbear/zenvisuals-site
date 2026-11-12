@@ -92,12 +92,17 @@ content:
           - { name: answer, label: Answer, type: text, required: true }
 
   - name: pages
-    label: Service pages
+    label: Pages (services, areas, guides)
     type: collection
     path: content/pages
     format: json
     fields:
       - { name: slug, label: "Web address (e.g. wedding-videographer-derbyshire)", type: string, required: true }
+      - name: kind
+        label: Kind of page
+        type: select
+        options:
+          values: [service, area, guide]
       - { name: nav_label, label: Short name (used in links), type: string }
       - { name: seo_title, label: "Page title in Google (under 60 characters)", type: string }
       - { name: seo_description, label: "Description in Google (under 155 characters)", type: text }

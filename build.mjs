@@ -10,6 +10,8 @@ const OUT = join(ROOT, 'dist');
 // The public address used for Google, sharing previews and the sitemap.
 const SITE_URL = (process.env.SITE_URL || 'https://zenvisuals.co.uk').replace(/\/$/, '');
 const TODAY = new Date().toISOString().slice(0, 10);
+import { execSync } from 'node:child_process';
+const modified = (slug) => { try { return execSync(`git log -1 --format=%cs -- content/pages/${slug}.json`, { cwd: ROOT, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim() || TODAY; } catch { return TODAY; } };
 
 const load = (f) => JSON.parse(readFileSync(join(ROOT, 'content', f), 'utf8'));
 const site = load('site.json');
@@ -205,6 +207,9 @@ const c = site.contact;
 const telHref = 'tel:' + c.phone.replace(/[^0-9+]/g, '');
 const pageUrl = (slug) => `${SITE_URL}/${slug}/`;
 const pageBySlug = (s) => landingPages.find((p) => p.slug === s);
+const pagesOf = (kind) => landingPages.filter((p) => (p.kind || 'service') === kind);
+const servicePages = pagesOf('service'), areaPages = pagesOf('area'), guidePages = pagesOf('guide');
+const pageLinks = (list) => list.map((p) => `<a href="/${esc(p.slug)}/">${esc(p.nav_label || p.h1)}</a>`).join('\n      ');
 
 const ratingValue = (String(site.reviews.rating_text || '').match(/^([0-9.]+)/) || [])[1];
 const reviewCount = (String(site.reviews.rating_text || '').match(/from\s+([0-9]+)/) || [])[1];
@@ -312,7 +317,7 @@ const topbar = (base) => `<header class="bar" id="topbar">
     ${faqs.length ? `<a href="${base}#faq">Questions</a>` : ''}
     <a href="#contact">Contact</a>
   </nav>
-  ${landingPages.length ? `<div class="mobile-menu-sub">${landingPages.map((p) => `<a href="/${esc(p.slug)}/">${esc(p.nav_label || p.h1)}</a>`).join('')}</div>` : ''}
+  ${landingPages.length ? `<div class="mobile-menu-sub">${[...servicePages, ...guidePages].map((p) => `<a href="/${esc(p.slug)}/">${esc(p.nav_label || p.h1)}</a>`).join('')}</div>` : ''}
   <a href="${telHref}" class="mobile-menu-phone">${esc(c.phone)}</a>
 </div>
 `;
@@ -492,8 +497,14 @@ const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="
 </main>
 <footer class="footer">
   <div class="footer-cols">
-    ${landingPages.length ? `<nav class="footer-col" aria-label="Services"><p>Services</p>
-      ${landingPages.map((p) => `<a href="/${esc(p.slug)}/">${esc(p.nav_label || p.h1)}</a>`).join('\n      ')}
+    ${servicePages.length ? `<nav class="footer-col" aria-label="Services"><p>Services</p>
+      ${pageLinks(servicePages)}
+    </nav>` : ''}
+    ${areaPages.length ? `<nav class="footer-col" aria-label="Areas"><p>Where we work</p>
+      ${pageLinks(areaPages)}
+    </nav>` : ''}
+    ${guidePages.length ? `<nav class="footer-col" aria-label="Guides"><p>Guides</p>
+      ${pageLinks(guidePages)}
     </nav>` : ''}
     <nav class="footer-col" aria-label="Films"><p>Films</p>
       ${films.filter((f) => f.category === 'wedding').map((f) => `<a href="${filmPath(f)}">${esc(f.title)}</a>`).join('\n      ')}
@@ -504,7 +515,7 @@ const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="
       ${site.social.facebook ? `<a href="${esc(site.social.facebook)}" rel="noopener" target="_blank">Facebook</a>` : ''}
       ${site.social.google_business ? `<a href="${esc(site.social.google_business)}" rel="noopener" target="_blank">Google reviews</a>` : ''}
     </div>
-    ${site.contact.areas ? `<div class="footer-col"><p>Where we work</p><span>${esc(site.contact.areas)}</span></div>` : ''}
+    ${site.contact.areas && !areaPages.length ? `<div class="footer-col"><p>Where we work</p><span>${esc(site.contact.areas)}</span></div>` : ''}
   </div>
   <div class="footer-mark" data-footer-mark>
     ${footerLogo()}
@@ -640,7 +651,7 @@ ${editBlock()}
     ${site.about.paragraphs.map((p) => `<p class="about-text" data-reveal>${esc(p)}</p>`).join('\n    ')}
     <div class="about-record">
       <div data-reveal><h3>Venues</h3><ul role="list">${['Shottle Hall', 'West Mill, Darley Abbey', 'Weddings in London'].map((n) => { const v = venues.find((x) => n.toLowerCase().startsWith(x.name.toLowerCase())); return `<li>${v ? `<a href="${venuePath(v.name)}">${esc(n)}</a>` : esc(n)}</li>`; }).join('')}</ul></div>
-      <div data-reveal><h3>Where we work</h3><ul role="list"><li>Belper and Derby</li><li>Matlock and Ashbourne</li><li>The Peak District</li><li>The rest of the UK</li></ul></div>
+      <div data-reveal><h3>Where we work</h3><ul role="list">${areaPages.length ? areaPages.map((a) => `<li><a href="/${esc(a.slug)}/">${esc(a.nav_label || a.h1)}</a></li>`).join('') : '<li>Belper and Derby</li><li>Matlock and Ashbourne</li><li>The Peak District</li>'}<li>The rest of the UK</li></ul></div>
     </div>
   </div>
 </section>
@@ -682,6 +693,8 @@ function landing(p) {
     ...pFilms.map(videoSchema),
   ];
   if (p.faqs && p.faqs.length) graph.push(faqSchema(p.faqs));
+  if ((p.kind || 'service') === 'area') { const svc = graph.find((g) => g['@type'] === 'Service'); if (svc) svc.areaServed = [p.nav_label, 'Derbyshire']; }
+  if ((p.kind || 'service') === 'guide') graph.push({ '@type': 'Article', '@id': url + '#article', headline: p.h1, description: p.seo_description, image: abs(p.hero_image), author: { '@id': SITE_URL + '/#business' }, publisher: { '@id': SITE_URL + '/#business' }, datePublished: modified(p.slug), dateModified: modified(p.slug), mainEntityOfPage: url });
   const others = landingPages.filter((x) => x.slug !== p.slug);
   const enquiry = isCommercial ? 'Advert / promo film' : 'Wedding';
 
@@ -724,11 +737,10 @@ ${p.show_pricing ? pricingBlock(false) : ''}
 ${isCommercial ? '' : bookingBlock()}
 ${p.faqs && p.faqs.length ? faqBlock(`Questions about ${(p.nav_label || 'our work').toLowerCase()}`, p.faqs) : ''}
 
-${others.length ? `<section class="related" aria-labelledby="related-title">
+${others.length ? `<section class="related related--grouped" aria-labelledby="related-title">
   <h2 class="h-head" id="related-title">More from <em>Zen Visuals</em></h2>
-  <div class="related-links">
-    <a href="/">Home</a>
-    ${others.map((o) => `<a href="/${esc(o.slug)}/">${esc(o.nav_label || o.h1)}</a>`).join('\n    ')}
+  <div class="related-groups">
+    ${[['Services', servicePages], ['Where we work', areaPages], ['Guides', guidePages]].filter(([, l]) => l.some((o) => o.slug !== p.slug)).map(([label, l]) => `<div class="related-group"><h3>${label}</h3><div class="related-links">${l.filter((o) => o.slug !== p.slug).map((o) => `<a href="/${esc(o.slug)}/">${esc(o.nav_label || o.h1)}</a>`).join('')}</div></div>`).join('\n    ')}
   </div>
 </section>` : ''}
 
@@ -872,7 +884,7 @@ const sitemapEntries = [
   ...landingPages.map((p) => {
     const pPhotos = p.photo_category ? photos.filter((x) => x.category === p.photo_category).slice(0, p.photo_limit || 9) : [];
     const pFilms = p.film_category ? films.filter((f) => f.category === p.film_category) : [];
-    return `<url><loc>${pageUrl(p.slug)}</loc><lastmod>${TODAY}</lastmod>${imgTags([p.hero_image, ...pPhotos.map((x) => x.image)])}${vidTags(pFilms)}</url>`;
+    return `<url><loc>${pageUrl(p.slug)}</loc><lastmod>${modified(p.slug)}</lastmod>${imgTags([p.hero_image, ...pPhotos.map((x) => x.image)])}${vidTags(pFilms)}</url>`;
   }),
 ];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
