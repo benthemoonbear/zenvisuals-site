@@ -1712,4 +1712,7 @@ body::after { mix-blend-mode: normal; opacity: 0.045; will-change: transform; }
   .chapter { height: auto; padding: 48px 0; }
 }
 
+/* the two of us sit just left of centre in the portrait */
+.about-pic img { object-position: 46% 60%; }
+
 /* taste-skill-ignore-end */
