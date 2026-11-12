@@ -1444,4 +1444,29 @@ html:not(.js) .reel-stage, .reduced .reel-stage { overflow-x: auto; scroll-snap-
 :focus-visible { outline: 2px solid #E2B79C; outline-offset: 3px; border-radius: 4px; }
 /* nicer wrapping on headings and leads */
 .h-display, .h-head, .chapter-title { text-wrap: balance; }
+
+/* FIXES for wide screens */
+/* editing steps: cards sized to their words, no stagger, bar sits inside the rounded corner */
+.edit-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.edit-steps .step:nth-child(even) { margin-top: 0; }
+.step { overflow: hidden; }
+.step::before { top: 0; border-radius: 0 0 2px 2px; }
+.step p { max-width: 52ch; font-size: clamp(15px, 0.95vw, 19px); }
+.step .h-head { font-size: clamp(24px, 1.9vw, 36px); }
+.edit-steps .step .h-head::before, .steps .step .h-head::before { font-size: clamp(36px, 2.8vw, 56px); }
+/* sound design: heading above, words and moments beside each other underneath, all on one line */
+.sound { grid-template-columns: minmax(0, 1fr); align-items: start; gap: 28px var(--g); }
+.sound-title { grid-column: 1 / -1; }
+.sound-body { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 40ch) minmax(0, 64ch); gap: 24px clamp(32px, 4vw, 80px); align-items: start; }
+.sound-body > p { max-width: 38ch; }
+.sound-body .moments { margin-top: 6px; }
+/* photo reel: sits right under its heading and fills more of a tall screen */
+.reel { margin-top: clamp(8px, 1.5vw, 24px); }
+.reel-frame { height: min(72svh, 980px); }
+@media (min-width: 761px) { .js .reel-stage { justify-content: flex-start; padding-top: max(24px, 5svh); } }
+@media (max-width: 760px) {
+  .edit-steps { grid-template-columns: 1fr; }
+  .sound-body { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) { .reel { margin-top: 24px; } }
 /* taste-skill-ignore-end */
