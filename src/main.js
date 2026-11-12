@@ -480,28 +480,55 @@
   });
 
   // ---------- pricing: pick photography, film or both ----------
+  // ---------- the price card is the calculator: pick photo / film, add extras, the total follows ----------
+  const money = (n) => '£' + Math.round(n).toLocaleString('en-GB');
+  window.zenState = null;
   document.querySelectorAll('[data-offer]').forEach((offer) => {
     const data = JSON.parse(offer.querySelector('[data-offer-data]').textContent);
     const picks = [...offer.querySelectorAll('[data-pick]')];
-    const extras = offer.querySelector('[data-extras]');
+    const extrasWrap = offer.querySelector('[data-extras]');
+    const extras = [...offer.querySelectorAll('[data-extra]')];
     const words = offer.querySelector('[data-offer-words]');
     const price = offer.querySelector('[data-offer-price]');
     const text = offer.querySelector('[data-offer-text]');
+    const totalEl = offer.querySelector('[data-offer-total]');
     const restart = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+    let key = 'both', shown = data.both.n;
+    const tween = (to) => {
+      if (!totalEl) return;
+      if (reduceMotion) { totalEl.textContent = money(to); shown = to; return; }
+      const from = shown, t0 = performance.now();
+      const step = (t) => { const k = Math.min(1, (t - t0) / 600); const e = 1 - Math.pow(1 - k, 3); totalEl.textContent = money(from + (to - from) * e); if (k < 1) requestAnimationFrame(step); else shown = to; };
+      requestAnimationFrame(step);
+    };
+    const isOn = (k) => picks.some((x) => x.dataset.pick === k && x.getAttribute('aria-pressed') === 'true');
+    const total = () => {
+      const film = isOn('film');
+      if (extrasWrap) extrasWrap.hidden = !film;
+      extras.forEach((x) => { x.disabled = !film; if (!film) x.checked = false; });
+      const chosen = extras.filter((x) => x.checked);
+      const o = data[key];
+      const sum = o.n + chosen.reduce((t, x) => t + +x.dataset.price, 0);
+      tween(sum);
+      window.zenState = { pack: o.pack, extras: chosen.map((x) => x.value), total: sum };
+      if (window.zenSync) window.zenSync(window.zenState);
+    };
     const render = () => {
       const on = picks.filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.pick);
-      const key = on.length === 2 ? 'both' : on[0];
+      key = on.length === 2 ? 'both' : on[0];
       const o = data[key];
-      if (!o || price.textContent === o.price) return;
-      words.textContent = o.words[0] + ' ';
-      const em = document.createElement('em');
-      em.textContent = o.words[1];
-      words.appendChild(em);
-      price.textContent = o.price;
-      text.textContent = o.text;
-      restart(words, 'swap');
-      restart(price, 'roll-in');
-      if (window.zenType) window.zenType(em, 180);
+      if (o && price.textContent !== o.price) {
+        words.textContent = o.words[0] + ' ';
+        const em = document.createElement('em');
+        em.textContent = o.words[1];
+        words.appendChild(em);
+        price.textContent = o.price;
+        text.textContent = o.text;
+        restart(words, 'swap');
+        restart(price, 'roll-in');
+        if (window.zenType) window.zenType(em, 180);
+      }
+      total();
     };
     picks.forEach((b) => b.addEventListener('click', () => {
       const pressed = b.getAttribute('aria-pressed') === 'true';
@@ -509,10 +536,9 @@
       if (pressed && !others.length) { picks.forEach((x) => x.setAttribute('aria-pressed', String(x !== b))); }
       else b.setAttribute('aria-pressed', String(!pressed));
       render();
-      if (extras) extras.hidden = !picks.some((x) => x.dataset.pick === 'film' && x.getAttribute('aria-pressed') === 'true');
-      const isOn = (k) => picks.some((x) => x.dataset.pick === k && x.getAttribute('aria-pressed') === 'true');
-      if (window.zenPick) window.zenPick(isOn('photo'), isOn('film'));
     }));
+    extras.forEach((x) => x.addEventListener('change', total));
+    total();
   });
 
   // ---------- film player ----------
@@ -580,43 +606,29 @@
     });
   });
 
-  // ---------- price calculator inside the enquiry form ----------
+  // ---------- the enquiry form carries the estimate from the price card ----------
   const calc = document.querySelector('[data-calc]');
   if (calc) {
-    const packs = [...calc.querySelectorAll('input[name="package"]')];
-    const extrasBox = calc.querySelector('[data-calc-extras]');
-    const extras = [...calc.querySelectorAll('input[name="extras"]')];
+    const pick = calc.querySelector('[data-calc-pick]');
     const totalEl = calc.querySelector('[data-calc-total]');
-    const est = calc.querySelector('[data-calc-estimate]');
-    const money = (n) => '£' + Math.round(n).toLocaleString('en-GB');
-    let shown = 0;
-    const tween = (to) => {
-      if (reduceMotion) { totalEl.textContent = money(to); shown = to; return; }
-      const from = shown, t0 = performance.now();
-      const step = (t) => { const k = Math.min(1, (t - t0) / 600); const e = 1 - Math.pow(1 - k, 3); totalEl.textContent = money(from + (to - from) * e); if (k < 1) requestAnimationFrame(step); else shown = to; };
-      requestAnimationFrame(step);
+    const fPack = calc.querySelector('[data-calc-package]');
+    const fExtras = calc.querySelector('[data-calc-extras]');
+    const fEst = calc.querySelector('[data-calc-estimate]');
+    const change = calc.querySelector('[data-calc-change]');
+    if (change && !document.querySelector('[data-offer]')) change.href = '/#pricing';
+    const label = (v) => v.replace(/\s*\(.*\)$/, '');
+    window.zenSync = (st) => {
+      pick.textContent = [label(st.pack), ...st.extras.map(label)].join(' + ');
+      totalEl.textContent = money(st.total);
+      fPack.value = st.pack;
+      fExtras.value = st.extras.join(', ');
+      fEst.value = [st.pack, ...st.extras].join(' + ') + ' = ' + money(st.total);
     };
-    const update = (animate = true) => {
-      const p = packs.find((x) => x.checked);
-      const film = p && p.dataset.hasFilm === '1';
-      extras.forEach((x) => { x.disabled = !film; if (!film) x.checked = false; });
-      if (extrasBox) extrasBox.classList.toggle('is-off', !film);
-      const chosen = extras.filter((x) => x.checked);
-      const total = (p ? +p.dataset.price : 0) + chosen.reduce((a, x) => a + +x.dataset.price, 0);
-      est.value = p ? [p.value, ...chosen.map((x) => x.value)].join(' + ') + ' = ' + money(total) : '';
-      if (animate) tween(total); else { totalEl.textContent = money(total); shown = total; }
-    };
-    calc.addEventListener('change', () => update());
-    update(false);
+    window.zenSync(window.zenState || { pack: calc.dataset.defaultPack, extras: [], total: +calc.dataset.defaultTotal });
     // only weddings need it
     const type = document.getElementById('enquiry-type');
-    const showCalc = () => { calc.hidden = type && type.value !== 'Wedding'; calc.disabled = calc.hidden; };
+    const showCalc = () => { const off = type && type.value !== 'Wedding'; calc.hidden = off; [fPack, fExtras, fEst].forEach((f) => { f.disabled = off; }); };
     if (type) { type.addEventListener('change', showCalc); showCalc(); }
-    // choosing photography / film on the price card carries over to the form
-    window.zenPick = (photo, film) => {
-      const p = packs.find((x) => x.dataset.hasPhoto === (photo ? '1' : '0') && x.dataset.hasFilm === (film ? '1' : '0'));
-      if (p && !p.checked) { p.checked = true; update(); }
-    };
   }
 
   // ---------- enquiry form: send without leaving the page (falls back to /thank-you/ without JS) ----------

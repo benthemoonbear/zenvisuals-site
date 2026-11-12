@@ -377,6 +377,7 @@ const pricingBlock = (withCommercial = true) => `<section class="offer" id="pric
       <p class="offer-note">${esc(site.pricing.intro)} Half secures your date; the rest is due any time up to two weeks after the wedding.${pageBySlug('wedding-photographer-videographer-prices-derbyshire') ? ` <a href="/wedding-photographer-videographer-prices-derbyshire/">See everything that's included</a>.` : ''}</p>
     </div>
     <div class="offer-actions">
+      <p class="offer-sum" data-offer-sum aria-live="polite"><span>Your estimate</span> <strong data-offer-total>${esc(offers.both.price)}</strong></p>
       <a href="#contact" class="btn btn-accent" data-enquiry="Wedding">${esc(site.pricing.button_text)}</a>
       ${withCommercial ? `<a href="#contact" class="text-link" data-enquiry="Advert / promo film">Commercial work is quoted per project</a>` : ''}
     </div>
@@ -384,10 +385,10 @@ const pricingBlock = (withCommercial = true) => `<section class="offer" id="pric
   ${(site.pricing.extras || []).length ? `<div class="offer-extras" data-extras data-reveal>
     <h3 class="extras-title">${esc(site.pricing.extras_title || 'Extras')}</h3>
     <ul class="extras">
-      ${site.pricing.extras.map((x) => `<li class="extra"><span class="extra-name">${esc(x.name)}</span><span class="extra-price">${esc(x.price)}</span><p class="extra-text">${esc(x.description || '')}</p></li>`).join('\n      ')}
+      ${site.pricing.extras.map((x) => `<li><label class="extra"><input type="checkbox" data-extra value="${esc(x.name)} (${esc(x.price)})" data-price="${num(x.price)}"><span class="extra-tick" aria-hidden="true"></span><span class="extra-name">${esc(x.name)}</span><span class="extra-price">${esc(x.price)}</span><span class="extra-text">${esc(x.description || '')}</span></label></li>`).join('\n      ')}
     </ul>
   </div>` : ''}
-  <script type="application/json" data-offer-data>${JSON.stringify(Object.fromEntries(Object.entries(offers).map(([k, o]) => [k, { words: o.words, price: o.price, text: offerText(o) }]))).replace(/</g, '\\u003c')}</script>
+  <script type="application/json" data-offer-data>${JSON.stringify(Object.fromEntries(Object.entries(offers).map(([k, o]) => [k, { words: o.words, price: o.price, n: num(o.price), pack: `${o.name} (${o.price})`, text: offerText(o) }]))).replace(/</g, '\\u003c')}</script>
 </section>
 `;
 
@@ -461,18 +462,13 @@ const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="
         <label>Enquiry<select name="enquiry-type" id="enquiry-type">${c.enquiry_types.map((t) => `<option${t === enquiryDefault ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></label>
         <label>Date<input type="text" name="date" placeholder="DD / MM / YYYY" inputmode="numeric"></label>
       </div>
-      <fieldset class="calc" data-calc>
-        <legend>Your wedding <span class="calc-hint">Pick what you'd like for a price straight away</span></legend>
-        <div class="calc-packages">
-          ${site.pricing.packages.map((x, i) => `<label class="calc-pack"><input type="radio" name="package" value="${esc(x.name)} (${esc(x.price)})" data-price="${x.price.replace(/[^0-9.]/g, '')}" data-has-film="${/film/i.test(x.name) ? 1 : 0}" data-has-photo="${/photo/i.test(x.name) ? 1 : 0}"${x.highlight ? ' checked' : ''}><span class="calc-pack-name">${esc(x.name)}</span><span class="calc-pack-price">${esc(x.price)}</span>${x.badge ? `<span class="calc-pack-badge">${esc(x.badge)}</span>` : ''}</label>`).join('')}
-        </div>
-        ${(site.pricing.extras || []).length ? `<div class="calc-extras" data-calc-extras>
-          ${site.pricing.extras.map((x) => `<label class="calc-extra"><input type="checkbox" name="extras" value="${esc(x.name)} (${esc(x.price)})" data-price="${x.price.replace(/[^0-9.]/g, '')}"><span>${esc(x.name)}</span><span class="calc-extra-price">${esc(x.price)}</span></label>`).join('')}
-          <p class="calc-note">Extras go with a film package.</p>
-        </div>` : ''}
-        <p class="calc-total">Your estimate <strong data-calc-total>${esc((site.pricing.packages.find((x) => x.highlight) || site.pricing.packages[0]).price)}</strong></p>
+      <div class="calc-sum" data-calc data-default-pack="${esc(`${(site.pricing.packages.find((x) => x.highlight) || site.pricing.packages[0]).name} (${(site.pricing.packages.find((x) => x.highlight) || site.pricing.packages[0]).price})`)}" data-default-total="${num((site.pricing.packages.find((x) => x.highlight) || site.pricing.packages[0]).price)}">
+        <p><span class="calc-sum-label">Your wedding</span> <span class="calc-sum-pick" data-calc-pick></span></p>
+        <p class="calc-sum-total"><strong data-calc-total>${esc((site.pricing.packages.find((x) => x.highlight) || site.pricing.packages[0]).price)}</strong> <a href="#pricing" class="calc-sum-change" data-calc-change>Change</a></p>
+        <input type="hidden" name="package" data-calc-package value="">
+        <input type="hidden" name="extras" data-calc-extras value="">
         <input type="hidden" name="estimate" data-calc-estimate value="">
-      </fieldset>
+      </div>
       <label>Phone (optional)<input type="tel" name="phone" autocomplete="tel"></label>
       <label>Message<textarea name="message" rows="4" required></textarea></label>
       <button type="submit" class="btn btn-light">Send enquiry</button>
