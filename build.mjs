@@ -468,7 +468,7 @@ const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="
       <fieldset class="calc" data-calc>
         <legend>Your wedding <span class="calc-hint">Pick what you'd like for a price straight away</span></legend>
         <div class="calc-packages">
-          ${site.pricing.packages.map((x, i) => `<label class="calc-pack"><input type="radio" name="package" value="${esc(x.name)} (${esc(x.price)})" data-price="${x.price.replace(/[^0-9.]/g, '')}" data-film="${/film/i.test(x.name) ? 1 : 0}" data-photo="${/photo/i.test(x.name) ? 1 : 0}"${x.highlight ? ' checked' : ''}><span class="calc-pack-name">${esc(x.name)}</span><span class="calc-pack-price">${esc(x.price)}</span>${x.badge ? `<span class="calc-pack-badge">${esc(x.badge)}</span>` : ''}</label>`).join('')}
+          ${site.pricing.packages.map((x, i) => `<label class="calc-pack"><input type="radio" name="package" value="${esc(x.name)} (${esc(x.price)})" data-price="${x.price.replace(/[^0-9.]/g, '')}" data-has-film="${/film/i.test(x.name) ? 1 : 0}" data-has-photo="${/photo/i.test(x.name) ? 1 : 0}"${x.highlight ? ' checked' : ''}><span class="calc-pack-name">${esc(x.name)}</span><span class="calc-pack-price">${esc(x.price)}</span>${x.badge ? `<span class="calc-pack-badge">${esc(x.badge)}</span>` : ''}</label>`).join('')}
         </div>
         ${(site.pricing.extras || []).length ? `<div class="calc-extras" data-calc-extras>
           ${site.pricing.extras.map((x) => `<label class="calc-extra"><input type="checkbox" name="extras" value="${esc(x.name)} (${esc(x.price)})" data-price="${x.price.replace(/[^0-9.]/g, '')}"><span>${esc(x.name)}</span><span class="calc-extra-price">${esc(x.price)}</span></label>`).join('')}

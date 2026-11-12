@@ -1509,4 +1509,19 @@ html:not(.js) .reel-stage, .reduced .reel-stage { overflow-x: auto; scroll-snap-
 }
 .about { margin-left: auto; margin-right: auto; }
 @media (min-width: 1800px) { .about { max-width: 1800px; grid-template-columns: minmax(0, 4fr) minmax(0, 6fr); } }
+
+/* ONE PAGE: no hard edges between sections. Every section is see-through over one continuous dark
+   ground, and the reviews photo and section glows fade in and out at their edges. */
+body, main { background: #141311; }
+main { background:
+  radial-gradient(80% 40% at 100% 0%, rgba(122, 74, 53, 0.12), transparent 70%),
+  #141311; }
+.films, .voices, .voices.voices--bold, .contact, .about, .intro, .edit, .photos, .booking, .faq, .commercial { background: transparent; }
+.voices-bg { -webkit-mask-image: linear-gradient(transparent, #000 22%, #000 78%, transparent); mask-image: linear-gradient(transparent, #000 22%, #000 78%, transparent); }
+.voices-bg::after { background:
+  radial-gradient(70% 60% at 50% 45%, rgba(20, 19, 17, 0.45), rgba(20, 19, 17, 0.9) 80%),
+  radial-gradient(60% 50% at 80% 20%, rgba(201, 150, 122, 0.28), transparent 70%); }
+.chapters-stage { background: #0E0D0C; }
+.chapters { -webkit-mask-image: linear-gradient(transparent, #000 3%, #000 97%, transparent); mask-image: linear-gradient(transparent, #000 3%, #000 97%, transparent); }
+.offer { margin-top: clamp(24px, 3vw, 48px); }
 /* taste-skill-ignore-end */

@@ -443,10 +443,10 @@
     if (dir && !reduceMotion) { lightImg.classList.remove('is-in'); lightImg.style.setProperty('--dir', dir); lightImg.classList.add('is-out'); setTimeout(swap, 220); } else swap();
     if (lightCount) lightCount.textContent = lightSet.length > 1 ? `${String(lightAt + 1).padStart(2, '0')} / ${String(lightSet.length).padStart(2, '0')}` : '';
   };
-  document.querySelectorAll('[data-photo]').forEach((btn) => {
+  document.querySelectorAll('button[data-photo]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const group = btn.closest('[data-reel], .stagger, section') || document;
-      lightSet = [...group.querySelectorAll('[data-photo]')];
+      lightSet = [...group.querySelectorAll('button[data-photo]')];
       lightbox.classList.toggle('is-single', lightSet.length < 2);
       showPhoto(lightSet.indexOf(btn));
       lightbox.showModal();
@@ -493,7 +493,7 @@
     };
     const update = (animate = true) => {
       const p = packs.find((x) => x.checked);
-      const film = p && p.dataset.film === '1';
+      const film = p && p.dataset.hasFilm === '1';
       extras.forEach((x) => { x.disabled = !film; if (!film) x.checked = false; });
       if (extrasBox) extrasBox.classList.toggle('is-off', !film);
       const chosen = extras.filter((x) => x.checked);
@@ -509,7 +509,7 @@
     if (type) { type.addEventListener('change', showCalc); showCalc(); }
     // choosing photography / film on the price card carries over to the form
     window.zenPick = (photo, film) => {
-      const p = packs.find((x) => x.dataset.photo === (photo ? '1' : '0') && x.dataset.film === (film ? '1' : '0'));
+      const p = packs.find((x) => x.dataset.hasPhoto === (photo ? '1' : '0') && x.dataset.hasFilm === (film ? '1' : '0'));
       if (p && !p.checked) { p.checked = true; update(); }
     };
   }
