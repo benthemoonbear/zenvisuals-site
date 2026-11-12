@@ -1388,4 +1388,38 @@ html:not(.js) .reel-stage, .reduced .reel-stage { overflow-x: auto; scroll-snap-
 .lightbox-count { position: fixed; bottom: 22px; left: 50%; translate: -50% 0; pointer-events: none; text-align: center; font: 500 13px/1 var(--sans); letter-spacing: 0.2em; color: var(--on-night-soft); font-variant-numeric: tabular-nums; }
 .lightbox.is-single .lightbox-nav { display: none; }
 @media (max-width: 760px) { .lightbox-nav { width: 48px; height: 48px; font-size: 28px; top: auto; bottom: 14px; translate: none; } .lightbox-count { bottom: 30px; } }
+
+/* ONE VOICE: the rest of the page takes its type from Kind words —
+   serif leads in cream, copper capitals for labels, and lit cards for anything in a list */
+.intro-note, .films-head > p, .edit-head > p, .sound-body > p, .contact-intro p, .phero-lead, .commercial > p, .fstory-text p {
+  font: 400 clamp(20px, 1.7vw, 26px)/1.35 var(--serif); letter-spacing: -0.005em; color: var(--on-night); max-width: 34ch; text-wrap: pretty;
+}
+.about-text { font: 400 clamp(19px, 1.5vw, 23px)/1.45 var(--serif); color: var(--on-night); max-width: 40ch; }
+.about-text:first-of-type { font-size: clamp(24px, 2.2vw, 32px); line-height: 1.25; max-width: 30ch; }
+.facts dd, .chapter-desc, .step p, .offer-note, .edit-note, .story-row p, .fwatch + *, .venue-sum { font-size: var(--fs-small); line-height: 1.55; color: var(--on-night-soft); }
+/* labels everywhere read like the review names */
+.facts dd { letter-spacing: 0.01em; }
+.chapter-kicker, .reel-bar, .letterbox, .intro-kicker, .about-facts dt, .about-record h3, .extras-title, .related-group h3, .venue-meta, .footer-col p {
+  font-family: var(--sans); font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: #E2B79C;
+}
+.letterbox { color: rgba(226, 183, 156, 0.85); }
+/* steps become cards, like the reviews */
+.steps { gap: 16px; align-items: stretch; }
+.step { padding: clamp(24px, 2.4vw, 32px); padding-top: clamp(28px, 2.6vw, 36px); border-radius: 10px; background: linear-gradient(160deg, rgba(36, 32, 28, 0.94), rgba(22, 20, 18, 0.94)); box-shadow: inset 0 0 0 1px rgba(241, 238, 231, 0.1), 0 30px 60px -20px rgba(0, 0, 0, 0.6); transition: translate 600ms var(--ease-expo), box-shadow 600ms ease; }
+.step:hover { translate: 0 -6px; box-shadow: inset 0 0 0 1px rgba(217, 168, 138, 0.45), 0 40px 70px -20px rgba(0, 0, 0, 0.7); }
+.step::before { left: clamp(24px, 2.4vw, 32px); top: 0; width: 44px; }
+.step:nth-child(even) { margin-top: clamp(0px, 2.4vw, 36px); }
+.step .h-head { font-size: clamp(24px, 2vw, 30px); line-height: 1.15; }
+/* the facts read as one strip of lit cards too */
+.facts > div { padding: 22px 22px 20px; border-radius: 10px; background: linear-gradient(160deg, rgba(36, 32, 28, 0.7), rgba(22, 20, 18, 0.5)); box-shadow: inset 0 0 0 1px rgba(241, 238, 231, 0.08); }
+.facts > div::before { left: 22px; right: auto; width: 44px; height: 2px; background: var(--g-copper); }
+/* questions use the review card look when open, and serif questions */
+.faq-item h3 { font: 400 clamp(20px, 1.6vw, 24px)/1.3 var(--serif); letter-spacing: 0; }
+.faq-a p { font-size: var(--fs-small); line-height: 1.6; }
+@media (max-width: 760px) {
+  .intro-note, .films-head > p, .edit-head > p, .sound-body > p, .contact-intro p, .phero-lead, .commercial > p, .fstory-text p { font-size: 21px; }
+  .step:nth-child(even) { margin-top: 0; }
+  .facts > div { padding: 18px 16px 16px; }
+  .facts > div::before { left: 16px; }
+}
 /* taste-skill-ignore-end */
