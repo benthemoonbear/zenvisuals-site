@@ -71,8 +71,8 @@ ul[role="list"] { list-style: none; padding: 0; }
 .h-display em, .h-head em, .offer-title em, .contact-email em { font-family: var(--serif); font-style: italic; letter-spacing: -0.01em; }
 .films .h-display em, .voices .h-head em, .contact .h-display em { color: var(--sage); }
 /* typing */
-.type-caret { display: inline-block; position: relative; width: 0; height: 0.82em; vertical-align: -0.06em; }
-.type-caret::after { content: ''; position: absolute; left: 0.04em; top: 0; bottom: 0; width: max(2px, 0.045em); background: currentColor; animation: caret 1s steps(1) infinite; }
+.type-caret { display: inline; position: relative; } /* inline, not inline-block: a box mid-word would let the line wrap there and the words jump */
+.type-caret::after { content: ''; position: absolute; left: 0.04em; bottom: -0.08em; height: 0.82em; width: max(2px, 0.045em); background: currentColor; animation: caret 1s steps(1) infinite; }
 .type-caret.is-done::after { animation: caret-out 600ms ease forwards; }
 .type-rest { visibility: hidden; }
 @keyframes caret { 50% { opacity: 0; } }
@@ -1714,5 +1714,9 @@ body::after { mix-blend-mode: normal; opacity: 0.045; will-change: transform; }
 
 /* the two of us sit just left of centre in the portrait */
 .about-pic img { object-position: 46% 60%; }
+
+/* the footer waits behind the page; it stays out of the picture until the page is about to uncover it,
+   so a late font changing the page's length can't nudge it */
+.js .footer:not(.is-near) { visibility: hidden; }
 
 /* taste-skill-ignore-end */

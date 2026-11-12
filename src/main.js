@@ -131,8 +131,7 @@
         } else if (child.nodeType === 1 && !child.hasAttribute('data-type') && !child.classList.contains('sr')) walk(child);
       });
     };
-    el.setAttribute('aria-label', el.textContent.trim());
-    walk(el);
+    walk(el); // the words stay real text with their spaces, so screen readers read the line as normal
     el.classList.add('split');
   };
 
@@ -142,9 +141,10 @@
     const full = el.textContent;
     if (!full.trim() || el.dataset.typed) return;
     el.dataset.typed = '1';
-    el.setAttribute('aria-label', full);
-    el.innerHTML = '<span class="typed" aria-hidden="true"></span><span class="type-caret" aria-hidden="true"></span><span class="type-rest" aria-hidden="true"></span>';
-    const typed = el.firstChild;
+    // screen readers get the words whole from a hidden copy (a label on a plain span isn't allowed)
+    el.innerHTML = '<span class="sr"></span><span class="typed" aria-hidden="true"></span><span class="type-caret" aria-hidden="true"></span><span class="type-rest" aria-hidden="true"></span>';
+    el.firstChild.textContent = full;
+    const typed = el.firstChild.nextSibling;
     const caret = typed.nextSibling;
     const rest = caret.nextSibling;
     rest.textContent = full;
@@ -467,6 +467,7 @@
   // The footer sits pinned behind the page the whole time, so it plays only once the page has moved aside to show it.
   const footerEl = document.querySelector('.footer');
   const mainEl = document.querySelector('main');
+  if (footerEl && (reduceMotion || !footerMark || !mainEl)) footerEl.classList.add('is-near');
   if (footerMark && footerEl && mainEl && !reduceMotion) {
     const reel = footerEl.querySelector('.footer-reel');
     let loaded = false, on = null;
@@ -474,6 +475,7 @@
     footerReel = (vh) => {
       const show = box(mainEl).bottom < vh + 200;
       if (show === on) return;
+      footerEl.classList.toggle('is-near', show);
       on = show; reel.__covered = !show;
       if (show) {
         if (!loaded) {
