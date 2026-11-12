@@ -206,11 +206,21 @@ const telHref = 'tel:' + c.phone.replace(/[^0-9+]/g, '');
 const pageUrl = (slug) => `${SITE_URL}/${slug}/`;
 const pageBySlug = (s) => landingPages.find((p) => p.slug === s);
 
+const ratingValue = (String(site.reviews.rating_text || '').match(/^([0-9.]+)/) || [])[1];
+const reviewCount = (String(site.reviews.rating_text || '').match(/from\s+([0-9]+)/) || [])[1];
 const business = {
   '@type': 'ProfessionalService',
   '@id': SITE_URL + '/#business',
   name: 'Zen Visuals',
-  founder: [{ '@type': 'Person', name: 'Zuzia' }, { '@type': 'Person', name: 'Ben' }],
+  founder: [
+    { '@type': 'Person', name: 'Ben', jobTitle: 'Wedding photographer and videographer', description: 'Photographer and videographer since 2014', worksFor: { '@id': SITE_URL + '/#business' } },
+    { '@type': 'Person', name: 'Zuzia', jobTitle: 'Wedding photographer and videographer', description: 'Behind the camera since 2023', worksFor: { '@id': SITE_URL + '/#business' } },
+  ],
+  foundingDate: '2014',
+  knowsAbout: ['Wedding photography', 'Wedding videography', 'Wedding films', 'Video production', 'Promotional films', 'Product photography', 'Colour grading', 'Sound design'],
+  ...(ratingValue ? { aggregateRating: { '@type': 'AggregateRating', ratingValue, reviewCount, bestRating: '5', worstRating: '1' } } : {}),
+  review: reviews.map((r) => ({ '@type': 'Review', author: { '@type': 'Person', name: r.name }, reviewBody: r.text, reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' } })),
+  ...(c.town === 'Belper' ? { geo: { '@type': 'GeoCoordinates', latitude: 53.0236, longitude: -1.4816 } } : {}),
   priceRange: '£750–£1,650',
   description: site.seo.description,
   url: SITE_URL + '/',
@@ -242,7 +252,7 @@ const videoSchema = (f) => ({
 const ldScript = (graph) => `<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c')}</script>`;
 
 // ---------- shared page parts ----------
-const head = ({ title, description, url, image, graph, preload }) => `<!doctype html>
+const head = ({ title, description, url, image, graph, preload, ogType = 'website', video = null }) => `<!doctype html>
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
@@ -252,14 +262,18 @@ const head = ({ title, description, url, image, graph, preload }) => `<!doctype 
 <meta name="description" content="${esc(description)}">
 <meta name="robots" content="index, follow, max-image-preview:large, max-video-preview:-1">
 <link rel="canonical" href="${url}">
-<meta property="og:type" content="website">
+<meta property="og:type" content="${ogType}">
 <meta property="og:site_name" content="Zen Visuals">
 <meta property="og:locale" content="en_GB">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${abs(image)}">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image:alt" content="${esc(title)}">
+${video ? `<meta property="og:video" content="${abs(video)}">\n<meta property="og:video:type" content="video/mp4">\n` : ''}<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(title)}">
+<meta name="twitter:description" content="${esc(description)}">
+<meta name="twitter:image" content="${abs(image)}">
 <meta name="theme-color" content="#1A1916">
 <link rel="icon" href="/media/brand/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/media/brand/favicon-32.png" sizes="32x32">
@@ -359,7 +373,7 @@ const pricingBlock = (withCommercial = true) => `<section class="offer" id="pric
   <div class="offer-foot" data-reveal>
     <div class="offer-copy">
       <p class="offer-text" data-offer-text>${esc(offerText(offers.both))}</p>
-      <p class="offer-note">${esc(site.pricing.intro)} Half secures your date; the rest is due any time up to two weeks after the wedding.</p>
+      <p class="offer-note">${esc(site.pricing.intro)} Half secures your date; the rest is due any time up to two weeks after the wedding.${pageBySlug('wedding-photographer-videographer-prices-derbyshire') ? ` <a href="/wedding-photographer-videographer-prices-derbyshire/">See everything that's included</a>.` : ''}</p>
     </div>
     <div class="offer-actions">
       <a href="#contact" class="btn btn-accent" data-enquiry="Wedding">${esc(site.pricing.button_text)}</a>
@@ -481,6 +495,9 @@ const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="
     ${landingPages.length ? `<nav class="footer-col" aria-label="Services"><p>Services</p>
       ${landingPages.map((p) => `<a href="/${esc(p.slug)}/">${esc(p.nav_label || p.h1)}</a>`).join('\n      ')}
     </nav>` : ''}
+    <nav class="footer-col" aria-label="Films"><p>Films</p>
+      ${films.filter((f) => f.category === 'wedding').map((f) => `<a href="${filmPath(f)}">${esc(f.title)}</a>`).join('\n      ')}
+    </nav>
     <div class="footer-col"><p>Contact</p><a href="${telHref}">${esc(c.phone)}</a><a href="mailto:${esc(c.email)}">${esc(c.email)}</a></div>
     <div class="footer-col"><p>Follow</p>
       ${site.social.instagram ? `<a href="${esc(site.social.instagram)}" rel="noopener" target="_blank">Instagram</a>` : ''}
@@ -734,7 +751,9 @@ function filmPage(f) {
   const parent = landingPages.find((p) => p.film_category === f.category && (isCommercial || /video/i.test(p.slug))) || landingPages.find((p) => p.film_category === f.category);
   const where = [f.venue, f.location].filter(Boolean).join(', ');
   const title = isCommercial ? `${f.title} | Commercial film by Zen Visuals` : `${f.title} | ${f.venue ? `Wedding film at ${f.venue}` : 'Derbyshire wedding film'} | Zen Visuals`;
-  const description = (f.description || `${f.title}, filmed by Zen Visuals.`).slice(0, 158);
+  const base = (f.description || `${f.title}, filmed by Zen Visuals.`).replace(/\s+$/, '');
+  const tail = isCommercial ? ' Watch the film, made by Zen Visuals in Derbyshire.' : ' Watch the full film by Derbyshire wedding videographers Zen Visuals.';
+  const description = (base.length + tail.length <= 160 ? base + tail : base.length + 21 <= 160 ? base + ' Watch the full film.' : base).slice(0, 160);
   const related = [...films.filter((x) => x !== f && x.category === f.category), ...films.filter((x) => x !== f && x.category !== f.category)].slice(0, 3);
   const l = loopFor(f);
   const enquiry = isCommercial ? 'Advert / promo film' : 'Wedding';
@@ -746,7 +765,7 @@ function filmPage(f) {
     { ...videoSchema(f), '@id': url + '#video', url, embedUrl: url, ...(where ? { contentLocation: { '@type': 'Place', name: where } } : {}) },
   ];
   const story = paras(f.story);
-  return head({ title, description, url, image: f.poster, graph, preload: null })
+  return head({ title, description, url, image: f.poster, graph, preload: null, ogType: 'video.other', video: f.video })
   + topbar('/') + `
 <main id="main">
 
