@@ -102,10 +102,29 @@ const toned = (svg, id, extra = '') => {
     .replace(/(<svg[^>]*>)/, `$1<defs>${markTone(id)}${extra ? extra.defs : ''}</defs>`)
     .replace('</svg>', `${extra && d ? `<path fill-rule="evenodd" fill="url(#${extra.id})" d="${d}" aria-hidden="true"/>` : ''}</svg>`);
 };
-const heroLogo = () => toned(logo('hero-logo', 'Zen Visuals'), 'mark-tone', {
-  id: 'mark-sheen',
-  defs: `<linearGradient id="mark-sheen" gradientUnits="userSpaceOnUse" x1="-700" y1="0" x2="-200" y2="140"><stop offset="0" stop-color="#FFF6E8" stop-opacity="0"/><stop offset="0.5" stop-color="#FFF6E8" stop-opacity="0.9"/><stop offset="1" stop-color="#FFF6E8" stop-opacity="0"/><animate data-sheen attributeName="x1" values="-700;957" dur="2.4s" begin="indefinite" fill="freeze" calcMode="spline" keySplines="0.45 0 0.25 1"/><animate data-sheen attributeName="x2" values="-200;1457" dur="2.4s" begin="indefinite" fill="freeze" calcMode="spline" keySplines="0.45 0 0.25 1"/></linearGradient>`,
-});
+// The two stars in the wordmark are lifted out of the hero logo so they can arrive after it and catch the light.
+const starSplit = (d) => {
+  const subs = d.split(/(?=M)/).filter((x) => x.trim());
+  const isStar = (sp) => {
+    const n = (sp.match(/-?\d+\.?\d*/g) || []).map(Number);
+    const xs = n.filter((_, i) => i % 2 === 0), ys = n.filter((_, i) => i % 2 === 1);
+    const w = Math.max(...xs) - Math.min(...xs), h = Math.max(...ys) - Math.min(...ys);
+    return w < 80 && h < 80 && Math.min(...xs) > 300; // small shapes right of the "i" dot
+  };
+  return { body: subs.filter((x) => !isStar(x)).join(''), stars: subs.filter(isStar) };
+};
+const heroLogo = () => {
+  const svg = toned(logo('hero-logo', 'Zen Visuals'), 'mark-tone', {
+    id: 'mark-sheen',
+    defs: `<linearGradient id="mark-sheen" gradientUnits="userSpaceOnUse" x1="-700" y1="0" x2="-200" y2="140"><stop offset="0" stop-color="#FFF6E8" stop-opacity="0"/><stop offset="0.5" stop-color="#FFF6E8" stop-opacity="0.9"/><stop offset="1" stop-color="#FFF6E8" stop-opacity="0"/><animate data-sheen attributeName="x1" values="-700;957" dur="2.4s" begin="indefinite" fill="freeze" calcMode="spline" keySplines="0.45 0 0.25 1"/><animate data-sheen attributeName="x2" values="-200;1457" dur="2.4s" begin="indefinite" fill="freeze" calcMode="spline" keySplines="0.45 0 0.25 1"/></linearGradient><filter id="star-glow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="9"/></filter>`,
+  });
+  const d = (svg.match(/ d="([^"]+)"/) || [])[1];
+  if (!d) return svg;
+  const { body, stars } = starSplit(d);
+  if (!stars.length) return svg;
+  const starsSvg = stars.map((sp, i) => `<g class="hero-star hero-star-${i + 1}" aria-hidden="true"><path class="star-glow" d="${sp}" fill="#FFE6CC" filter="url(#star-glow)"/><path class="star-body" d="${sp}" fill="url(#mark-tone)"/><path class="star-core" d="${sp}" fill="#FFF9F0"/></g>`).join('');
+  return svg.split(` d="${d}"`).join(` d="${body}"`).replace('</svg>', `${starsSvg}</svg>`);
+};
 const footerLogo = () => toned(logo('footer-logo', 'Zen Visuals'), 'foot-tone');
 const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
 const chapters = (list) => `<div class="chapters" data-chapters style="--n:${list.length}">

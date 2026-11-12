@@ -1524,4 +1524,22 @@ main { background:
 .chapters-stage { background: #0E0D0C; }
 .chapters { -webkit-mask-image: linear-gradient(transparent, #000 3%, #000 97%, transparent); mask-image: linear-gradient(transparent, #000 3%, #000 97%, transparent); }
 .offer { margin-top: clamp(24px, 3vw, 48px); }
+
+/* HERO STARS: they arrive after the wordmark has settled, one then the other, then catch the light */
+.hero-star { transform-box: fill-box; transform-origin: 50% 50%; }
+.hero-star .star-glow, .hero-star .star-core { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .js .hero-star { opacity: 0; scale: 0.2; rotate: -100deg; animation: star-in 1100ms cubic-bezier(0.2, 1.4, 0.35, 1) forwards, star-twinkle 9s ease-in-out 9s infinite; }
+  .js .hero-star-1 { animation-delay: 4300ms, 9500ms; }
+  .js .hero-star-2 { animation-delay: 4650ms, 11000ms; }
+  .js .hero-star .star-glow { animation: star-shine 1800ms ease-out forwards; }
+  .js .hero-star .star-core { animation: star-core 1400ms ease-out forwards; }
+  .js .hero-star-1 .star-glow { animation-delay: 5200ms; } .js .hero-star-1 .star-core { animation-delay: 5250ms; }
+  .js .hero-star-2 .star-glow { animation-delay: 5550ms; } .js .hero-star-2 .star-core { animation-delay: 5600ms; }
+}
+@keyframes star-in { 0% { opacity: 0; scale: 0.2; rotate: -100deg; } 60% { opacity: 1; } 100% { opacity: 1; scale: 1; rotate: 0deg; } }
+@keyframes star-shine { 0% { opacity: 0; } 25% { opacity: 0.95; } 100% { opacity: 0.18; } }
+@keyframes star-core { 0% { opacity: 0; } 20% { opacity: 0.9; } 100% { opacity: 0; } }
+/* every so often a star glints again, very gently */
+@keyframes star-twinkle { 0%, 88%, 100% { scale: 1; rotate: 0deg; } 92% { scale: 1.25; rotate: 45deg; } 96% { scale: 1; rotate: 90deg; } }
 /* taste-skill-ignore-end */
