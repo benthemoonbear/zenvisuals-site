@@ -232,6 +232,7 @@
       play(i);
     };
     return {
+      load,
       update(vh) {
         const r = box(wrap);
         if (r.bottom < -vh || r.top > vh * 2) { if (loaded) items.forEach((it) => { const v = it.querySelector('.chapter-loop'); if (v) v.pause(); }); return; }
@@ -368,6 +369,26 @@
     window.addEventListener('scroll', hold, { passive: true });
     window.addEventListener('wheel', hold, { passive: true });
   }
+
+  // Some phone browsers (in-app browsers inside TikTok, Instagram, Facebook; battery or data saver) won't start
+  // even a silent clip until the visitor touches the page. On the first touch every clip is woken inside that
+  // touch, then the usual rules decide which ones keep playing.
+  const wake = () => {
+    ['pointerup', 'touchend', 'click', 'keydown'].forEach((e) => window.removeEventListener(e, wake, true));
+    chapterSets.forEach((c) => c.load && c.load());
+    const clips = [...document.querySelectorAll('video')].filter((v) => v.id !== 'player-video' && (v.src || v.currentSrc));
+    clips.forEach((v) => {
+      if (!v.paused) return;
+      const p = v.play();
+      const settle = () => { if (v !== heroVideo || holding) { v.pause(); if (v === heroVideo) wanted.add(v); } };
+      if (p && p.then) p.then(settle, () => {}); else settle();
+    });
+    setTimeout(() => {
+      if (heroVideo && !reduceMotion) { const r = heroVideo.getBoundingClientRect(); if (r.bottom > 0 && r.top < innerHeight) playSafe(heroVideo); else heroVideo.pause(); }
+      rerun();
+    }, 60);
+  };
+  if (!reduceMotion) ['pointerup', 'touchend', 'click', 'keydown'].forEach((e) => window.addEventListener(e, wake, { capture: true, passive: true }));
 
   // Once the wordmark is fully drawn its mask is no longer needed; dropping it saves redrawing it on every frame.
   const heroLogo = document.querySelector('.hero-logo');

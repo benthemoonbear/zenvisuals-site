@@ -1698,4 +1698,18 @@ body::after { mix-blend-mode: normal; opacity: 0.045; will-change: transform; }
 .calc-sum-total strong { font: italic 400 30px/1 var(--serif); color: #F1E6D4; font-variant-numeric: tabular-nums; }
 .calc-sum-change { font-size: 13px; color: var(--on-night-soft); }
 
+/* PHONE CHAPTERS: the films are wide, so on a tall screen they sit in a wide cinema frame instead of being
+   blown up to fill it (which only showed an ear). The words sit under the picture. */
+@media (max-width: 760px) {
+  .chapter { display: flex; flex-direction: column; justify-content: center; gap: 26px; background: #0E0D0C; }
+  .chapter-media { position: relative; inset: auto; flex: none; width: 100%; aspect-ratio: 16 / 10; }
+  .chapter-media::after { background: linear-gradient(to top, rgba(14, 13, 12, 0.35), rgba(14, 13, 12, 0) 40%); }
+  .chapter-card { position: relative; left: auto; right: auto; bottom: auto; padding: 0 var(--m); }
+  .chapter-desc { display: block; }
+  .js .chapter-media img, .js .chapter-loop { scale: calc(1.02 + max(var(--k, 0), var(--k, 0) * -1) * 0.08); translate: 0 calc(var(--k, 0) * -4%); }
+}
+@media (max-width: 760px) and (prefers-reduced-motion: reduce) {
+  .chapter { height: auto; padding: 48px 0; }
+}
+
 /* taste-skill-ignore-end */
