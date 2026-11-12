@@ -90,10 +90,21 @@ const loopFor = (f) => {
   const base = join(ROOT, 'media', 'films', 'loops', slug);
   return existsSync(base + '.mp4') ? { desktop: `/media/films/loops/${slug}.mp4`, mobile: existsSync(base + '-mobile.mp4') ? `/media/films/loops/${slug}-mobile.mp4` : `/media/films/loops/${slug}.mp4` } : null;
 };
-// the hero wordmark carries a soft sheen that crosses it once, after it has come into focus
-const heroLogo = () => logo('hero-logo', 'Zen Visuals')
-  .replace('fill="currentColor"', 'fill="url(#mark-sheen)"')
-  .replace(/(<svg[^>]*>)/, `$1<defs><linearGradient id="mark-sheen" gradientUnits="userSpaceOnUse" x1="-700" y1="0" x2="-200" y2="140"><stop offset="0" style="stop-color:currentColor"/><stop offset="0.5" stop-color="#FFF4E2"/><stop offset="1" style="stop-color:currentColor"/><animate data-sheen attributeName="x1" values="-700;957" dur="2.4s" begin="indefinite" fill="freeze" calcMode="spline" keySplines="0.45 0 0.25 1"/><animate data-sheen attributeName="x2" values="-200;1457" dur="2.4s" begin="indefinite" fill="freeze" calcMode="spline" keySplines="0.45 0 0.25 1"/></linearGradient></defs>`);
+// the wordmarks shade from sage into warm cream and copper, like the italic accents in the headings;
+// the hero one also carries a soft sheen that crosses it once, after it has come into focus
+const markTone = (id) => `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="140" x2="957" y2="370"><stop offset="0" stop-color="#C9C8B4"/><stop offset="0.5" stop-color="#F1E6D4"/><stop offset="1" stop-color="#D9A88A"/></linearGradient>`;
+const toned = (svg, id, extra = '') => {
+  const d = (svg.match(/ d="([^"]+)"/) || [])[1];
+  return svg
+    .replace('fill="currentColor"', `fill="url(#${id})"`)
+    .replace(/(<svg[^>]*>)/, `$1<defs>${markTone(id)}${extra ? extra.defs : ''}</defs>`)
+    .replace('</svg>', `${extra && d ? `<path fill-rule="evenodd" fill="url(#${extra.id})" d="${d}" aria-hidden="true"/>` : ''}</svg>`);
+};
+const heroLogo = () => toned(logo('hero-logo', 'Zen Visuals'), 'mark-tone', {
+  id: 'mark-sheen',
+  defs: `<linearGradient id="mark-sheen" gradientUnits="userSpaceOnUse" x1="-700" y1="0" x2="-200" y2="140"><stop offset="0" stop-color="#FFF6E8" stop-opacity="0"/><stop offset="0.5" stop-color="#FFF6E8" stop-opacity="0.9"/><stop offset="1" stop-color="#FFF6E8" stop-opacity="0"/><animate data-sheen attributeName="x1" values="-700;957" dur="2.4s" begin="indefinite" fill="freeze" calcMode="spline" keySplines="0.45 0 0.25 1"/><animate data-sheen attributeName="x2" values="-200;1457" dur="2.4s" begin="indefinite" fill="freeze" calcMode="spline" keySplines="0.45 0 0.25 1"/></linearGradient>`,
+});
+const footerLogo = () => toned(logo('footer-logo', 'Zen Visuals'), 'foot-tone');
 const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
 const chapters = (list) => `<div class="chapters" data-chapters style="--n:${list.length}">
     <div class="chapters-stage">
@@ -444,7 +455,7 @@ const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="
     ${site.contact.areas ? `<div class="footer-col"><p>Where we work</p><span>${esc(site.contact.areas)}</span></div>` : ''}
   </div>
   <div class="footer-mark" data-footer-mark>
-    ${logo('footer-logo', 'Zen Visuals')}
+    ${footerLogo()}
   </div>
   <div class="footer-bg" aria-hidden="true">
     <video class="footer-reel" data-src="${esc(site.hero.reel_mobile || site.hero.reel)}" poster="${esc(site.hero.reel_poster)}" muted loop playsinline preload="none"></video>
