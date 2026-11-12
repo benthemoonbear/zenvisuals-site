@@ -1319,4 +1319,26 @@ body { text-shadow: 0 0 18px rgba(241, 230, 212, 0.14); }
 /* dark type on light cards and inside fields stays crisp */
 .offer, .offer *, .btn-light, .btn-light *, input, select, textarea, .venue-tag, .calc-pack-badge { text-shadow: none; }
 .offer .h-display em, .offer-title em, .offer .facts dt { filter: none; }
+
+/* intro: tighter, and the left column carries the venues instead of empty space */
+.facts { margin-top: clamp(48px, 5vw, 80px); }
+.intro-bottom { margin-top: clamp(56px, 6vw, 96px); }
+@media (min-width: 761px) { .intro-bottom { align-items: center; } }
+.intro-links { grid-column: 1 / 6; gap: 28px; padding-bottom: 0; }
+.intro-pic { grid-column: 6 / 13; }
+.intro-kicker { font: 500 12px/1.4 var(--sans); letter-spacing: 0.18em; text-transform: uppercase; color: #E2B79C; }
+.intro-venues { list-style: none; margin: -12px 0 0; padding: 0; display: grid; gap: 4px; }
+.intro-venues a { font: 400 clamp(26px, 2.3vw, 38px)/1.2 var(--serif); color: var(--on-night); text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size 600ms var(--ease-expo), color 300ms ease; }
+.intro-venues a:hover { background-size: 100% 1px; color: #F1E6D4; }
+.intro-venues li:last-child a { font: italic 400 clamp(20px, 1.6vw, 26px)/1.4 var(--serif); color: #E2B79C; margin-top: 6px; display: inline-block; }
+@media (max-width: 760px) { .intro-venues a { font-size: 28px; } }
+/* pictures finish opening sooner, so they never sit half-hidden as blank space */
+@supports (animation-timeline: view()) { @media (prefers-reduced-motion: no-preference) {
+  .js .shot-frame { animation-range: entry 0% entry 40%; }
+  .js .intro-pic .shot-frame, .js .about-pic .shot-frame { animation-range: entry 0% entry 30%; }
+} }
+/* less dead space between sections, especially on big screens */
+:root { --gap: clamp(88px, 9vw, 150px); }
+.films { margin-top: clamp(24px, 3vw, 48px); padding-top: clamp(72px, 7vw, 120px); }
+@media (max-width: 760px) { :root { --gap: 88px; } .films { padding-top: 72px; } }
 /* taste-skill-ignore-end */

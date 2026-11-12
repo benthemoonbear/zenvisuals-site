@@ -603,7 +603,8 @@ const home = head({ title: site.seo.title, description: site.seo.description, ur
   </dl>
   <div class="intro-bottom">
     <div class="intro-links" data-reveal>
-      ${site.weddings.venues ? `<p>${esc(site.weddings.venues)}</p>` : ''}
+      ${venues.some((x) => x.worked) ? `<p class="intro-kicker">Venues we've worked at</p>
+      <ul class="intro-venues" role="list">${venues.filter((x) => x.worked).map((x) => `<li><a href="${venuePath(x.name)}">${esc(x.name)}</a></li>`).join('')}<li><a href="/venues/">All Derbyshire venues</a></li></ul>` : (site.weddings.venues ? `<p>${esc(site.weddings.venues)}</p>` : '')}
       <div class="link-row">
         <a href="#contact" class="btn btn-accent" data-enquiry="Wedding">${esc(site.weddings.link_text)}</a>
         ${moreLink('wedding-videographer-derbyshire', 'Wedding films')}
