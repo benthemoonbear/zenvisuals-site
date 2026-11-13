@@ -17,7 +17,7 @@
       "category": "wedding",
       "featured": false,
       "video": "/media/films/harrison-soraya.mp4",
-      "poster": "/media/photos/poster-harrison-soraya.jpg",
+      "poster": "/media/photos/poster-harrison-soraya-bench.jpg",
       "description": "Harrison and Soraya's wedding film, from getting ready and the ceremony to portraits in the fields and the first dance.",
       "duration_seconds": 211,
       "date_added": "2026-10-19"
@@ -27,7 +27,7 @@
       "category": "wedding",
       "featured": false,
       "video": "/media/films/luke-arali.mp4",
-      "poster": "/media/photos/luke-arali-smile.jpg",
+      "poster": "/media/photos/luke-arali-car.jpg",
       "description": "Luke and Arali's wedding highlight film, from the morning preparations to golden-hour portraits and the party.",
       "duration_seconds": 269,
       "date_added": "2026-10-19"
@@ -56,8 +56,8 @@
       "title": "The Thermal Heat Company",
       "category": "commercial",
       "featured": false,
-      "video": "/media/films/thermal-heat-company.mp4",
-      "poster": "/media/photos/poster-thermal-heat.jpg",
+      "video": "/media/films/thermal-heat-company-1080.mp4",
+      "poster": "/media/photos/poster-thermal-heat-169.jpg",
       "description": "Customer information film for The Thermal Heat Company, a plumbing and heating firm, explaining what to expect on installation day.",
       "duration_seconds": 114,
       "date_added": "2026-10-19"

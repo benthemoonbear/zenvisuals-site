@@ -63,10 +63,10 @@ function imageSize(webPath) {
 const dims = (p) => { const d = imageSize(p); return d ? ` width="${d.w}" height="${d.h}"` : ''; };
 
 // <picture> with lighter WebP versions when they exist (photo-800.webp / photo-1600.webp).
-function pic(src, alt, { cls = '', sizes = '100vw', eager = false } = {}) {
+function pic(src, alt, { cls = '', sizes = '100vw', eager = false, load = '' } = {}) {
   const base = src.replace(/\.(jpe?g|png)$/i, '');
   const variants = [800, 1600, 2400].filter((w) => existsSync(fileOf(`${base}-${w}.webp`)));
-  const img = `<img src="${esc(src)}" alt="${esc(alt)}"${dims(src)}${cls ? ` class="${cls}"` : ''} ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
+  const img = `<img src="${esc(src)}" alt="${esc(alt)}"${dims(src)}${cls ? ` class="${cls}"` : ''} ${eager ? 'fetchpriority="high"' : load === 'eager' ? 'loading="eager"' : 'loading="lazy"'} decoding="async">`;
   if (!variants.length) return img;
   const srcset = variants.map((w) => `${esc(base)}-${w}.webp ${w}w`).join(', ');
   return `<picture><source type="image/webp" srcset="${srcset}" sizes="${sizes}">${img}</picture>`;
@@ -133,7 +133,7 @@ const chapters = (list) => `<div class="chapters" data-chapters style="--n:${lis
       <div class="letterbox letterbox-top" aria-hidden="true"><span data-ch-title>${esc(list[0].title)}</span><span class="letterbox-right"><span data-ch-meta>${esc(kind(list[0]))}${list[0].duration_seconds ? ` · ${minutes(list[0].duration_seconds)}` : ''}</span></span></div>
       ${list.map((f, i) => { const l = loopFor(f); return `<div class="chapter${i === 0 ? ' is-active' : ''}" data-chapter="${i}" data-title="${esc(f.title)}" data-meta="${esc(kind(f))}${f.duration_seconds ? ` · ${minutes(f.duration_seconds)}` : ''}">
         <div class="chapter-media">
-          ${pic(f.poster, `Still from ${f.title}, ${kind(f).toLowerCase()} by Zen Visuals`, { sizes: '100vw' })}
+          ${pic(f.poster, `Still from ${f.title}, ${kind(f).toLowerCase()} by Zen Visuals`, { sizes: '100vw', load: 'eager' })}
           ${l ? `<video class="chapter-loop" data-src="${esc(l.desktop)}" data-src-mobile="${esc(l.mobile)}" muted loop playsinline preload="none" aria-hidden="true"></video>` : ''}
         </div>
         <div class="chapter-card">
