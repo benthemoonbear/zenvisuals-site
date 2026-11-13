@@ -154,5 +154,13 @@
         "The first dance"
       ]
     }
+  },
+  "promo": {
+    "enabled": true,
+    "percent": 15,
+    "title": "15% off until the New Year",
+    "text": "Book your 2027 wedding before midnight on 31 December and save 15% on every package.",
+    "ends": "2026-12-31T23:59:59Z",
+    "ribbon": "15% off every wedding booked before the New Year"
   }
 }

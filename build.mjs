@@ -333,6 +333,7 @@ ${ldScript(graph)}
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
+${ribbon()}
 `;
 
 // base = '' on the homepage (links jump within the page) and '/' elsewhere.
@@ -384,6 +385,14 @@ const offers = {
   film: { ...pkg((n) => /^film$/i.test(n.trim())), words: ['A film of', 'the whole day'] },
 };
 const num = (p) => Number(String(p || '').replace(/[^0-9.]/g, '')) || 0;
+// ---- the offer: a percentage off every package until a date, with a countdown ----
+const promo = site.promo && site.promo.enabled && site.promo.percent > 0 && new Date(site.promo.ends) > new Date() ? site.promo : null;
+const gbp = (n) => '£' + Math.round(n).toLocaleString('en-GB');
+const off = (p) => promo ? Math.floor(num(p) * (100 - promo.percent) / 100) : num(p);   // rounded down to the pound
+const promoEnds = promo ? new Date(promo.ends) : null;
+const promoEndsText = promo ? promoEnds.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'Europe/London' }) : '';
+const ribbon = () => promo ? `<script type="application/json" data-promo>${JSON.stringify({ ends: promo.ends, percent: promo.percent })}</script><a class="ribbon" href="#pricing" data-promo-ribbon><span class="ribbon-text">${esc(promo.ribbon || promo.title)}</span><span class="ribbon-clock" aria-label="time left"><span class="sr">Ends in </span><span data-countdown>…</span></span></a>` : '';
+for (const o of Object.values(offers)) o.pack = `${o.name} (${promo ? gbp(off(o.price)) + ', ' + promo.percent + '% off' : o.price})`;
 const saving = num(offers.photo.price) + num(offers.film.price) - num(offers.both.price);
 const offerText = (o) => `${o.description || ''}${o === offers.both && saving > 0 ? ` Booking both saves £${saving.toLocaleString('en-GB')}.` : ''}`;
 const pricingBlock = (withCommercial = true) => `<section class="offer" id="pricing" data-offer aria-labelledby="pricing-title">
@@ -391,14 +400,15 @@ const pricingBlock = (withCommercial = true) => `<section class="offer" id="pric
     <button type="button" class="pick" aria-pressed="true" data-pick="photo">Photography</button>
     <button type="button" class="pick" aria-pressed="true" data-pick="film">Film</button>
   </div>
-  <h2 class="offer-title" id="pricing-title" aria-live="polite" data-reveal><span class="sr">Wedding photography and film prices: </span><span class="offer-words" data-offer-words>${esc(offers.both.words[0])} <em data-type>${esc(offers.both.words[1])}</em></span> <span class="price-chip"><span data-offer-price>${esc(offers.both.price)}</span></span></h2>
+  <h2 class="offer-title" id="pricing-title" aria-live="polite" data-reveal><span class="sr">Wedding photography and film prices: </span><span class="offer-words" data-offer-words>${esc(offers.both.words[0])} <em data-type>${esc(offers.both.words[1])}</em></span> <span class="price-chip">${promo ? `<s class="was" data-offer-was>${esc(offers.both.price)}</s> ` : ''}<span data-offer-price>${promo ? gbp(off(offers.both.price)) : esc(offers.both.price)}</span></span></h2>
+  ${promo ? `<p class="offer-promo" data-reveal><strong>${esc(promo.title)}</strong> <span>${esc(promo.text)}</span> <span class="offer-clock"><span class="sr">Ends in </span><span data-countdown>…</span></span></p>` : ''}
   <div class="offer-foot" data-reveal>
     <div class="offer-copy">
       <p class="offer-text" data-offer-text>${esc(offerText(offers.both))}</p>
       <p class="offer-note">${esc(site.pricing.intro)} Half secures your date; the rest is due any time up to two weeks after the wedding.${pageBySlug('wedding-photographer-videographer-prices-derbyshire') ? ` <a href="/wedding-photographer-videographer-prices-derbyshire/">See everything that's included</a>.` : ''}</p>
     </div>
     <div class="offer-actions">
-      <p class="offer-sum" data-offer-sum aria-live="polite"><span>Your estimate</span> <strong data-offer-total>${esc(offers.both.price)}</strong></p>
+      <p class="offer-sum" data-offer-sum aria-live="polite"><span>Your estimate${promo ? ` <em data-offer-saving>(${promo.percent}% off)</em>` : ''}</span> <strong data-offer-total>${promo ? gbp(off(offers.both.price)) : esc(offers.both.price)}</strong></p>
       <a href="#contact" class="btn btn-accent" data-enquiry="Wedding">${esc(site.pricing.button_text)}</a>
       ${withCommercial ? `<a href="#contact" class="text-link" data-enquiry="Advert / promo film">Commercial work is quoted per project</a>` : ''}
     </div>
@@ -406,10 +416,10 @@ const pricingBlock = (withCommercial = true) => `<section class="offer" id="pric
   ${(site.pricing.extras || []).length ? `<div class="offer-extras" data-extras data-reveal>
     <h3 class="extras-title">${esc(site.pricing.extras_title || 'Extras')}</h3>
     <ul class="extras">
-      ${site.pricing.extras.map((x) => `<li><label class="extra"><input type="checkbox" data-extra value="${esc(x.name)} (${esc(x.price)})" data-price="${num(x.price)}"><span class="extra-tick" aria-hidden="true"></span><span class="extra-name">${esc(x.name)}</span><span class="extra-price">${esc(x.price)}</span><span class="extra-text">${esc(x.description || '')}</span></label></li>`).join('\n      ')}
+      ${site.pricing.extras.map((x) => `<li><label class="extra"><input type="checkbox" data-extra value="${esc(x.name)} (${promo ? '+' + gbp(off(x.price)) + ', ' + promo.percent + '% off' : esc(x.price)})" data-value-full="${esc(x.name)} (${esc(x.price)})" data-price="${off(x.price)}" data-full="${num(x.price)}"><span class="extra-tick" aria-hidden="true"></span><span class="extra-name">${esc(x.name)}</span><span class="extra-price">${promo ? `<s class="was">${esc(x.price)}</s> +${gbp(off(x.price))}` : esc(x.price)}</span><span class="extra-text">${esc(x.description || '')}</span></label></li>`).join('\n      ')}
     </ul>
   </div>` : ''}
-  <script type="application/json" data-offer-data>${JSON.stringify(Object.fromEntries(Object.entries(offers).map(([k, o]) => [k, { words: o.words, price: o.price, n: num(o.price), pack: `${o.name} (${o.price})`, text: offerText(o) }]))).replace(/</g, '\\u003c')}</script>
+  <script type="application/json" data-offer-data>${JSON.stringify(Object.fromEntries(Object.entries(offers).map(([k, o]) => [k, { words: o.words, price: promo ? gbp(off(o.price)) : o.price, full: o.price, n: off(o.price), nFull: num(o.price), pack: `${o.name} (${promo ? gbp(off(o.price)) + ', ' + promo.percent + '% off' : o.price})`, packFull: `${o.name} (${o.price})`, text: offerText(o) }]))).replace(/</g, '\\u003c')}</script>
 </section>
 `;
 
@@ -483,9 +493,9 @@ const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="
         <label>Enquiry<select name="enquiry-type" id="enquiry-type">${c.enquiry_types.map((t) => `<option${t === enquiryDefault ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></label>
         <label>Date<input type="text" name="date" placeholder="DD / MM / YYYY" inputmode="numeric"></label>
       </div>
-      <div class="calc-sum" data-calc data-default-pack="${esc(`${(site.pricing.packages.find((x) => x.highlight) || site.pricing.packages[0]).name} (${(site.pricing.packages.find((x) => x.highlight) || site.pricing.packages[0]).price})`)}" data-default-total="${num((site.pricing.packages.find((x) => x.highlight) || site.pricing.packages[0]).price)}">
+      <div class="calc-sum" data-calc data-default-pack="${esc((promo ? offers.both : offers.both).pack || '')}" data-default-total="${off((site.pricing.packages.find((x) => x.highlight) || site.pricing.packages[0]).price)}">
         <p><span class="calc-sum-label">Your wedding</span> <span class="calc-sum-pick" data-calc-pick></span></p>
-        <p class="calc-sum-total"><strong data-calc-total>${esc((site.pricing.packages.find((x) => x.highlight) || site.pricing.packages[0]).price)}</strong> <a href="#pricing" class="calc-sum-change" data-calc-change>Change</a></p>
+        <p class="calc-sum-total"><strong data-calc-total>${gbp(off((site.pricing.packages.find((x) => x.highlight) || site.pricing.packages[0]).price))}</strong> <a href="#pricing" class="calc-sum-change" data-calc-change>Change</a></p>
         <input type="hidden" name="package" data-calc-package value="">
         <input type="hidden" name="extras" data-calc-extras value="">
         <input type="hidden" name="estimate" data-calc-estimate value="">

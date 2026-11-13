@@ -503,6 +503,27 @@
   });
 
   // ---------- pricing: pick photography, film or both ----------
+  // ---------- the offer: a countdown by the second; when it runs out the full prices come back ----------
+  const promoEl = document.querySelector('[data-promo]');
+  const promoOn = () => !!promoEl && !root.classList.contains('promo-over');
+  let onPromoOver = () => {};
+  if (promoEl) {
+    const end = Date.parse(JSON.parse(promoEl.textContent).ends);
+    const clocks = [...document.querySelectorAll('[data-countdown]')];
+    const pad = (n) => String(n).padStart(2, '0');
+    const tick = () => {
+      let s = Math.floor((end - Date.now()) / 1000);
+      if (s <= 0) { root.classList.add('promo-over'); clocks.forEach((c) => { c.textContent = 'Offer ended'; }); onPromoOver(); return; }
+      const d = Math.floor(s / 86400); s -= d * 86400;
+      const h = Math.floor(s / 3600); s -= h * 3600;
+      const m = Math.floor(s / 60); s -= m * 60;
+      const str = `${d ? d + (d === 1 ? ' day ' : ' days ') : ''}${pad(h)}:${pad(m)}:${pad(s)}`;
+      clocks.forEach((c) => { if (c.textContent !== str) c.textContent = str; });
+      setTimeout(tick, 1000 - (Date.now() % 1000));
+    };
+    tick();
+  }
+
   // ---------- the price card is the calculator: pick photo / film, add extras, the total follows ----------
   const money = (n) => '£' + Math.round(n).toLocaleString('en-GB');
   window.zenState = null;
@@ -530,22 +551,24 @@
       if (extrasWrap) extrasWrap.hidden = !film;
       extras.forEach((x) => { x.disabled = !film; if (!film) x.checked = false; });
       const chosen = extras.filter((x) => x.checked);
-      const o = data[key];
-      const sum = o.n + chosen.reduce((t, x) => t + +x.dataset.price, 0);
+      const o = data[key], on = promoOn();
+      const sum = (on ? o.n : o.nFull ?? o.n) + chosen.reduce((t, x) => t + +(on ? x.dataset.price : x.dataset.full || x.dataset.price), 0);
       tween(sum);
-      window.zenState = { pack: o.pack, extras: chosen.map((x) => x.value), total: sum };
+      window.zenState = { pack: on ? o.pack : o.packFull || o.pack, extras: chosen.map((x) => (on ? x.value : x.dataset.valueFull || x.value)), total: sum };
       if (window.zenSync) window.zenSync(window.zenState);
     };
     const render = () => {
       const on = picks.filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.pick);
       key = on.length === 2 ? 'both' : on[0];
       const o = data[key];
-      if (o && price.textContent !== o.price) {
+      const shownPrice = promoOn() ? o.price : o.full || o.price;
+      if (o && price.textContent !== shownPrice) {
         words.textContent = o.words[0] + ' ';
         const em = document.createElement('em');
         em.textContent = o.words[1];
         words.appendChild(em);
-        price.textContent = o.price;
+        price.textContent = shownPrice;
+        const was = offer.querySelector('[data-offer-was]'); if (was) was.textContent = o.full || '';
         text.textContent = o.text;
         restart(words, 'swap');
         restart(price, 'roll-in');
@@ -561,6 +584,7 @@
       render();
     }));
     extras.forEach((x) => x.addEventListener('change', total));
+    onPromoOver = render;
     total();
   });
 

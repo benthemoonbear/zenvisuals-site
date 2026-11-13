@@ -222,6 +222,16 @@ content:
             fields:
               - { name: title, label: Step heading, type: string }
               - { name: text, label: Step text, type: text }
+      - name: promo
+        label: "Offer (countdown banner)"
+        type: object
+        fields:
+          - { name: enabled, label: "Show the offer", type: boolean }
+          - { name: percent, label: "Percent off (e.g. 15)", type: number }
+          - { name: title, label: "Offer title", type: string }
+          - { name: text, label: "Offer text", type: text }
+          - { name: ribbon, label: "Ribbon text at the top of every page", type: string }
+          - { name: ends, label: "Ends (UTC, e.g. 2026-12-31T23:59:59Z)", type: string }
       - name: pricing
         label: Pricing
         type: object
