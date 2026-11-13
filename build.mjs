@@ -246,7 +246,7 @@ const business = {
   ...(ratingValue ? { aggregateRating: { '@type': 'AggregateRating', ratingValue, reviewCount, bestRating: '5', worstRating: '1' } } : {}),
   review: reviews.map((r) => ({ '@type': 'Review', author: { '@type': 'Person', name: r.name }, reviewBody: r.text, reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' } })),
   ...(c.town === 'Belper' ? { geo: { '@type': 'GeoCoordinates', latitude: 53.0236, longitude: -1.4816 } } : {}),
-  priceRange: '£750–£1,650',
+  priceRange: `${(site.pricing.packages.find((x) => /photo/i.test(x.name) && !/\+|film/i.test(x.name)) || {}).price}–${(site.pricing.packages.find((x) => /\+/.test(x.name)) || {}).price}`,
   description: site.seo.description,
   url: SITE_URL + '/',
   image: SITE_URL + site.seo.share_image,
@@ -623,7 +623,7 @@ const home = head({ title: site.seo.title, description: site.seo.description, ur
     <div data-reveal><dt>Whole day</dt><dd>From getting ready to the last dance</dd></div>
     <div data-reveal><dt>3–6 min</dt><dd>The length of your wedding film</dd></div>
     <div data-reveal><dt>3–6 weeks</dt><dd>Until your photos and film arrive</dd></div>
-    <div data-reveal><dt>From ${esc(offers.photo.price || '£750')}</dt><dd>One price for the day, never by the hour</dd></div>
+    <div data-reveal><dt>From ${esc(offers.photo.price || '')}</dt><dd>One price for the day, never by the hour</dd></div>
   </dl>
   <div class="intro-bottom">
     <div class="intro-links" data-reveal>
@@ -868,13 +868,13 @@ function venuePage(v) {
   const nearby = venues.filter((x) => x.slug !== v.slug && x.area === v.area).slice(0, 6);
   const title = (`${v.name} Wedding Photographer & Videographer | Zen Visuals`.length <= 66 ? `${v.name} Wedding Photographer & Videographer | Zen Visuals` : `${v.name} Wedding Videographer | Zen Visuals`);
   const descFor = (w) => v.worked
-    ? `Wedding photography and film at ${w} by Zuzia and Ben, who've worked there before. Whole day from £750, 5.0 on Google. Check your date.`
-    : `Getting married at ${w}? Wedding photography and film by Zuzia and Ben from Belper. Whole day from £750, 5.0 on Google. Check your date.`;
+    ? `Wedding photography and film at ${w} by Zuzia and Ben, who've worked there before. Whole day from ${offers.photo.price}, 5.0 on Google. Check your date.`
+    : `Getting married at ${w}? Wedding photography and film by Zuzia and Ben from Belper. Whole day from ${offers.photo.price}, 5.0 on Google. Check your date.`;
   const description = descFor(where).length <= 160 ? descFor(where) : descFor(v.name);
   const image = (vFilms[0] || {}).poster || v.image || site.seo.share_image;
   const faqsV = [
     { question: `Have you photographed or filmed a wedding at ${v.name}?`, answer: v.worked ? `Yes. ${vFilms.length ? `We filmed ${vFilms.map((f) => f.title).join(' and ')} at ${v.name}` : `Ben has photographed and filmed weddings at ${v.name}`}, so we know the spaces and where the light falls through the day.` : `Possibly. Ben has photographed and filmed weddings at venues across Derbyshire for more than ten years, many of them while working for another studio, so there's a good chance he knows ${v.name}. If not, we're based in Belper and happy to visit beforehand so we know the spaces on the day.` },
-    { question: `How much is a wedding photographer and videographer at ${v.name}?`, answer: `Wedding photography of your whole day is £750, a 3–6 minute wedding film is £1,100, and both together are £1,650, saving £200. The price is the same at every venue.` },
+    { question: `How much is a wedding photographer and videographer at ${v.name}?`, answer: `Wedding photography of your whole day is ${offers.photo.price}, a 3–6 minute wedding film is ${offers.film.price}, and both together are ${offers.both.price}, saving £${saving.toLocaleString('en-GB')}. The price is the same at every venue.` },
     { question: `Do you cover the whole day at ${v.name}?`, answer: `Yes. Every price covers your whole wedding day, from getting ready to the last dance, with no hourly packages.` },
   ];
   const graph = [
@@ -892,7 +892,7 @@ function venuePage(v) {
   <div class="phero-copy">
     <nav class="breadcrumb" aria-label="Breadcrumb" data-load style="--d:100ms"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/venues/">Venues</a> <span aria-hidden="true">/</span> <span>${esc(v.name)}</span></nav>
     <h1 class="h-display${v.name.length > 18 ? ' is-long' : ''}" data-load style="--d:180ms">${esc(v.name)} wedding photographer <em data-type-now>and videographer</em></h1>
-    <p class="phero-lead" data-load style="--d:300ms">${v.worked ? `We've photographed and filmed weddings at ${esc(v.name)}, and we'd love to do yours.` : `Getting married at ${esc(v.name)}? We're Zuzia and Ben, wedding photographers and videographers from Belper, and we cover ${esc(v.town || 'Derbyshire')}.`} One price covers your whole day, from £750.</p>
+    <p class="phero-lead" data-load style="--d:300ms">${v.worked ? `We've photographed and filmed weddings at ${esc(v.name)}, and we'd love to do yours.` : `Getting married at ${esc(v.name)}? We're Zuzia and Ben, wedding photographers and videographers from Belper, and we cover ${esc(v.town || 'Derbyshire')}.`} One price covers your whole day, from ${esc(offers.photo.price)}.</p>
     <a href="#contact" class="btn btn-accent" data-enquiry="Wedding" data-load style="--d:420ms">Check your date</a>
   </div>
   <figure class="phero-pic" data-hero-pic>${pic(image, vFilms[0] ? `Still from ${vFilms[0].title}` : 'Wedding photograph by Zen Visuals', { sizes: '(max-width: 760px) 100vw, 50vw', eager: true })}</figure>
@@ -901,7 +901,7 @@ function venuePage(v) {
 <section class="story" aria-label="About ${esc(v.name)}">
   ${v.summary ? `<div class="story-row"><h2 class="h-head" data-reveal>About <em>${esc(v.name)}</em></h2><p data-reveal>${esc(v.summary)}</p></div>` : ''}
   ${v.film ? `<div class="story-row"><h2 class="h-head" data-reveal>Photographing and filming at ${esc(v.name)}</h2><p data-reveal>${esc(v.film)}</p></div>` : ''}
-  <div class="story-row"><h2 class="h-head" data-reveal>What you get</h2><p data-reveal>Wedding photography of your whole day is £750. A 3–6 minute wedding film is £1,100. Both together are £1,650, saving £200. Your photographs and film are ready within 3 to 6 weeks, and half of the price secures your date.</p></div>
+  <div class="story-row"><h2 class="h-head" data-reveal>What you get</h2><p data-reveal>Wedding photography of your whole day is ${esc(offers.photo.price)}. A 3–6 minute wedding film is ${esc(offers.film.price)}. Both together are ${esc(offers.both.price)}, saving £${saving.toLocaleString('en-GB')}. Your photographs and film are ready within 3 to 6 weeks, and half of the price secures your date.</p></div>
 </section>
 
 ${vFilms.length ? `<section class="films films--page" id="films" aria-labelledby="films-title">
@@ -945,7 +945,7 @@ function venuesHub() {
   <div class="phero-copy">
     <nav class="breadcrumb" aria-label="Breadcrumb" data-load style="--d:100ms"><a href="/">Home</a> <span aria-hidden="true">/</span> <span>Venues</span></nav>
     <h1 class="h-display" data-load style="--d:180ms">Derbyshire wedding <em data-type-now>venues</em></h1>
-    <p class="phero-lead" data-load style="--d:300ms">A local guide to wedding venues near us in Belper, from Derwent Valley mills to Peak District country houses. Whichever you choose, we photograph and film the whole day for one price, from £750.</p>
+    <p class="phero-lead" data-load style="--d:300ms">A local guide to wedding venues near us in Belper, from Derwent Valley mills to Peak District country houses. Whichever you choose, we photograph and film the whole day for one price, from ${esc(offers.photo.price)}.</p>
     <a href="#contact" class="btn btn-accent" data-enquiry="Wedding" data-load style="--d:420ms">Check your date</a>
   </div>
   <figure class="phero-pic" data-hero-pic>${pic('/media/photos/gazebo-sunset.jpg', 'Couple silhouetted inside a white gazebo at sunset', { sizes: '(max-width: 760px) 100vw, 50vw', eager: true })}</figure>

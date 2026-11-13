@@ -1,7 +1,7 @@
 {
   "seo": {
     "title": "Derbyshire Wedding Photographer & Videographer | Zen Visuals",
-    "description": "Rated 5.0 from 22 Google reviews. Wedding photography and film by Zuzia and Ben in Belper, Derbyshire. Your whole day from £750. Check your date.",
+    "description": "Rated 5.0 from 22 Google reviews. Wedding photography and film by Zuzia and Ben in Belper, Derbyshire. Your whole day from £1,000. Check your date.",
     "share_image": "/media/brand/share-image.jpg"
   },
   "hero": {
@@ -48,21 +48,21 @@
     "packages": [
       {
         "name": "Photography",
-        "price": "£750",
+        "price": "£1,000",
         "badge": "",
         "description": "Your whole day in photographs, from getting ready to the dance floor.",
         "highlight": false
       },
       {
         "name": "Photo + Film",
-        "price": "£1,650",
+        "price": "£2,200",
         "badge": "Save £200",
         "description": "Photographs of the whole day plus a 3–6 minute wedding film, with every angle covered.",
         "highlight": true
       },
       {
         "name": "Film",
-        "price": "£1,100",
+        "price": "£1,400",
         "badge": "",
         "description": "Your whole day on film, cut into a 3–6 minute wedding film to watch again and again.",
         "highlight": false
