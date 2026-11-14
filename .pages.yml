@@ -267,7 +267,8 @@ content:
           - { name: title, label: Heading, type: string }
           - { name: title_emphasis, label: "Heading (italic part)", type: string }
           - { name: phone, label: Phone, type: string }
-          - { name: email, label: Email, type: string }
+          - { name: email, label: "Email (Ben)", type: string }
+          - { name: email_2, label: "Second email (Zuzia)", type: string }
           - { name: area, label: Area line, type: string }
           - { name: town, label: "Town you are based in (for Google)", type: string }
           - { name: areas, label: "Areas covered (footer line)", type: string }

@@ -508,7 +508,7 @@ const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="
   </div>
   <a class="contact-email" href="mailto:${esc(c.email)}" data-reveal>${esc(c.email).replace('@', '@<wbr>')}</a>
   <div class="contact-corners">
-    <p><a href="${telHref}">${esc(c.phone)}</a></p>
+    <p><a href="${telHref}">${esc(c.phone)}</a>${c.email_2 ? `<a href="mailto:${esc(c.email_2)}">${esc(c.email_2)}</a>` : ''}</p>
     <p>${esc(c.area)}</p>
     <p>
       ${site.social.instagram ? `<a href="${esc(site.social.instagram)}" rel="noopener" target="_blank">Instagram</a>` : ''}
@@ -533,7 +533,7 @@ const contactAndFooter = (enquiryDefault = '') => `<section class="contact" id="
     <nav class="footer-col" aria-label="Films"><p>Films</p>
       ${films.filter((f) => f.category === 'wedding').map((f) => `<a href="${filmPath(f)}">${esc(f.title)}</a>`).join('\n      ')}
     </nav>
-    <div class="footer-col"><p>Contact</p><a href="${telHref}">${esc(c.phone)}</a><a href="mailto:${esc(c.email)}">${esc(c.email)}</a></div>
+    <div class="footer-col"><p>Contact</p><a href="${telHref}">${esc(c.phone)}</a><a href="mailto:${esc(c.email)}">${esc(c.email)}</a>${c.email_2 ? `<a href="mailto:${esc(c.email_2)}">${esc(c.email_2)}</a>` : ''}</div>
     <div class="footer-col"><p>Follow</p>
       ${site.social.instagram ? `<a href="${esc(site.social.instagram)}" rel="noopener" target="_blank">Instagram</a>` : ''}
       ${site.social.facebook ? `<a href="${esc(site.social.facebook)}" rel="noopener" target="_blank">Facebook</a>` : ''}
@@ -1013,7 +1013,7 @@ const llms = `# Zen Visuals
 - Ben has worked as a photographer and videographer since 2014; Zuzia joined in 2023
 ${faqs.map((f) => `- ${f.question} ${f.answer}`).join('\n')}
 - Rating: ${site.reviews.rating_text}
-- Contact: ${c.phone}, ${c.email}
+- Contact: ${c.phone}, ${c.email}${c.email_2 ? `, ${c.email_2}` : ''}
 
 ## Pages
 - [Home](${SITE_URL}/): films, photographs, pricing, reviews and enquiries
